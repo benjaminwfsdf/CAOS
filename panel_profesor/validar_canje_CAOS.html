@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Validar Canje de Cartas - CAOS</title>
+  <link rel="stylesheet" href="../style-caos.css">
+  <style>
+    body {
+      font-family: 'Rock Salt', cursive;
+      padding: 20px;
+      background: repeating-linear-gradient(45deg, #000 0px, #000 1px, transparent 1px, transparent 6px);
+    }
+    .panel {
+      border: 3px solid black;
+      padding: 20px;
+      box-shadow: 6px 6px 0 black;
+      background-color: white;
+      max-width: 800px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+      font-size: 30px;
+      border: 3px dashed black;
+      padding: 10px;
+      margin-bottom: 20px;
+      background-color: white;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid black;
+      padding: 8px;
+      text-align: center;
+    }
+    button {
+      font-family: inherit;
+      font-size: 14px;
+      padding: 6px 10px;
+      border: 2px solid black;
+      box-shadow: 2px 2px 0 black;
+      background-color: white;
+      cursor: pointer;
+    }
+    .mensaje {
+      margin-top: 20px;
+      padding: 10px;
+      border-top: 2px dashed black;
+    }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <h1>🔍 Validar Canje de Cartas</h1>
+
+    <div id="solicitudesContainer">Cargando solicitudes...</div>
+
+    <div style="margin-top: 30px; text-align: center;">
+      <a href="../index.html" style="
+        text-decoration: none;
+        font-family: inherit;
+        font-size: 16px;
+        padding: 10px 20px;
+        border: 3px solid black;
+        background-color: white;
+        box-shadow: 4px 4px 0 black;
+        display: inline-block;">⬅ Volver al menú principal</a>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbxZ5pH12xvU9-jnibxM5Uosjk0ntBNt_gONtGuhVM_s4jFE9j8lWJpDLicgG71fcd2B/exec"; // Reemplaza con tu API real
+
+    async function cargarSolicitudes() {
+      try {
+        const res = await fetch(`${API_URL}?accion=ver_solicitudes`);
+        const solicitudes = await res.json();
+
+        const contenedor = document.getElementById("solicitudesContainer");
+
+        if (solicitudes.length === 0) {
+          contenedor.innerHTML = "<p>📭 No hay solicitudes pendientes.</p>";
+          return;
+        }
+
+        let html = `
+          <table>
+            <thead>
+              <tr>
+                <th>Alumno</th>
+                <th>Carta</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${solicitudes.map(s => `
+                <tr>
+                  <td>${s.alumno}</td>
+                  <td>${s.carta}</td>
+                  <td>
+                    <button onclick="aprobar('${s.alumno}', '${s.carta}')">✅ Aprobar</button>
+                    <button onclick="rechazar('${s.alumno}', '${s.carta}')">❌ Rechazar</button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+
+        contenedor.innerHTML = html;
+
+      } catch (error) {
+        console.error("Error cargando solicitudes:", error);
+        document.getElementById("solicitudesContainer").innerHTML = `<p style="color:red;">❌ Error al cargar las solicitudes.</p>`;
+      }
+    }
+
+    async function aprobar(alumno, carta) {
+      const confirmacion = confirm(`¿Aprobar canje de '${carta}' para ${alumno}?`);
+      if (!confirmacion) return;
+
+      const url = `${API_URL}?accion=aprobar_canje&alumno=${encodeURIComponent(alumno)}&carta=${encodeURIComponent(carta)}`;
+      const res = await fetch(url);
+      const mensaje = await res.text();
+      alert(mensaje);
+      cargarSolicitudes(); // recarga
+    }
+
+    async function rechazar(alumno, carta) {
+      const confirmacion = confirm(`¿Rechazar canje de '${carta}' para ${alumno}?`);
+      if (!confirmacion) return;
+
+      const url = `${API_URL}?accion=rechazar_canje&alumno=${encodeURIComponent(alumno)}&carta=${encodeURIComponent(carta)}`;
+      const res = await fetch(url);
+      const mensaje = await res.text();
+      alert(mensaje);
+      cargarSolicitudes();
+    }
+
+    cargarSolicitudes();
+  </script>
+</body>
+</html>

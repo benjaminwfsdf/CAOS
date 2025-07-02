@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>CAOS - Mis Cartas</title>
+  <style>
+    body {
+      background-color: #fff;
+      font-family: 'Rock Salt', cursive;
+      margin: 20px;
+      background-image: repeating-linear-gradient(45deg, #000 0px, #000 1px, transparent 1px, transparent 6px);
+      background-size: 100% 100%;
+      color: #000;
+    }
+
+    .panel {
+      background-color: white;
+      border: 3px solid black;
+      padding: 20px;
+      box-shadow: 8px 8px 0 black;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .titulo {
+      font-size: 28px;
+      text-align: center;
+      border: 3px dashed black;
+      padding: 10px;
+      background-color: white;
+      margin-bottom: 10px;
+    }
+
+    .subtitulo {
+      font-size: 20px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .carta {
+      border: 2px solid black;
+      padding: 10px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      box-shadow: 4px 4px 0 black;
+      background-color: white;
+    }
+
+    .carta img {
+      width: 80px;
+      height: auto;
+      margin-right: 20px;
+    }
+
+    .carta-info {
+      flex-grow: 1;
+    }
+
+    .cantidad {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .boton-canje {
+      padding: 8px 12px;
+      background-color: white;
+      border: 2px solid black;
+      box-shadow: 3px 3px 0 black;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    .boton-canje:disabled {
+      background-color: #eee;
+      color: #aaa;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <div class="titulo">CAOS (Cartas Anti Orden en la Sala)</div>
+    <div class="subtitulo" id="nombreAlumno">Cargando estudiante...</div>
+    <div id="cartasContainer">Cargando cartas...</div>
+  </div>
+
+  <script>
+    async function cargarCartas() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const alumno = urlParams.get("alumno");
+      if (!alumno) {
+        document.getElementById("cartasContainer").innerText = "No se proporcionó nombre de estudiante.";
+        return;
+      }
+
+      document.getElementById("nombreAlumno").innerText = alumno;
+
+      const apiURL = "https://script.google.com/macros/s/AKfycbzp3kpcaQqnf-o6kDB_7Vo5YPNVPRvQXIhVSPFfp5Clt95-zEBFSf7JmeBAD9DgDiA/exec"; // reemplaza YOUR_SCRIPT_ID
+
+      try {
+        // Obtener cartas del estudiante
+        const resCartas = await fetch(`${apiURL}?alumno=${encodeURIComponent(alumno)}`);
+        const dataCartas = await resCartas.json();
+
+        // Obtener imágenes
+        const resImagenes = await fetch(`${apiURL}?accion=imagenes`);
+        const dataImagenes = await resImagenes.json();
+
+        const conteo = dataCartas.conteo;
+        const contenedor = document.getElementById("cartasContainer");
+        contenedor.innerHTML = "";
+
+        Object.entries(conteo).forEach(([nombre, cantidad]) => {
+          const carta = dataImagenes.find(img => img.Nombre === nombre);
+          const div = document.createElement("div");
+          div.className = "carta";
+
+         const img = new Image();
+            img.alt = nombre;
+            img.loading = "lazy";
+
+            if (carta && carta["URL Pública"]) {
+                img.src = carta["URL Pública"];
+            } else {
+            img.src = "https://i.imgur.com/U3F4gA1.png"; // imagen por defecto
+            }
+
+            img.onerror = () => {
+            console.warn("Imagen falló para", nombre);
+            img.src = "https://i.imgur.com/U3F4gA1.png"; // otra imagen si falla
+            };
+
+            img.onload = () => {
+            // Solo cuando la imagen se carga con éxito, se agrega al DOM
+             div.appendChild(img);
+             div.appendChild(info);
+             div.appendChild(boton);
+             contenedor.appendChild(div);
+
+             };
+
+          const info = document.createElement("div");
+          info.className = "carta-info";
+          info.innerHTML = `
+            <div><strong>${nombre}</strong></div>
+            <div class="cantidad">Cantidad: ${cantidad}</div>
+          `;
+
+          const boton = document.createElement("button");
+          boton.className = "boton-canje";
+          boton.innerText = "Solicitar Canje";
+          boton.disabled = cantidad < 1;
+          boton.onclick = async () => {
+            const confirmacion = confirm(`¿Confirmas solicitar el canje de '${nombre}'?`);
+            if (!confirmacion) return;
+           const url = `${apiURL}?accion=solicitar_canje&alumno=${encodeURIComponent(alumno)}&carta=${encodeURIComponent(nombre)}`;
+const res = await fetch(url);
+const texto = await res.text();
+alert("Solicitud enviada al profesor.\n" + texto);
+
+          };
+
+          div.appendChild(img);
+          div.appendChild(info);
+          div.appendChild(boton);
+          contenedor.appendChild(div);
+        });
+
+      } catch (error) {
+        console.error(error);
+        document.getElementById("cartasContainer").innerText = "Error al cargar las cartas.";
+      }
+    }
+
+    cargarCartas();
+  </script>
+</body>
+</html>

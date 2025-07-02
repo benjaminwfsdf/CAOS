@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Cargar Estudiantes desde Excel - CAOS</title>
+  <link rel="stylesheet" href="style-caos-v2.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    .volver-btn {
+      display: inline-block;
+      margin-top: 30px;
+      padding: 10px 20px;
+      background-color: black;
+      color: white;
+      text-decoration: none;
+      border: 2px dashed white;
+      font-family: 'Rock Salt', cursive;
+    }
+
+    .volver-btn:hover {
+      background-color: white;
+      color: black;
+    }
+  </style>
+</head>
+<body>
+  <div class="contenedor">
+    <h1>Cargar Estudiantes desde Excel</h1>
+    <input type="file" id="archivoExcel" accept=".xlsx, .xls">
+    <button onclick="procesarExcel()">Procesar</button>
+    <br><br>
+    <table id="tablaEstudiantes">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Curso</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <!-- Botón para volver al index -->
+    <a href="index.html" class="volver-btn">⬅ Volver al menú principal</a>
+  </div>
+
+  <script>
+    function procesarExcel() {
+      const archivoInput = document.getElementById('archivoExcel');
+      const archivo = archivoInput.files[0];
+      if (!archivo) {
+        alert('Por favor, selecciona un archivo Excel.');
+        return;
+      }
+
+      const lector = new FileReader();
+      lector.onload = function(e) {
+        const datos = new Uint8Array(e.target.result);
+        const libro = XLSX.read(datos, { type: 'array' });
+        const hoja = libro.Sheets[libro.SheetNames[0]];
+        const estudiantes = XLSX.utils.sheet_to_json(hoja, { header: 1 });
+
+        const tabla = document.getElementById('tablaEstudiantes').getElementsByTagName('tbody')[0];
+        tabla.innerHTML = ''; // Limpiar tabla
+
+        for (let i = 1; i < estudiantes.length; i++) {
+          const fila = estudiantes[i];
+          const nombre = fila[0];
+          const curso = fila[1];
+
+          if (nombre && curso) {
+            const nuevaFila = tabla.insertRow();
+            nuevaFila.insertCell().textContent = nombre;
+            nuevaFila.insertCell().textContent = curso;
+          }
+        }
+      };
+
+      lector.readAsArrayBuffer(archivo);
+    }
+  </script>
+</body>
+</html>

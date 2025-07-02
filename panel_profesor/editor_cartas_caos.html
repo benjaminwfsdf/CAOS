@@ -1,0 +1,101 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editor de Cartas - CAOS</title>
+    <link rel="stylesheet" href="style-caos.css">
+    <style>
+        body {
+            font-family: monospace;
+            background-color: #fff;
+            padding: 20px;
+        }
+        h1 {
+            text-decoration: underline;
+        }
+        form {
+            margin-bottom: 30px;
+        }
+        label, select, input, textarea {
+            display: block;
+            margin-top: 10px;
+            width: 100%;
+        }
+        .carta-preview {
+            border: 1px solid black;
+            padding: 10px;
+            margin-top: 10px;
+            text-align: center;
+        }
+        img {
+            max-width: 100px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>✏️ Editor de Cartas</h1>
+
+<form id="formCarta">
+    <label>Nombre de la Carta:
+        <input type="text" id="nombreCarta" required>
+    </label>
+
+    <label>Tipo:
+        <select id="tipoCarta" required>
+            <option value="comun">Común</option>
+            <option value="epica">Épica</option>
+            <option value="legendaria">Legendaria</option>
+        </select>
+    </label>
+
+    <label>Efecto:
+        <textarea id="efectoCarta" rows="3" required></textarea>
+    </label>
+
+    <label>Imagen:
+        <input type="file" id="imagenCarta" accept="image/*">
+    </label>
+
+    <button type="submit">Guardar Carta</button>
+</form>
+
+<div class="carta-preview" id="previewCarta"></div>
+
+<script>
+    const form = document.getElementById("formCarta");
+    const preview = document.getElementById("previewCarta");
+
+    form.addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const nombre = document.getElementById("nombreCarta").value;
+        const tipo = document.getElementById("tipoCarta").value;
+        const efecto = document.getElementById("efectoCarta").value;
+        const imagen = document.getElementById("imagenCarta").files[0];
+
+        const reader = new FileReader();
+        reader.onloadend = function () {
+            const imgSrc = imagen ? `<img src="\${reader.result}" alt="Carta">` : '';
+            preview.innerHTML = `
+                <h2>\${nombre} [\${tipo}]</h2>
+                <p><strong>Efecto:</strong> \${efecto}</p>
+                \${imgSrc}
+            `;
+        }
+
+        if (imagen) {
+            reader.readAsDataURL(imagen);
+        } else {
+            preview.innerHTML = `
+                <h2>\${nombre} [\${tipo}]</h2>
+                <p><strong>Efecto:</strong> \${efecto}</p>
+            `;
+        }
+    });
+</script>
+
+</body>
+</html>

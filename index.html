@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+  <script>
+  // Clave de acceso (puedes cambiarla)
+  const CLAVE_CORRECTA = "profecaos123";
+
+  // Verifica al cargar la página
+  window.onload = function () {
+    const claveIngresada = prompt("🔒 Ingreso restringido\nPor favor, ingresa la clave:");
+    if (claveIngresada !== CLAVE_CORRECTA) {
+      alert("❌ Clave incorrecta. No puedes acceder.");
+      // Redirecciona a Google o cierra la pestaña
+      window.location.href = "https://www.redcrecemos.cl/tdgloprado";
+    }
+  };
+</script>
+
+
+  <meta charset="UTF-8">
+  <title>CAOS - Estética Panel</title>
+  <link rel="stylesheet" href="style-caos.css">
+  <style>
+    body {
+      background-color: #fff;
+      color: #000;
+      font-family: 'Rock Salt', cursive;
+      margin: 20px;
+      background-image: repeating-linear-gradient(45deg, #000 0px, #000 1px, transparent 1px, transparent 6px);
+      background-size: 100% 100%;
+    }
+
+    .panel {
+      background-color: white;
+      border: 3px solid black;
+      padding: 20px;
+      box-shadow: 8px 8px 0 black;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .titulo {
+      font-size: 40px;
+      font-weight: bold;
+      text-align: center;
+      border: 3px dashed black;
+      padding: 15px;
+      background-color: white;
+      clip-path: polygon(0 0, 90% 0, 100% 10%, 100% 90%, 90% 100%, 0 100%);
+      margin-bottom: 5px;
+    }
+
+    .subtitulo {
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .bloque {
+      border: 2px solid black;
+      box-shadow: 5px 5px 0 black;
+      padding: 15px;
+      background-color: white;
+      margin-bottom: 20px;
+    }
+
+    label, select, button {
+      font-family: inherit;
+      font-size: 16px;
+    }
+
+    select, button {
+      border: 2px solid black;
+      background: white;
+      padding: 8px;
+      margin-right: 5px;
+      box-shadow: 3px 3px 0 black;
+      cursor: pointer;
+    }
+
+    .fila {
+      display:flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 10px 0;
+    }
+
+    .qr-box {
+      border: 2px solid black;
+      text-align: center;
+      margin-top: 20px;
+      padding: 10px;
+      box-shadow: 4px 4px 0 black;
+      display: none;
+    }
+
+    .autorizar {
+      margin-top: 20px;
+      display: block;
+      width: 100%;
+      font-size: 16px;
+      padding: 12px;
+      background: white;
+      border: 3px solid black;
+      box-shadow: 4px 4px 0 black;
+      text-transform: uppercase;
+      text-align: center;
+      text-decoration: none;
+      color: black;
+      font-family: 'Rock Salt', cursive;
+    }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <div class="titulo">CAOS</div>
+    <p class="subtitulo">(CARTAS ANTI ORDEN EN LA SALA)</p>
+
+    <div class="bloque">
+      <div class="fila">
+        <label>Curso:
+          <select id="cursoSelect">
+            <option>Selecciona un curso</option>
+          </select>
+        </label>
+        <a href="panel_profesor/cargar_excel_estudiantes.html">
+          <button>Editar Cursos</button>
+        </a>
+      </div>
+    </div>
+
+    <div class="bloque">
+      <label>Alumno:
+        <select id="alumnoSelect"><option>Selecciona un estudiante</option></select>
+      </label>  
+      
+      <div class="fila">
+        <span>////////////////</span>
+        <a id="btnAleatoria" href="#"><button disabled>Asignar carta aleatoria</button></a>
+      </div>
+      <div class="fila">
+        <span>////////////////</span>
+        <a id="btnEspecifica" href="#"><button disabled>Asignar carta específica</button></a>
+      </div>
+    </div>
+
+    <div class="qr-box" id="qrContainer">
+      <p><strong>Código QR del estudiante</strong></p>
+      <img id="qrImage" src="" alt="QR Personalizado" style="width:100px;height:100px;">
+    </div>
+
+    <a id="btnAutorizar" href="#" class="autorizar">Autorizar uso</a>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const apiUrl = 'https://script.google.com/macros/s/AKfycbz7HPvNIWo06DfwT60oiCkoniLNqt450f0IVDn9sCU0hnb4bdr5kZlwuAfDW_e5G48ULQ/exec';
+      const cursoSelect = document.getElementById('cursoSelect');
+      const alumnoSelect = document.getElementById('alumnoSelect');
+      const btnAleatoria = document.getElementById('btnAleatoria');
+      const btnEspecifica = document.getElementById('btnEspecifica');
+      const btnAutorizar = document.getElementById('btnAutorizar');
+      const qrContainer = document.getElementById('qrContainer');
+      const qrImage = document.getElementById('qrImage');
+
+      btnAleatoria.querySelector('button').disabled = true;
+      btnEspecifica.querySelector('button').disabled = true;
+      qrContainer.style.display = "none";
+
+      try {
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+        data.cursos.forEach(curso => {
+          const option = document.createElement('option');
+          option.textContent = curso;
+          cursoSelect.appendChild(option);
+        });
+      } catch (error) {
+        console.error("Error al cargar cursos:", error);
+        alert("No se pudieron cargar los cursos.");
+      }
+
+      cursoSelect.addEventListener('change', async () => {
+        const curso = cursoSelect.value;
+        alumnoSelect.innerHTML = '<option>Selecciona un estudiante</option>';
+        qrContainer.style.display = "none";
+        qrImage.src = '';
+        btnAleatoria.querySelector('button').disabled = true;
+        btnEspecifica.querySelector('button').disabled = true;
+
+        try {
+          const response = await fetch(`${apiUrl}?curso=${encodeURIComponent(curso)}`);
+          const data = await response.json();
+          data.estudiantes.forEach(nombre => {
+            const option = document.createElement('option');
+            option.textContent = nombre;
+            alumnoSelect.appendChild(option);
+          });
+        } catch (error) {
+          console.error("Error al cargar estudiantes:", error);
+          alert("No se pudieron cargar los estudiantes.");
+        }
+      });
+
+      alumnoSelect.addEventListener('change', () => {
+        const alumno = alumnoSelect.value;
+        if (alumno && alumno !== 'Selecciona un estudiante') {
+          const encoded = encodeURIComponent(alumno);
+          btnAleatoria.querySelector('button').disabled = false;
+          btnEspecifica.querySelector('button').disabled = false;
+
+          btnAleatoria.href = `panel_profesor/reparto_carta_aleatoria.html?alumno=${encoded}`;
+          btnEspecifica.href = `panel_profesor/reparto_carta_especifica.html?alumno=${encoded}`;
+          btnAutorizar.href = `panel_profesor/validar_canje_CAOS.html?alumno=${encoded}`;
+
+          // Generar QR que dirija al perfil del estudiante
+          const perfilURL = `estudiante.html?alumno=${encoded}`;
+          qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(perfilURL)}&size=100x100`;
+          qrContainer.style.display = "block";
+        } else {
+          qrContainer.style.display = "none";
+          qrImage.src = '';
+          btnAleatoria.querySelector('button').disabled = true;
+          btnEspecifica.querySelector('button').disabled = true;
+          btnAutorizar.href = '#';
+        }
+      });
+
+      btnAutorizar.addEventListener("click", function(event) {
+        if (btnAutorizar.href.endsWith("#")) {
+          event.preventDefault();
+          alert("Debes seleccionar un estudiante antes de autorizar uso.");
+        }
+      });
+    });
+  </script>
+</body>
+</html>

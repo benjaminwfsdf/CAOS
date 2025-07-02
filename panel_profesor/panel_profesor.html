@@ -1,0 +1,77 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel Profesor CAOS</title>
+  <link rel="stylesheet" href="style-caos.css">
+  <style>
+    .menu {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .menu button {
+      flex-grow: 1;
+    }
+    .modulo {
+      display: none;
+    }
+    .modulo.activo {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🧑‍🏫 Panel Profesor CAOS</h1>
+
+  <div class="menu">
+    <button onclick="mostrar('gestion')">👥 Estudiantes</button>
+    <button onclick="mostrar('excel')">📥 Cargar Excel</button>
+    <button onclick="mostrar('qr')">🔳 Generar QR</button>
+    <button onclick="mostrar('reparto')">🎴 Reparto de Cartas</button>
+    <button onclick="mostrar('editor')">✏️ Editor de Cartas</button>
+    <button onclick="mostrar('canje')">✅ Validar Canje</button>
+    <button onclick="mostrar('estadisticas')">📊 Estadísticas</button>
+  </div>
+
+  <div id="gestion" class="modulo activo">
+    <iframe src="módulos/gestion_estudiantes.html" width="100%" height="500px"></iframe>
+  </div>
+
+  <div id="excel" class="modulo">
+    <iframe src="módulos/cargar_excel_estudiantes.html" width="100%" height="500px"></iframe>
+  </div>
+
+  <div id="qr" class="modulo">
+    <iframe src="módulos/generador_qr_estudiantes.html" width="100%" height="500px"></iframe>
+  </div>
+
+  <div id="reparto" class="modulo">
+    <iframe src="módulos/reparto_cartas_profesor.html" width="100%" height="500px"></iframe>
+  </div>
+
+  <div id="editor" class="modulo">
+    <iframe src="módulos/editor_cartas_caos.html" width="100%" height="500px"></iframe>
+  </div>
+
+  <div id="canje" class="modulo">
+    <iframe src="módulos/validar_canje_CAOS.html" width="100%" height="500px"></iframe>
+  </div>
+
+  <div id="estadisticas" class="modulo">
+    <iframe src="módulos/estadisticas_CAOS.html" width="100%" height="500px"></iframe>
+  </div>
+
+  <script>
+    function mostrar(id) {
+      const modulos = document.querySelectorAll('.modulo');
+      modulos.forEach(m => m.classList.remove('activo'));
+      document.getElementById(id).classList.add('activo');
+    }
+  </script>
+
+</body>
+</html>

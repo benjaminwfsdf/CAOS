@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Agregar Estudiantes</title>
+  <style>
+    body {
+      font-family: 'Rock Salt', cursive;
+      background-color: #fff;
+      background-image: repeating-linear-gradient(45deg, #000 0px, #000 1px, transparent 1px, transparent 6px);
+      background-size: 100% 100%;
+      color: #000;
+      padding: 20px;
+    }
+
+    .panel {
+      border: 3px solid black;
+      padding: 20px;
+      background-color: white;
+      box-shadow: 8px 8px 0 black;
+      max-width: 800px;
+      margin: auto;
+    }
+
+    h1 {
+      font-size: 28px;
+      border: 3px dashed black;
+      padding: 10px;
+      background-color: white;
+      clip-path: polygon(0 0, 90% 0, 100% 10%, 100% 90%, 90% 100%, 0 100%);
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin-top: 20px;
+    }
+
+    select, input[type="text"], button {
+      font-family: inherit;
+      font-size: 16px;
+      padding: 8px;
+      margin-top: 5px;
+      border: 2px solid black;
+      background-color: white;
+      box-shadow: 3px 3px 0 black;
+      width: 100%;
+    }
+
+    .mensaje {
+      margin-top: 15px;
+      padding: 10px;
+      border: 2px dashed black;
+      background-color: #eee;
+    }
+
+    .volver {
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    .volver a {
+      text-decoration: none;
+      font-family: inherit;
+      font-size: 16px;
+      padding: 10px 20px;
+      border: 3px solid black;
+      background-color: white;
+      box-shadow: 4px 4px 0 black;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+
+<div class="panel">
+  <h1>Agregar Estudiantes</h1>
+
+  <label for="cursoSelect">Selecciona el curso:</label>
+  <select id="cursoSelect"></select>
+
+  <label for="nombreInput">Nombre del estudiante:</label>
+  <input type="text" id="nombreInput" placeholder="Ej: Juanito Pérez">
+
+  <button id="guardarBtn">Guardar estudiante</button>
+
+  <div id="mensaje" class="mensaje" style="display: none;"></div>
+
+  <div class="volver">
+    <a href="../index.html">⬅ Volver al menú principal</a>
+  </div>
+</div>
+
+<script>
+  const apiUrl = "https://script.google.com/macros/s/AKfycbxPf336bqe1cQzqLsHCRWZmguqWmwIHIVmuEjBRZcFWYLIYeyq6qhlcO88x2GTo4zI_kw/exec";
+
+  // Generar cursos del 1ro Básico A al 4to Medio C
+  const cursos = [];
+  const niveles = [
+    "1ro Básico", "2do Básico", "3ro Básico", "4to Básico",
+    "5to Básico", "6to Básico", "7mo Básico", "8vo Básico",
+    "1ro Medio", "2do Medio", "3ro Medio", "4to Medio"
+  ];
+  const letras = ["A", "B", "C"];
+
+  niveles.forEach(nivel => {
+    letras.forEach(letra => cursos.push(`${nivel} ${letra}`));
+  });
+
+  const cursoSelect = document.getElementById("cursoSelect");
+  cursos.forEach(curso => {
+    const opt = document.createElement("option");
+    opt.textContent = curso;
+    cursoSelect.appendChild(opt);
+  });
+
+  document.getElementById("guardarBtn").addEventListener("click", async () => {
+    const curso = cursoSelect.value;
+    const nombre = document.getElementById("nombreInput").value.trim();
+    const mensaje = document.getElementById("mensaje");
+
+    if (!nombre) {
+      alert("Por favor escribe un nombre.");
+      return;
+    }
+
+   try {
+  const res = await fetch(`${apiUrl}?accion=agregar_estudiante&curso=${encodeURIComponent(curso)}&nombre=${encodeURIComponent(nombre)}`);
+  const json = await res.json();
+  console.log("Respuesta de la API:", json);  // <-- Añade esto
+
+  if (json.exito) {
+    mensaje.style.display = "block";
+    mensaje.innerHTML = `
+     ✅ Estudiante agregado:<br>
+     <strong>Nombre:</strong> ${json.nombre}<br>
+     <strong>Curso:</strong> ${json.curso}<br>
+     <strong>URL Perfil:</strong> <a href="${json.urlPerfil}" target="_blank">${json.urlPerfil}</a>
+
+    `;
+    document.getElementById("nombreInput").value = "";
+  } else {
+    alert("Error desde el servidor: " + json.error);
+  }
+} catch (err) {
+  alert("Error al guardar estudiante.");
+  console.error(err);
+}
+
+  });
+</script>
+
+</body>
+</html>

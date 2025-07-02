@@ -1,0 +1,91 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel Profesor CAOS - Gestión de Estudiantes</title>
+    <style>
+        body {
+            font-family: monospace;
+            background-color: #fff;
+            color: #000;
+            padding: 20px;
+        }
+        h1 {
+            text-decoration: underline;
+        }
+        input, button {
+            margin: 5px;
+            padding: 5px;
+        }
+        table, th, td {
+            border: 1px solid #000;
+            border-collapse: collapse;
+            padding: 5px;
+        }
+        table {
+            width: 100%;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1>👨‍🏫 Gestión de Estudiantes</h1>
+    <div>
+        <input type="text" id="nombre" placeholder="Nombre completo">
+        <input type="text" id="curso" placeholder="Curso">
+        <button onclick="agregarEstudiante()">➕ Añadir</button>
+    </div>
+    <table id="tablaEstudiantes">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Curso</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        let estudiantes = [];
+
+        function renderTabla() {
+            const tbody = document.querySelector("#tablaEstudiantes tbody");
+            tbody.innerHTML = "";
+            estudiantes.forEach((est, i) => {
+                const row = `<tr>
+                    <td><input value="${est.nombre}" onchange="editarNombre(${i}, this.value)"></td>
+                    <td><input value="${est.curso}" onchange="editarCurso(${i}, this.value)"></td>
+                    <td><button onclick="eliminarEstudiante(${i})">🗑️ Eliminar</button></td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+        }
+
+        function agregarEstudiante() {
+            const nombre = document.getElementById("nombre").value;
+            const curso = document.getElementById("curso").value;
+            if (nombre && curso) {
+                estudiantes.push({ nombre, curso });
+                document.getElementById("nombre").value = "";
+                document.getElementById("curso").value = "";
+                renderTabla();
+            }
+        }
+
+        function eliminarEstudiante(index) {
+            estudiantes.splice(index, 1);
+            renderTabla();
+        }
+
+        function editarNombre(index, nuevoNombre) {
+            estudiantes[index].nombre = nuevoNombre;
+        }
+
+        function editarCurso(index, nuevoCurso) {
+            estudiantes[index].curso = nuevoCurso;
+        }
+    </script>
+</body>
+</html>
