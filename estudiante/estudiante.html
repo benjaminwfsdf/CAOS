@@ -81,6 +81,23 @@
   </style>
 </head>
 <body>
+  <script src="../auth-docente.js"></script>
+
+  <script>
+  const PASSWORD = "caos2025"; // Puedes cambiarla aquí
+
+  const acceso = sessionStorage.getItem("accesoCAOS");
+  if (acceso !== "autorizado") {
+    const ingreso = prompt("Este sitio está protegido. Ingresa la contraseña:");
+    if (ingreso !== PASSWORD) {
+      alert("Contraseña incorrecta. Acceso denegado.");
+      window.location.href = "https://www.google.com"; // o redirige a index.html
+    } else {
+      sessionStorage.setItem("accesoCAOS", "autorizado");
+    }
+  }
+</script>
+
   <div class="panel">
     <div class="titulo">CAOS (Cartas Anti Orden en la Sala)</div>
     <div class="subtitulo" id="nombreAlumno">Cargando estudiante...</div>

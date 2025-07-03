@@ -1,6 +1,20 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <script>
+  // Clave de acceso (puedes cambiarla)
+  const CLAVE_CORRECTA = "profecaos123";
+
+  // Verifica al cargar la página
+  window.onload = function () {
+    const claveIngresada = prompt("🔒 Ingreso restringido\nPor favor, ingresa la clave:");
+    if (claveIngresada !== CLAVE_CORRECTA) {
+      alert("❌ Clave incorrecta. No puedes acceder.");
+      // Redirecciona a Google o cierra la pestaña
+      window.location.href = "https://www.redcrecemos.cl/tdgloprado";
+    }
+  };
+</script>
   <meta charset="UTF-8">
   <title>Reparto Carta Aleatoria - CAOS</title>
   <link rel="stylesheet" href="../style-caos.css">
@@ -44,6 +58,8 @@
   </style>
 </head>
 <body>
+  <script src="../auth-docente.js"></script>
+
   <div class="panel">
     <h1>🃏 Repartir Carta Aleatoria</h1>
     
