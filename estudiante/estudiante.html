@@ -3,26 +3,25 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <script>
-  // Clave de acceso (puedes cambiarla)
-  const CLAVE_CORRECTA = "Caos2025";
-
-  // Verifica al cargar la página
-  window.onload = function () {
-    const claveIngresada = prompt("🔒 Ingreso restringido\nPor favor, ingresa la clave:");
-    if (claveIngresada !== CLAVE_CORRECTA) {
-      alert("❌ Clave incorrecta. No puedes acceder.");
-      // Redirecciona a Google o cierra la pestaña
-      window.location.href = "https://www.redcrecemos.cl/tdgloprado";
-    }
-  };
-</script>
   <meta charset="UTF-8">
   <title>CAOS - Mis Cartas</title>
+  <!-- Fuente más gruesa y legible -->
+  <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
+  <script>
+    // Clave de acceso (puedes cambiarla)
+    const CLAVE_CORRECTA = "Caos2025";
+    window.onload = function () {
+      const claveIngresada = prompt("🔒 Ingreso restringido\nPor favor, ingresa la clave:");
+      if (claveIngresada !== CLAVE_CORRECTA) {
+        alert("❌ Clave incorrecta. No puedes acceder.");
+        window.location.href = "https://www.redcrecemos.cl/tdgloprado";
+      }
+    };
+  </script>
   <style>
     body {
       background-color: #fff;
-      font-family: 'Rock Salt', cursive;
+      font-family: 'Comic Neue', 'Comic Sans MS', cursive, sans-serif;
       margin: 20px;
       background-image: repeating-linear-gradient(45deg, #000 0px, #000 1px, transparent 1px, transparent 6px);
       background-size: 100% 100%;
@@ -40,6 +39,7 @@
 
     .titulo {
       font-size: 28px;
+      font-weight: bold;
       text-align: center;
       border: 3px dashed black;
       padding: 10px;
@@ -49,6 +49,7 @@
 
     .subtitulo {
       font-size: 20px;
+      font-weight: bold;
       text-align: center;
       margin-bottom: 20px;
     }
@@ -112,14 +113,12 @@
 
       document.getElementById("nombreAlumno").innerText = alumno;
 
-      const apiURL = "https://script.google.com/macros/s/AKfycbzp3kpcaQqnf-o6kDB_7Vo5YPNVPRvQXIhVSPFfp5Clt95-zEBFSf7JmeBAD9DgDiA/exec"; // reemplaza YOUR_SCRIPT_ID
+      const apiURL = "https://script.google.com/macros/s/AKfycbzp3kpcaQqnf-o6kDB_7Vo5YPNVPRvQXIhVSPFfp5Clt95-zEBFSf7JmeBAD9DgDiA/exec";
 
       try {
-        // Obtener cartas del estudiante
         const resCartas = await fetch(`${apiURL}?alumno=${encodeURIComponent(alumno)}`);
         const dataCartas = await resCartas.json();
 
-        // Obtener imágenes
         const resImagenes = await fetch(`${apiURL}?accion=imagenes`);
         const dataImagenes = await resImagenes.json();
 
@@ -132,36 +131,17 @@
           const div = document.createElement("div");
           div.className = "carta";
 
-         const img = new Image();
-            img.alt = nombre;
-            img.loading = "lazy";
-
-            if (carta && carta["URL Pública"]) {
-                img.src = carta["URL Pública"];
-            } else {
-            img.src = "https://i.imgur.com/U3F4gA1.png"; // imagen por defecto
-            }
-
-            img.onerror = () => {
-            console.warn("Imagen falló para", nombre);
-            img.src = "https://i.imgur.com/U3F4gA1.png"; // otra imagen si falla
-            };
-
-            img.onload = () => {
-            // Solo cuando la imagen se carga con éxito, se agrega al DOM
-             div.appendChild(img);
-             div.appendChild(info);
-             div.appendChild(boton);
-             contenedor.appendChild(div);
-
-             };
+          const img = new Image();
+          img.alt = nombre;
+          img.loading = "lazy";
+          img.src = carta && carta["URL Pública"] ? carta["URL Pública"] : "https://i.imgur.com/U3F4gA1.png";
+          img.onerror = () => {
+            img.src = "https://i.imgur.com/U3F4gA1.png";
+          };
 
           const info = document.createElement("div");
           info.className = "carta-info";
-          info.innerHTML = `
-            <div><strong>${nombre}</strong></div>
-            <div class="cantidad">Cantidad: ${cantidad}</div>
-          `;
+          info.innerHTML = `<div><strong>${nombre}</strong></div><div class="cantidad">Cantidad: ${cantidad}</div>`;
 
           const boton = document.createElement("button");
           boton.className = "boton-canje";
@@ -170,11 +150,10 @@
           boton.onclick = async () => {
             const confirmacion = confirm(`¿Confirmas solicitar el canje de '${nombre}'?`);
             if (!confirmacion) return;
-           const url = `${apiURL}?accion=solicitar_canje&alumno=${encodeURIComponent(alumno)}&carta=${encodeURIComponent(nombre)}`;
-const res = await fetch(url);
-const texto = await res.text();
-alert("Solicitud enviada al profesor.\n" + texto);
-
+            const url = `${apiURL}?accion=solicitar_canje&alumno=${encodeURIComponent(alumno)}&carta=${encodeURIComponent(nombre)}`;
+            const res = await fetch(url);
+            const texto = await res.text();
+            alert("Solicitud enviada al profesor.\n" + texto);
           };
 
           div.appendChild(img);
@@ -191,25 +170,11 @@ alert("Solicitud enviada al profesor.\n" + texto);
 
     cargarCartas();
   </script>
-<footer style="
-  border: 3px solid black;
-  box-shadow: 4px 4px 0 black;
-  padding: 15px;
-  margin-top: 40px;
-  text-align: center;
-  font-size: 0.9em;
-  background: white;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-">
-  © 2025 CAOS. Todos los derechos reservados. <br>
-  Sitio desarrollado por Benjamín González. <br>
-  Ilustraciones originales por Constanza Cayul.
-</footer>
 
-
-
+  <footer style="border: 3px solid black; box-shadow: 4px 4px 0 black; padding: 15px; margin-top: 40px; text-align: center; font-size: 0.9em; background: white; max-width: 600px; margin-left: auto; margin-right: auto;">
+    © 2025 CAOS. Todos los derechos reservados. <br>
+    Sitio desarrollado por Benjamín González. <br>
+    Ilustraciones originales por Constanza Cayul.
+  </footer>
 </body>
 </html>
- 
