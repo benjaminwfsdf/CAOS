@@ -53,6 +53,20 @@
   </style>
 </head>
 <body>
+    <script>
+  // Clave de acceso (puedes cambiarla)
+  const CLAVE_CORRECTA = "profecaos123";
+
+  // Verifica al cargar la página
+  window.onload = function () {
+    const claveIngresada = prompt("🔒 Ingreso restringido\nPor favor, ingresa la clave:");
+    if (claveIngresada !== CLAVE_CORRECTA) {
+      alert("❌ Clave incorrecta. No puedes acceder.");
+      // Redirecciona a Google o cierra la pestaña
+      window.location.href = "https://www.redcrecemos.cl/tdgloprado";
+    }
+  };
+</script>
   <script src="../auth-docente.js"></script>
 
   <div class="panel">
