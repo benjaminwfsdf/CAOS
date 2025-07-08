@@ -1,14 +1,9 @@
-
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <title>CAOS - Mis Cartas</title>
-  <!-- Fuente más gruesa y legible -->
-  <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
   <script>
-    // Clave de acceso (puedes cambiarla)
     const CLAVE_CORRECTA = "Caos2025";
     window.onload = function () {
       const claveIngresada = prompt("🔒 Ingreso restringido\nPor favor, ingresa la clave:");
@@ -19,13 +14,13 @@
     };
   </script>
   <style>
-  body {
-  font-family: 'Rock Salt', cursive;
-  font-weight: 700; /* intenta engrosar */
-  text-shadow: 0 0 1px black; /* leve contorno para dar grosor */
-  
-}
-
+    body {
+      font-family: 'Rock Salt', cursive;
+      font-weight: 700;
+      text-shadow: 0 0 1px black;
+      background-color: #fff;
+      margin: 20px;
+    }
 
     .panel {
       background-color: white;
@@ -55,72 +50,76 @@
 
     .carta {
       border: 2px solid black;
-      padding: 10px;
-      margin-bottom: 20px;
+      padding: 15px;
+      margin-bottom: 25px;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
+      justify-content: space-between;
       box-shadow: 4px 4px 0 black;
       background-color: white;
+      flex-wrap: wrap;
     }
 
     .carta img {
-      width: 80px;
+      width: 200px;
       height: auto;
-      margin-right: 20px;
+      margin-right: 40px;
     }
 
     .carta-info {
-      flex-grow: 1;
+      font-family: Arial, sans-serif;
+      flex: 1;
+      font-size: 18px;
     }
 
     .cantidad {
       font-weight: bold;
-      margin-bottom: 10px;
+      font-size: 30px;
+      margin-top: 5px;
     }
 
     .boton-canje {
-  padding: 8px 12px;
-  background-color: white;
-  border: 2px solid black;
-  box-shadow: 3px 3px 0 black;
-  font-family: Arial, Helvetica, sans-serif;
-  font-weight: bold;
-  font-size: 16px;
-  color: black;
-  cursor: pointer;
-}
-
+      padding: 10px 16px;
+      background-color: white;
+      border: 2px solid black;
+      box-shadow: 3px 3px 0 black;
+      font-family: Arial, Helvetica, sans-serif;
+      font-weight: bold;
+      font-size: 16px;
+      color: black;
+      cursor: pointer;
+      margin-left: auto;
+      align-self: flex-end;
+    }
 
     .boton-canje:disabled {
       background-color: #eee;
       color: #aaa;
       cursor: not-allowed;
-
-   
-
     }
 
-   .descripcion-carta {
-   flex-grow: 1;
-  font-family: Arial, sans-serif;
-  font-size: 16px;
-  line-height: 1.4;
-}
-.carta {
-  margin-bottom: 25px;
-  padding: 15px;
-  flex-direction: column;
-  align-items: flex-start;
-}
-.carta img {
-  width: 100px;
-  margin-bottom: 10px;
-}
+    .descripcion {
+      display: none;
+      font-family: Arial, sans-serif;
+      font-size: 30px;
+      line-height: 1.4;
+      margin-top: 10px;
+      color: black;
+      width: 100%;
+    }
 
-
-
-
-
+    footer {
+      border: 3px solid black;
+      box-shadow: 4px 4px 0 black;
+      padding: 15px;
+      margin-top: 40px;
+      text-align: center;
+      font-size: 0.9em;
+      background: white;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
   </style>
 </head>
 <body>
@@ -158,18 +157,6 @@
           const carta = dataImagenes.find(img => img.Nombre === nombre);
           const div = document.createElement("div");
           div.className = "carta";
-          div.onclick = () => {
-  descripcion.style.display = (descripcion.style.display === "none") ? "block" : "none";
-};
-
-          const descripcion = document.createElement("div");
-descripcion.className = "descripcion";
-descripcion.style.display = "none";
-descripcion.style.marginTop = "10px";
-descripcion.style.fontSize = "14px";
-descripcion.style.color = "black";
-descripcion.innerText = obtenerDescripcion(nombre);
-
 
           const img = new Image();
           img.alt = nombre;
@@ -178,11 +165,14 @@ descripcion.innerText = obtenerDescripcion(nombre);
           img.onerror = () => {
             img.src = "https://i.imgur.com/U3F4gA1.png";
           };
-          
 
           const info = document.createElement("div");
           info.className = "carta-info";
           info.innerHTML = `<div><strong>${nombre}</strong></div><div class="cantidad">Cantidad: ${cantidad}</div>`;
+
+          const descripcion = document.createElement("div");
+          descripcion.className = "descripcion";
+          descripcion.innerText = obtenerDescripcion(nombre);
 
           const boton = document.createElement("button");
           boton.className = "boton-canje";
@@ -197,12 +187,15 @@ descripcion.innerText = obtenerDescripcion(nombre);
             alert("Solicitud enviada al profesor.\n" + texto);
           };
 
-          div.appendChild(img);
-div.appendChild(info);
-div.appendChild(boton);
-div.appendChild(descripcion); // <-- AÑADIDO
-contenedor.appendChild(div);
+          div.onclick = () => {
+            descripcion.style.display = (descripcion.style.display === "none") ? "block" : "none";
+          };
 
+          div.appendChild(img);
+          div.appendChild(info);
+          div.appendChild(boton);
+          div.appendChild(descripcion);
+          contenedor.appendChild(div);
         });
 
       } catch (error) {
@@ -211,49 +204,27 @@ contenedor.appendChild(div);
       }
     }
 
-    cargarCartas();
-
-    
     function obtenerDescripcion(nombre) {
-   
-    switch (nombre) {
-    case "Perro Bomba":
-      return "Evade pregunta y cárgala a un(a) compañero(a)";
-    case "Pinta Mono":
-      return " Evita una sancion o pide una anotacion positiva.";
-    case "Kodama":
-      return "Junta dos y evita una tarea.";
-      case "Niño Chocolate":
-      return "Puedes comer en clase.";
-      case "1UP":
-      return "0,5 decimas para una nota.";
-      case "Violeta Parra":
-      return "Eres dj durante una actividad o usa audifonos.";
-      case "El Reto":
-      return " Puedes subir un punto en una nota con una tarea extra.";
-      case "BME":
-      return "Puedes utilizar tu celular para buscar informacion en una actividad.";
-      case "GAMER":
-      return "Juega con tu celular si terminaste la actividad.";
-      case "Iluminati":
-      return " Puedes elegir la carta que desees dentro del mazo.";
-      case "Leftraru":
-      return "Pepiwiñoimi tami tuwvn.";
-    // Puedes agregar más casos personalizados acá
-    default:
-      return "Sin descripción disponible para esta carta.";
-      
-  }
-}
+      switch (nombre) {
+        case "Perro Bomba": return "Evade pregunta y cárgala a un(a) compañero(a)";
+        case "Pinta Mono": return "Evita una sanción o pide una anotación positiva.";
+        case "Kodama": return "Junta dos y evita una tarea.";
+        case "Niño Chocolate": return "Puedes comer en clase.";
+        case "1UP": return "0,5 décimas para una nota.";
+        case "Violeta Parra": return "Eres DJ durante una actividad o usa audífonos.";
+        case "El Reto": return "Puedes subir un punto en una nota con una tarea extra.";
+        case "BME": return "Puedes utilizar tu celular para buscar información en una actividad.";
+        case "GAMER": return "Juega con tu celular si terminaste la actividad.";
+        case "Iluminati": return "Puedes elegir la carta que desees dentro del mazo.";
+        case "Leftraru": return "Pepiwiñoimi tami tuwvn.";
+        default: return "Sin descripción disponible para esta carta.";
+      }
+    }
 
-
-
+    cargarCartas();
   </script>
 
- 
-</div>
-
-  <footer style="border: 3px solid black; box-shadow: 4px 4px 0 black; padding: 15px; margin-top: 40px; text-align: center; font-size: 0.9em; background: white; max-width: 600px; margin-left: auto; margin-right: auto;">
+  <footer>
     © 2025 CAOS. Todos los derechos reservados. <br>
     Sitio desarrollado por Benjamín González. <br>
     Ilustraciones originales por Constanza Cayul.
