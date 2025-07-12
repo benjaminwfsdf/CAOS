@@ -1,23 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-
-  <script>
-  // Clave de acceso (puedes cambiarla)
-  const CLAVE_CORRECTA = "profecaos123";
-
-  // Verifica al cargar la página
-  window.onload = function () {
-    const claveIngresada = prompt("🔒 Ingreso restringido\nPor favor, ingresa la clave:");
-    if (claveIngresada !== CLAVE_CORRECTA) {
-      alert("❌ Clave incorrecta. No puedes acceder.");
-      // Redirecciona a Google o cierra la pestaña
-      window.location.href = "https://www.redcrecemos.cl/tdgloprado";
-    }
-  };
-</script>
-
-
   <meta charset="UTF-8">
   <title>CAOS - Estética Panel</title>
   <link rel="stylesheet" href="style-caos.css">
@@ -135,7 +118,7 @@
       <label>Alumno:
         <select id="alumnoSelect"><option>Selecciona un estudiante</option></select>
       </label>  
-      
+
       <div class="fila">
         <span>////////////////</span>
         <a id="btnAleatoria" href="#"><button disabled>Asignar carta aleatoria</button></a>
@@ -154,9 +137,14 @@
     <a id="btnAutorizar" href="#" class="autorizar">Autorizar uso</a>
   </div>
 
+  <footer style="border: 3px solid black; box-shadow: 4px 4px 0 black; padding: 15px; margin-top: 40px; text-align: center; font-size: 0.9em; background: white; max-width: 600px; margin-left: auto; margin-right: auto;">
+    © 2025 CAOS. Todos los derechos reservados. <br>
+    Sitio desarrollado por Benjamín González. <br>
+  </footer>
+
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
-      const apiUrl = 'https://script.google.com/macros/s/AKfycbz7HPvNIWo06DfwT60oiCkoniLNqt450f0IVDn9sCU0hnb4bdr5kZlwuAfDW_e5G48ULQ/exec';
+      const apiUrl = 'https://script.google.com/macros/s/AKfycbyttPVfLEfjVmJ5O_AMKhqvVIoNBw_-iMiqsMd8EfjbSgH5CwxeJ2M1X7w0i1MJ2mxuQA/exec';
       const cursoSelect = document.getElementById('cursoSelect');
       const alumnoSelect = document.getElementById('alumnoSelect');
       const btnAleatoria = document.getElementById('btnAleatoria');
@@ -165,18 +153,41 @@
       const qrContainer = document.getElementById('qrContainer');
       const qrImage = document.getElementById('qrImage');
 
-      btnAleatoria.querySelector('button').disabled = true;
-      btnEspecifica.querySelector('button').disabled = true;
-      qrContainer.style.display = "none";
+      const usuario = new URLSearchParams(window.location.search).get("usuario") || "";
 
       try {
-        const response = await fetch(apiUrl);
+        const response = await fetch(`${apiUrl}?accion=obtener_cursos_profesor&usuario=${encodeURIComponent(usuario)}`);
         const data = await response.json();
-        data.cursos.forEach(curso => {
-          const option = document.createElement('option');
-          option.textContent = curso;
-          cursoSelect.appendChild(option);
-        });
+
+        if (data.ok) {
+          const sufijos = ["ro", "do", "ro", "to", "to", "to", "mo", "vo"];
+          const medios = ["1ro", "2do", "3ro", "4to"];
+
+          data.cursos.forEach(rawCurso => {
+            let cursoMostrado = "";
+            const match = rawCurso.match(/^(\d+)(?:º|\s)?\s?(Básico|Medio)\s([ABC])$/);
+
+            if (match) {
+              const grado = parseInt(match[1]);
+              const nivel = match[2];
+              const letra = match[3];
+              if (nivel === "Básico") {
+                cursoMostrado = `${grado}${sufijos[grado - 1]} Básico ${letra}`;
+              } else {
+                cursoMostrado = `${medios[grado - 1]} Medio ${letra}`;
+              }
+            } else {
+              cursoMostrado = rawCurso;
+            }
+
+            const option = document.createElement('option');
+            option.textContent = cursoMostrado;
+            option.value = rawCurso; // importante mantener el valor original para la API
+            cursoSelect.appendChild(option);
+          });
+        } else {
+          alert("No tienes cursos asignados o hubo un error al obtenerlos.");
+        }
       } catch (error) {
         console.error("Error al cargar cursos:", error);
         alert("No se pudieron cargar los cursos.");
@@ -191,8 +202,11 @@
         btnEspecifica.querySelector('button').disabled = true;
 
         try {
-          const response = await fetch(`${apiUrl}?curso=${encodeURIComponent(curso)}`);
+          const response = await fetch(`${apiUrl}?accion=obtener_estudiantes&curso=${encodeURIComponent(curso)}`);
           const data = await response.json();
+
+          if (!data.ok || !data.estudiantes) throw new Error();
+
           data.estudiantes.forEach(nombre => {
             const option = document.createElement('option');
             option.textContent = nombre;
@@ -215,7 +229,6 @@
           btnEspecifica.href = `panel_profesor/reparto_carta_especifica.html?alumno=${encoded}`;
           btnAutorizar.href = `panel_profesor/validar_canje_CAOS.html?alumno=${encoded}`;
 
-          // Generar QR que dirija al perfil del estudiante
           const perfilURL = `https://caos-stpn.vercel.app/estudiante/estudiante.html?alumno=${encoded}`;
           qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(perfilURL)}&size=100x100`;
           qrContainer.style.display = "block";
@@ -236,22 +249,5 @@
       });
     });
   </script>
-  <footer style="
-  border: 3px solid black;
-  box-shadow: 4px 4px 0 black;
-  padding: 15px;
-  margin-top: 40px;
-  text-align: center;
-  font-size: 0.9em;
-  background: white;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-">
-  © 2025 CAOS. Todos los derechos reservados. <br>
-  Sitio desarrollado por Benjamín González. <br>
- 
-</footer>
-
 </body>
 </html>

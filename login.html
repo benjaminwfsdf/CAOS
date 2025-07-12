@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>CAOS - Panel del Profesor</title>
+  <link rel="stylesheet" href="style-caos.css">
+  <style>
+    body {
+      background-color: #fff;
+      color: #000;
+      font-family: 'Rock Salt', cursive;
+      background-image: repeating-linear-gradient(45deg, #000 0px, #000 1px, transparent 1px, transparent 6px);
+      background-size: 100% 100%;
+      padding: 0; margin: 0;
+    }
+    .panel, .login {
+      background-color: white;
+      border: 3px solid black;
+      box-shadow: 8px 8px 0 black;
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+    .titulo {
+      font-size: 40px;
+      font-weight: bold;
+      text-align: center;
+      border: 3px dashed black;
+      padding: 15px;
+      background-color: white;
+      margin-bottom: 20px;
+    }
+    label, input, button {
+      font-family: inherit;
+      font-size: 16px;
+      margin-bottom: 10px;
+      display: block;
+      width: 100%;
+    }
+    input, textarea {
+      padding: 8px;
+      border: 2px solid black;
+      box-shadow: 3px 3px 0 black;
+    }
+    button {
+      background: white;
+      padding: 10px 20px;
+      cursor: pointer;
+      border: 2px solid black;
+      box-shadow: 3px 3px 0 black;
+    }
+    .oculto { display: none; }
+    .cursos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 5px;
+      max-height: 250px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+      border: 2px dashed black;
+      padding: 10px;
+    }
+    .curso-item {
+      display: flex;
+      align-items: center;
+    }
+    .curso-item input {
+      width: auto;
+      margin-right: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login">
+    <div class="titulo">CAOS</div>
+    <p style="text-align: center; font-weight: bold;">(Panel del Profesor - Cartas Anti Orden)</p>
+
+    <label>Usuario (correo):
+      <input type="email" id="usuario">
+    </label>
+    <label>Contraseña:
+      <input type="password" id="clave">
+    </label>
+
+    <label><input type="checkbox" id="crearCuenta"> Crear cuenta nueva</label>
+
+    <div id="registroExtra" class="oculto">
+      <label>Nueva Contraseña:
+        <input type="password" id="nuevaClave">
+      </label>
+
+      <label>Cursos a cargo:</label>
+      <div id="contenedorCursos" class="cursos-grid"></div>
+    </div>
+
+    <button id="btnIngresar">Ingresar</button>
+  </div>
+
+  <script>
+    const apiUrl = 'https://script.google.com/macros/s/AKfycbwuNchPFTW2nCQThMFq2LMngQ8gQHay_hww8kmWZf0D8znqw3K1S_V3KpZBVOVv1_nE/exec';
+
+    const crearCuentaCheckbox = document.getElementById("crearCuenta");
+    const registroExtra = document.getElementById("registroExtra");
+    const contenedorCursos = document.getElementById("contenedorCursos");
+
+    crearCuentaCheckbox.addEventListener("change", () => {
+      registroExtra.classList.toggle("oculto", !crearCuentaCheckbox.checked);
+    });
+
+    // Generar lista de cursos
+    const cursos = [];
+    const basico = ["1ro", "2do", "3ro", "4to", "5to", "6to", "7mo", "8vo"];
+    const medio = ["1ro", "2do", "3ro", "4to"];
+    const letras = ["A", "B", "C"];
+
+    basico.forEach(nivel => {
+      letras.forEach(letra => {
+        cursos.push(`${nivel} Básico ${letra}`);
+      });
+    });
+
+    medio.forEach(nivel => {
+      letras.forEach(letra => {
+        cursos.push(`${nivel} Medio ${letra}`);
+      });
+    });
+
+    cursos.forEach(curso => {
+      const div = document.createElement("div");
+      div.className = "curso-item";
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.value = curso;
+      const label = document.createElement("label");
+      label.textContent = curso;
+      label.style.cursor = "pointer";
+      div.appendChild(checkbox);
+      div.appendChild(label);
+      contenedorCursos.appendChild(div);
+    });
+
+    document.getElementById("btnIngresar").addEventListener("click", async () => {
+      const usuario = document.getElementById("usuario").value.trim().toLowerCase();
+      const clave = document.getElementById("clave").value.trim();
+
+      if (!usuario || !clave) return alert("Completa los campos de usuario y contraseña.");
+
+      if (crearCuentaCheckbox.checked) {
+        if (clave !== "profecaos123") {
+          return alert("Para crear cuenta, la contraseña debe ser 'profecaos123'.");
+        }
+
+        const nuevaClave = document.getElementById("nuevaClave").value.trim();
+        const cursosSeleccionados = Array.from(contenedorCursos.querySelectorAll("input:checked")).map(c => c.value).join(",");
+
+        if (!nuevaClave || !cursosSeleccionados) {
+          return alert("Completa todos los campos y selecciona al menos un curso.");
+        }
+
+        const crearRes = await fetch(`${apiUrl}?accion=crear_profesor&usuario=${encodeURIComponent(usuario)}&nueva=${encodeURIComponent(nuevaClave)}&cursos=${encodeURIComponent(cursosSeleccionados)}`);
+        const crearData = await crearRes.json();
+
+        if (!crearData.ok) {
+          return alert("❌ Error al crear la cuenta. Puede que ya exista ese usuario.");
+        }
+
+        alert("✅ Cuenta creada correctamente. Redirigiendo al panel...");
+        window.location.href = `index.html?usuario=${encodeURIComponent(usuario)}`;
+        return;
+      }
+
+      // Login normal si no se crea cuenta
+      const loginRes = await fetch(`${apiUrl}?accion=login_profesor&correo=${encodeURIComponent(usuario)}&pass=${encodeURIComponent(clave)}`);
+      const loginData = await loginRes.json();
+
+      if (loginData.ok) {
+        alert("✅ Bienvenido, redirigiendo al panel...");
+        window.location.href = `index.html?usuario=${encodeURIComponent(usuario)}`;
+      } else {
+        alert("❌ Acceso denegado o credenciales incorrectas.");
+      }
+    });
+  </script>
+
+  <footer style="border: 3px solid black; box-shadow: 4px 4px 0 black; padding: 15px; margin-top: 40px; text-align: center; font-size: 0.9em; background: white; max-width: 600px; margin-left: auto; margin-right: auto;">
+    © 2025 CAOS. Todos los derechos reservados. <br>
+    Sitio desarrollado por Benjamín González.
+  </footer>
+</body>
+</html>

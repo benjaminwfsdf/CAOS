@@ -3,16 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <title>CAOS - Mis Cartas</title>
-  <script>
-    const CLAVE_CORRECTA = "Caos2025";
-    window.onload = function () {
-      const claveIngresada = prompt("🔒 Ingreso restringido\nPor favor, ingresa la clave:");
-      if (claveIngresada !== CLAVE_CORRECTA) {
-        alert("❌ Clave incorrecta. No puedes acceder.");
-        window.location.href = "https://www.redcrecemos.cl/tdgloprado";
-      }
-    };
-  </script>
   <style>
     body {
       font-family: 'Rock Salt', cursive;
@@ -123,30 +113,84 @@
   </style>
 </head>
 <body>
-  <div class="panel">
+
+  <!-- Panel de login -->
+  <div class="panel" id="loginPanel">
+    <div class="titulo">🔐 Ingreso restringido</div>
+    <form id="loginForm">
+      <input type="password" id="password" placeholder="Ingresa tu contraseña" required><br><br>
+      <button type="submit">Entrar</button>
+    </form>
+    <div id="mensajeLogin"></div>
+  </div>
+
+  <!-- Panel de cartas oculto hasta loguearse -->
+  <div class="panel" id="cartasPanel" style="display: none;">
     <div class="titulo">CAOS (Cartas Anti Orden en la Sala)</div>
     <div class="subtitulo" id="nombreAlumno">Cargando estudiante...</div>
     <div id="cartasContainer">Cargando cartas...</div>
   </div>
 
+  <footer>
+    © 2025 CAOS. Todos los derechos reservados. <br>
+    Sitio desarrollado por Benjamín González. <br>
+    Ilustraciones originales por Constanza Cayul.
+  </footer>
+
   <script>
-    async function cargarCartas() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const alumno = urlParams.get("alumno");
-      if (!alumno) {
-        document.getElementById("cartasContainer").innerText = "No se proporcionó nombre de estudiante.";
+    const apiURL = "https://script.google.com/macros/s/AKfycbx_PzzXwJS06r93h_U0syl7UUzXwSbwU1ZK7B3FFMzgKh0Pgydu2GmQ1TDoGPTxhry1Ew/exec";
+
+    document.getElementById("loginForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const password = document.getElementById("password").value;
+      const nombre = new URLSearchParams(window.location.search).get("alumno");
+
+      if (!nombre) {
+        alert("Nombre de estudiante no detectado en la URL.");
         return;
       }
 
+      try {
+        const res = await fetch(`${apiURL}?accion=login&nombre=${encodeURIComponent(nombre)}&pass=${encodeURIComponent(password)}`);
+        const data = await res.json();
+
+        if (data.ok) {
+          const yaCambio = data.cambioHecho;
+
+          if (!yaCambio) {
+            const cambiar = confirm("✅ Contraseña correcta.\n¿Quieres cambiar tu contraseña? Solo se permite una vez.");
+            if (cambiar) {
+              const nueva = prompt("Ingresa tu nueva contraseña:");
+              if (nueva) {
+                await fetch(`${apiURL}?accion=cambiar_pass&nombre=${encodeURIComponent(nombre)}&nueva=${encodeURIComponent(nueva)}`);
+                alert("🔁 Contraseña actualizada. Ya no se te volverá a preguntar.");
+              }
+            }
+          }
+
+          document.getElementById("loginPanel").style.display = "none";
+          document.getElementById("cartasPanel").style.display = "block";
+          cargarCartas(nombre);
+        } else {
+          document.getElementById("mensajeLogin").innerText = "❌ Contraseña incorrecta.";
+        }
+      } catch (error) {
+        console.error(error);
+        document.getElementById("mensajeLogin").innerText = "⚠️ Error al conectar con el servidor.";
+      }
+    });
+
+    async function cargarCartas(alumno) {
       document.getElementById("nombreAlumno").innerText = alumno;
 
-      const apiURL = "https://script.google.com/macros/s/AKfycbzp3kpcaQqnf-o6kDB_7Vo5YPNVPRvQXIhVSPFfp5Clt95-zEBFSf7JmeBAD9DgDiA/exec";
+      const apiCartas = "https://script.google.com/macros/s/AKfycbzp3kpcaQqnf-o6kDB_7Vo5YPNVPRvQXIhVSPFfp5Clt95-zEBFSf7JmeBAD9DgDiA/exec";
 
       try {
-        const resCartas = await fetch(`${apiURL}?alumno=${encodeURIComponent(alumno)}`);
+        const resCartas = await fetch(`${apiCartas}?alumno=${encodeURIComponent(alumno)}`);
         const dataCartas = await resCartas.json();
 
-        const resImagenes = await fetch(`${apiURL}?accion=imagenes`);
+        const resImagenes = await fetch(`${apiCartas}?accion=imagenes`);
         const dataImagenes = await resImagenes.json();
 
         const conteo = dataCartas.conteo;
@@ -181,7 +225,7 @@
           boton.onclick = async () => {
             const confirmacion = confirm(`¿Confirmas solicitar el canje de '${nombre}'?`);
             if (!confirmacion) return;
-            const url = `${apiURL}?accion=solicitar_canje&alumno=${encodeURIComponent(alumno)}&carta=${encodeURIComponent(nombre)}`;
+            const url = `${apiCartas}?accion=solicitar_canje&alumno=${encodeURIComponent(alumno)}&carta=${encodeURIComponent(nombre)}`;
             const res = await fetch(url);
             const texto = await res.text();
             alert("Solicitud enviada al profesor.\n" + texto);
@@ -220,14 +264,6 @@
         default: return "Sin descripción disponible para esta carta.";
       }
     }
-
-    cargarCartas();
   </script>
-
-  <footer>
-    © 2025 CAOS. Todos los derechos reservados. <br>
-    Sitio desarrollado por Benjamín González. <br>
-    Ilustraciones originales por Constanza Cayul.
-  </footer>
 </body>
 </html>
