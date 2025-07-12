@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-
   <meta charset="UTF-8">
   <title>Reparto Carta Específica - CAOS</title>
   <link rel="stylesheet" href="../style-caos.css">
@@ -45,14 +44,12 @@
   </style>
 </head>
 <body>
- 
-
   <div class="panel">
     <h1>🎯 Repartir Carta Específica</h1>
 
     <label>Estudiante:
-      <select id="estudianteSelect">
-        <option>Benjamin Gonzalez (3ro Medio)</option>
+      <select id="estudianteSelect" disabled>
+        <option value="">Cargando estudiante...</option>
       </select>
     </label><br>
 
@@ -75,114 +72,83 @@
     <button onclick="repartirEspecifica()">Asignar Carta</button>
 
     <div class="log" id="logReparto"></div>
-    <!-- Aquí se mostrará el resumen del estudiante -->
-<div id="resumenEstudiante" style="margin-top: 30px;"></div>
+    <div id="resumenEstudiante" style="margin-top: 30px;"></div>
 
-    <!-- Botón para volver al menú principal -->
-<div style="margin-top: 30px; text-align: center;">
-  <a href="../index.html" style="
-    text-decoration: none;
-    font-family: inherit;
-    font-size: 16px;
-    padding: 10px 20px;
-    border: 3px solid black;
-    background-color: white;
-    box-shadow: 4px 4px 0 black;
-    display: inline-block;
-  ">⬅ Volver al menú principal</a>
-</div>
-
+    <div style="margin-top: 30px; text-align: center;">
+      <a id="volverBtn" href="#">⬅ Volver al menú principal</a>
+    </div>
   </div>
 
   <script>
-     const API_URL = "https://script.google.com/macros/s/AKfycbwfLuxwxhECHDAJtJzodgG-_3Qf5-OqMi00ShqSICxXFDhAWqOE-GpgqDoonkSRTQH0/exec";
-  function repartirEspecifica() {
-    const estudiante = document.getElementById("estudianteSelect").value;
-    const carta = document.getElementById("cartaEspecifica").value;
+    const API_URL = "https://script.google.com/macros/s/AKfycbwfLuxwxhECHDAJtJzodgG-_3Qf5-OqMi00ShqSICxXFDhAWqOE-GpgqDoonkSRTQH0/exec";
+    const params = new URLSearchParams(window.location.search);
+    const alumno = params.get("alumno");
+    const usuario = params.get("usuario");
 
-    document.getElementById("logReparto").innerHTML += `<p>🎯 ${estudiante} recibe: <b>${carta}</b></p>`;
-
-    guardarCartaEspecifica(estudiante, carta);
-    cargarResumenEstudiante(estudiante); // actualiza la tabla de resumen
-  }
-
-  async function guardarCartaEspecifica(estudiante, carta) {
-    try {
-      console.log("📤 Enviando carta específica:", estudiante, carta);
-
-      const response = await fetch(`${API_URL}?alumno=${encodeURIComponent(estudiante)}&carta=${encodeURIComponent(carta)}`);
-      const resultado = await response.text();
-      console.log("✅ Respuesta del servidor:", resultado);
-    } catch (error) {
-      console.error("❌ Error al guardar la carta:", error);
+    // Validar sesión
+    if (!usuario) {
+      window.location.href = "../login.html";
     }
-  }
-</script>
 
+    // Configurar botón volver con sesión
+    document.getElementById("volverBtn").href = `../index.html?usuario=${encodeURIComponent(usuario)}`;
+
+    // Mostrar estudiante
+    const select = document.getElementById("estudianteSelect");
+    if (alumno) {
+      select.innerHTML = `<option selected>${alumno}</option>`;
+      select.disabled = false;
+      cargarResumenEstudiante(alumno);
+    } else {
+      document.getElementById("resumenEstudiante").innerHTML = `<p style="color:red;">⚠️ No se ha seleccionado ningún estudiante.</p>`;
+    }
+
+    function repartirEspecifica() {
+      const estudiante = document.getElementById("estudianteSelect").value;
+      const carta = document.getElementById("cartaEspecifica").value;
+
+      document.getElementById("logReparto").innerHTML += `<p>🎯 ${estudiante} recibe: <b>${carta}</b></p>`;
+
+      guardarCartaEspecifica(estudiante, carta);
+      cargarResumenEstudiante(estudiante);
+    }
+
+    async function guardarCartaEspecifica(estudiante, carta) {
+      try {
+        console.log("📤 Enviando carta específica:", estudiante, carta);
+        const response = await fetch(`${API_URL}?alumno=${encodeURIComponent(estudiante)}&carta=${encodeURIComponent(carta)}`);
+        const resultado = await response.text();
+        console.log("✅ Respuesta del servidor:", resultado);
+      } catch (error) {
+        console.error("❌ Error al guardar la carta:", error);
+      }
+    }
+
+    async function cargarResumenEstudiante(nombreEstudiante) {
+      try {
+        const response = await fetch(`${API_URL}?alumno=${encodeURIComponent(nombreEstudiante)}`);
+        const data = await response.json();
+
+        const resumen = document.getElementById("resumenEstudiante");
+        resumen.innerHTML = `
+          <h2>Resumen de Cartas</h2>
+          <p><strong>🎓 Estudiante:</strong> ${data.alumno}</p>
+          <p><strong>🃏 Total cartas:</strong> ${data.total}</p>
+          <p><strong>Cartas obtenidas:</strong></p>
+          <ul>
+            ${Object.entries(data.conteo).map(([nombre, cantidad]) => `<li>${nombre}: ${cantidad}</li>`).join("")}
+          </ul>
+        `;
+      } catch (error) {
+        console.error("❌ Error al cargar resumen:", error);
+        document.getElementById("resumenEstudiante").innerHTML = `<p style="color:red;">Error al cargar las cartas del estudiante.</p>`;
+      }
+    }
   </script>
-  <script>
-  // Obtener parámetro "alumno" desde la URL
-  const params = new URLSearchParams(window.location.search);
-  const alumno = params.get("alumno");
 
-  // Insertar el alumno en el <select>
-  const select = document.getElementById("estudianteSelect");
-  if (alumno) {
-    select.innerHTML = `<option selected>${alumno}</option>`;
-  }
-</script>
-<script>
- 
-</script>
-
-<script>
-
-async function cargarResumenEstudiante(nombreEstudiante) {
-  try {
-    const response = await fetch(`${API_URL}?alumno=${encodeURIComponent(nombreEstudiante)}`);
-    const data = await response.json();
-
-    const resumen = document.getElementById("resumenEstudiante");
-    resumen.innerHTML = `
-      <h2>Resumen de Cartas</h2>
-      <p><strong>🎓 Estudiante:</strong> ${data.alumno}</p>
-      <p><strong>🃏 Total cartas:</strong> ${data.total}</p>
-      <p><strong>Cartas obtenidas:</strong></p>
-      <ul>
-        ${Object.entries(data.conteo).map(([nombre, cantidad]) => `<li>${nombre}: ${cantidad}</li>`).join("")}
-      </ul>
-    `;
-  } catch (error) {
-    console.error("❌ Error al cargar resumen:", error);
-    document.getElementById("resumenEstudiante").innerHTML = `<p style="color:red;">Error al cargar las cartas del estudiante.</p>`;
-  }
-}
-
-
-
-
-// Ejecutar si hay parámetro alumno
-if (alumno) {
-  cargarResumenEstudiante(alumno);
-}
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <footer style="
-  border: 3px solid black;
-  box-shadow: 4px 4px 0 black;
-  padding: 15px;
-  margin-top: 40px;
-  text-align: center;
-  font-size: 0.9em;
-  background: white;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-">
-  © 2025 CAOS. Todos los derechos reservados. <br>
-  Sitio desarrollado por Benjamín González. <br>
- 
-</footer>
+  <footer style="border: 3px solid black; box-shadow: 4px 4px 0 black; padding: 15px; margin-top: 40px; text-align: center; font-size: 0.9em; background: white; max-width: 600px; margin-left: auto; margin-right: auto;">
+    © 2025 CAOS. Todos los derechos reservados. <br>
+    Sitio desarrollado por Benjamín González.
+  </footer>
 </body>
 </html>

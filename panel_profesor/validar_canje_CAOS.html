@@ -53,29 +53,13 @@
   </style>
 </head>
 <body>
-    <script>
-  // Clave de acceso (puedes cambiarla)
-  const CLAVE_CORRECTA = "profecaos123";
-
-  // Verifica al cargar la página
-  window.onload = function () {
-    const claveIngresada = prompt("🔒 Ingreso restringido\nPor favor, ingresa la clave:");
-    if (claveIngresada !== CLAVE_CORRECTA) {
-      alert("❌ Clave incorrecta. No puedes acceder.");
-      // Redirecciona a Google o cierra la pestaña
-      window.location.href = "https://www.redcrecemos.cl/tdgloprado";
-    }
-  };
-</script>
-
-
   <div class="panel">
     <h1>🔍 Validar Canje de Cartas</h1>
 
     <div id="solicitudesContainer">Cargando solicitudes...</div>
 
     <div style="margin-top: 30px; text-align: center;">
-      <a href="../index.html" style="
+      <a id="volverBtn" href="#" style="
         text-decoration: none;
         font-family: inherit;
         font-size: 16px;
@@ -88,7 +72,19 @@
   </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbxZ5pH12xvU9-jnibxM5Uosjk0ntBNt_gONtGuhVM_s4jFE9j8lWJpDLicgG71fcd2B/exec"; // Reemplaza con tu API real
+    const API_URL = "https://script.google.com/macros/s/AKfycbxZ5pH12xvU9-jnibxM5Uosjk0ntBNt_gONtGuhVM_s4jFE9j8lWJpDLicgG71fcd2B/exec";
+
+    const params = new URLSearchParams(window.location.search);
+    const usuario = params.get("usuario");
+
+    // Si no hay sesión iniciada, redirigir
+    if (!usuario) {
+      alert("Sesión no iniciada. Redirigiendo al login.");
+      window.location.href = "../login.html";
+    }
+
+    // Asignar botón volver
+    document.getElementById("volverBtn").href = `../index.html?usuario=${encodeURIComponent(usuario)}`;
 
     async function cargarSolicitudes() {
       try {
@@ -97,7 +93,7 @@
 
         const contenedor = document.getElementById("solicitudesContainer");
 
-        if (solicitudes.length === 0) {
+        if (!Array.isArray(solicitudes) || solicitudes.length === 0) {
           contenedor.innerHTML = "<p>📭 No hay solicitudes pendientes.</p>";
           return;
         }
@@ -127,9 +123,8 @@
         `;
 
         contenedor.innerHTML = html;
-
       } catch (error) {
-        console.error("Error cargando solicitudes:", error);
+        console.error("❌ Error cargando solicitudes:", error);
         document.getElementById("solicitudesContainer").innerHTML = `<p style="color:red;">❌ Error al cargar las solicitudes.</p>`;
       }
     }
@@ -142,7 +137,7 @@
       const res = await fetch(url);
       const mensaje = await res.text();
       alert(mensaje);
-      cargarSolicitudes(); // recarga
+      cargarSolicitudes();
     }
 
     async function rechazar(alumno, carta) {
@@ -158,22 +153,20 @@
 
     cargarSolicitudes();
   </script>
-    <footer style="
-  border: 3px solid black;
-  box-shadow: 4px 4px 0 black;
-  padding: 15px;
-  margin-top: 40px;
-  text-align: center;
-  font-size: 0.9em;
-  background: white;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-">
-  © 2025 CAOS. Todos los derechos reservados. <br>
-  Sitio desarrollado por Benjamín González. <br>
- 
-</footer>
 
+  <footer style="
+    border: 3px solid black;
+    box-shadow: 4px 4px 0 black;
+    padding: 15px;
+    margin-top: 40px;
+    text-align: center;
+    font-size: 0.9em;
+    background: white;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;">
+    © 2025 CAOS. Todos los derechos reservados. <br>
+    Sitio desarrollado por Benjamín González.
+  </footer>
 </body>
 </html>

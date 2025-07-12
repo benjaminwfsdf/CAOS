@@ -72,9 +72,6 @@
   </style>
 </head>
 <body>
-  
-
-
 <div class="panel">
   <h1>Agregar Estudiantes</h1>
 
@@ -89,14 +86,23 @@
   <div id="mensaje" class="mensaje" style="display: none;"></div>
 
   <div class="volver">
-    <a href="../index.html">⬅ Volver al menú principal</a>
+    <a id="volverBtn" href="#">⬅ Volver al menú principal</a>
   </div>
 </div>
 
 <script>
   const apiUrl = "https://script.google.com/macros/s/AKfycbxomBS4kpyZcwIl38bjHbNhH0i7hASugNfiRL19SkkPNAMmW5cJHuwXnCO3RI6WFi7Rlg/exec";
+  const usuario = new URLSearchParams(window.location.search).get("usuario") || "";
 
-  // Generar cursos del 1ro Básico A al 4to Medio C
+  // Si no hay usuario, redirigir al login
+  if (!usuario) {
+    window.location.href = "../login.html";
+  }
+
+  // Agregar redirección con sesión
+  document.getElementById("volverBtn").href = `../index.html?usuario=${encodeURIComponent(usuario)}`;
+
+  // Generar cursos
   const cursos = [];
   const niveles = [
     "1ro Básico", "2do Básico", "3ro Básico", "4to Básico",
@@ -126,46 +132,32 @@
       return;
     }
 
-   try {
-  const res = await fetch(`${apiUrl}?accion=agregar_estudiante&curso=${encodeURIComponent(curso)}&nombre=${encodeURIComponent(nombre)}`);
-  const json = await res.json();
-  console.log("Respuesta de la API:", json);  // <-- Añade esto
+    try {
+      const res = await fetch(`${apiUrl}?accion=agregar_estudiante&curso=${encodeURIComponent(curso)}&nombre=${encodeURIComponent(nombre)}`);
+      const json = await res.json();
 
-  if (json.exito) {
-    mensaje.style.display = "block";
-    mensaje.innerHTML = `
-     ✅ Estudiante agregado:<br>
-     <strong>Nombre:</strong> ${json.nombre}<br>
-     <strong>Curso:</strong> ${json.curso}<br>
-     <strong>URL Perfil:</strong> <a href="${json.urlPerfil}" target="_blank">${json.urlPerfil}</a>
-
-    `;
-    document.getElementById("nombreInput").value = "";
-  } else {
-    alert("Error desde el servidor: " + json.error);
-  }
-} catch (err) {
-  alert("Error al guardar estudiante.");
-  console.error(err);
-}
-
+      if (json.exito) {
+        mensaje.style.display = "block";
+        mensaje.innerHTML = `
+          ✅ Estudiante agregado:<br>
+          <strong>Nombre:</strong> ${json.nombre}<br>
+          <strong>Curso:</strong> ${json.curso}<br>
+          <strong>URL Perfil:</strong> <a href="${json.urlPerfil}" target="_blank">${json.urlPerfil}</a>
+        `;
+        document.getElementById("nombreInput").value = "";
+      } else {
+        alert("Error desde el servidor: " + json.error);
+      }
+    } catch (err) {
+      alert("Error al guardar estudiante.");
+      console.error(err);
+    }
   });
 </script>
-   <footer style="
-  border: 3px solid black;
-  box-shadow: 4px 4px 0 black;
-  padding: 15px;
-  margin-top: 40px;
-  text-align: center;
-  font-size: 0.9em;
-  background: white;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-">
+
+<footer style="border: 3px solid black; box-shadow: 4px 4px 0 black; padding: 15px; margin-top: 40px; text-align: center; font-size: 0.9em; background: white; max-width: 600px; margin-left: auto; margin-right: auto;">
   © 2025 CAOS. Todos los derechos reservados. <br>
-  Sitio desarrollado por Benjamín González. <br>
- 
+  Sitio desarrollado por Benjamín González.
 </footer>
 </body>
 </html>

@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-
   <meta charset="UTF-8">
   <title>Reparto Carta Aleatoria - CAOS</title>
   <link rel="stylesheet" href="../style-caos.css">
@@ -45,7 +44,6 @@
   </style>
 </head>
 <body>
-  
 
   <div class="panel">
     <h1>🃏 Repartir Carta Aleatoria</h1>
@@ -59,21 +57,10 @@
     <button onclick="repartirAleatoria()">Repartir Carta Aleatoria</button>
 
     <div class="log" id="logReparto"></div>
-
     <div id="resumenEstudiante" style="margin-top: 30px;"></div>
 
-    <!-- Botón para volver al menú principal -->
     <div style="margin-top: 30px; text-align: center;">
-      <a href="../index.html" style="
-        text-decoration: none;
-        font-family: inherit;
-        font-size: 16px;
-        padding: 10px 20px;
-        border: 3px solid black;
-        background-color: white;
-        box-shadow: 4px 4px 0 black;
-        display: inline-block;
-      ">⬅ Volver al menú principal</a>
+      <a id="volverBtn" href="#">⬅ Volver al menú principal</a>
     </div>
   </div>
 
@@ -110,19 +97,15 @@
     }
 
     async function guardarCartaEnSheets(estudiante, carta) {
-  try {
-    console.log("📤 Enviando datos a Sheets (por GET):", estudiante, carta);
-
-    const response = await fetch(`${API_URL}?alumno=${encodeURIComponent(estudiante)}&carta=${encodeURIComponent(carta)}`);
-    const texto = await response.text();
-    console.log("✅ Respuesta del servidor:", texto);
-  } catch (error) {
-    console.error("❌ Error al guardar la carta:", error);
-  }
-}
-
-
-    
+      try {
+        console.log("📤 Enviando datos a Sheets:", estudiante, carta);
+        const response = await fetch(`${API_URL}?alumno=${encodeURIComponent(estudiante)}&carta=${encodeURIComponent(carta)}`);
+        const texto = await response.text();
+        console.log("✅ Respuesta del servidor:", texto);
+      } catch (error) {
+        console.error("❌ Error al guardar la carta:", error);
+      }
+    }
 
     async function cargarResumenEstudiante(nombreEstudiante) {
       try {
@@ -145,10 +128,17 @@
       }
     }
 
-    // Al cargar, obtiene el nombre desde la URL
+    // Obtener parámetros
     const params = new URLSearchParams(window.location.search);
     const alumno = params.get("alumno");
+    const usuario = params.get("usuario");
 
+    // Validar sesión
+    if (!usuario) {
+      window.location.href = "../login.html";
+    }
+
+    // Configurar estudiante y botón volver
     const select = document.getElementById("estudianteSelect");
     if (alumno) {
       select.innerHTML = `<option selected>${alumno}</option>`;
@@ -158,22 +148,13 @@
       document.getElementById("resumenEstudiante").innerHTML = `
         <p style="color:red;">⚠️ No se ha seleccionado ningún estudiante. Vuelve al menú principal.</p>`;
     }
+
+    document.getElementById("volverBtn").href = `../index.html?usuario=${encodeURIComponent(usuario)}`;
   </script>
-    <footer style="
-  border: 3px solid black;
-  box-shadow: 4px 4px 0 black;
-  padding: 15px;
-  margin-top: 40px;
-  text-align: center;
-  font-size: 0.9em;
-  background: white;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-">
-  © 2025 CAOS. Todos los derechos reservados. <br>
-  Sitio desarrollado por Benjamín González. <br>
- 
-</footer>
+
+  <footer style="border: 3px solid black; box-shadow: 4px 4px 0 black; padding: 15px; margin-top: 40px; text-align: center; font-size: 0.9em; background: white; max-width: 600px; margin-left: auto; margin-right: auto;">
+    © 2025 CAOS. Todos los derechos reservados. <br>
+    Sitio desarrollado por Benjamín González.
+  </footer>
 </body>
 </html>

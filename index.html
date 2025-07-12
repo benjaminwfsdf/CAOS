@@ -108,7 +108,7 @@
             <option>Selecciona un curso</option>
           </select>
         </label>
-        <a href="panel_profesor/cargar_excel_estudiantes.html">
+        <a id="btnEditarCursos" href="#">
           <button>Editar Cursos</button>
         </a>
       </div>
@@ -144,12 +144,13 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
-      const apiUrl = 'https://script.google.com/macros/s/AKfycbyttPVfLEfjVmJ5O_AMKhqvVIoNBw_-iMiqsMd8EfjbSgH5CwxeJ2M1X7w0i1MJ2mxuQA/exec';
+      const apiUrl = 'https://script.google.com/macros/s/AKfycbzXzq67mlTZTX3T_fx9EXXrrIIE2BwfhIweQS78iQQS5X28KcuwhpPw5wF24TplEeRdEA/exec';
       const cursoSelect = document.getElementById('cursoSelect');
       const alumnoSelect = document.getElementById('alumnoSelect');
       const btnAleatoria = document.getElementById('btnAleatoria');
       const btnEspecifica = document.getElementById('btnEspecifica');
       const btnAutorizar = document.getElementById('btnAutorizar');
+      const btnEditarCursos = document.getElementById('btnEditarCursos');
       const qrContainer = document.getElementById('qrContainer');
       const qrImage = document.getElementById('qrImage');
 
@@ -182,7 +183,7 @@
 
             const option = document.createElement('option');
             option.textContent = cursoMostrado;
-            option.value = rawCurso; // importante mantener el valor original para la API
+            option.value = rawCurso;
             cursoSelect.appendChild(option);
           });
         } else {
@@ -225,9 +226,9 @@
           btnAleatoria.querySelector('button').disabled = false;
           btnEspecifica.querySelector('button').disabled = false;
 
-          btnAleatoria.href = `panel_profesor/reparto_carta_aleatoria.html?alumno=${encoded}`;
-          btnEspecifica.href = `panel_profesor/reparto_carta_especifica.html?alumno=${encoded}`;
-          btnAutorizar.href = `panel_profesor/validar_canje_CAOS.html?alumno=${encoded}`;
+          btnAleatoria.href = `panel_profesor/reparto_carta_aleatoria.html?alumno=${encoded}&usuario=${usuario}`;
+          btnEspecifica.href = `panel_profesor/reparto_carta_especifica.html?alumno=${encoded}&usuario=${usuario}`;
+          btnAutorizar.href = `panel_profesor/validar_canje_CAOS.html?alumno=${encoded}&usuario=${usuario}`;
 
           const perfilURL = `https://caos-stpn.vercel.app/estudiante/estudiante.html?alumno=${encoded}`;
           qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(perfilURL)}&size=100x100`;
@@ -247,6 +248,9 @@
           alert("Debes seleccionar un estudiante antes de autorizar uso.");
         }
       });
+
+      // Enlace a editar cursos manteniendo sesión
+      btnEditarCursos.href = `panel_profesor/cargar_excel_estudiantes.html?usuario=${usuario}`;
     });
   </script>
 </body>
