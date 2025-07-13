@@ -110,6 +110,45 @@
       margin-left: auto;
       margin-right: auto;
     }
+
+    #modalCambio {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #modalCambio .contenido {
+      background: white;
+      border: 3px solid black;
+      box-shadow: 6px 6px 0 black;
+      padding: 20px;
+      text-align: center;
+      font-family: 'Comic Neue', cursive;
+      width: 90%;
+      max-width: 350px;
+    }
+
+    #modalCambio input {
+      padding: 10px;
+      font-size: 18px;
+      width: 90%;
+      border: 2px solid black;
+    }
+
+    #modalCambio button {
+      padding: 10px 20px;
+      font-size: 18px;
+      border: 2px solid black;
+      box-shadow: 3px 3px 0 black;
+      background: white;
+      margin-top: 10px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -124,11 +163,21 @@
     <div id="mensajeLogin"></div>
   </div>
 
-  <!-- Panel de cartas oculto hasta loguearse -->
+  <!-- Panel de cartas -->
   <div class="panel" id="cartasPanel" style="display: none;">
     <div class="titulo">CAOS (Cartas Anti Orden en la Sala)</div>
     <div class="subtitulo" id="nombreAlumno">Cargando estudiante...</div>
     <div id="cartasContainer">Cargando cartas...</div>
+  </div>
+
+  <!-- Modal de cambio de contraseña -->
+  <div id="modalCambio">
+    <div class="contenido">
+      <h2>🔁 Cambiar Contraseña</h2>
+      <p>Ingresa tu nueva contraseña.<br>Solo puedes hacerlo una vez.</p>
+      <input type="password" id="nuevaPass" placeholder="Nueva contraseña"><br>
+      <button onclick="guardarNuevaClave()">Guardar</button>
+    </div>
   </div>
 
   <footer>
@@ -139,39 +188,28 @@
 
   <script>
     const apiURL = "https://script.google.com/macros/s/AKfycbx_PzzXwJS06r93h_U0syl7UUzXwSbwU1ZK7B3FFMzgKh0Pgydu2GmQ1TDoGPTxhry1Ew/exec";
+    let alumnoGlobal = "";
 
     document.getElementById("loginForm").addEventListener("submit", async function (e) {
       e.preventDefault();
-
       const password = document.getElementById("password").value;
       const nombre = new URLSearchParams(window.location.search).get("alumno");
+      alumnoGlobal = nombre;
 
-      if (!nombre) {
-        alert("Nombre de estudiante no detectado en la URL.");
-        return;
-      }
+      if (!nombre) return alert("Nombre de estudiante no detectado en la URL.");
 
       try {
         const res = await fetch(`${apiURL}?accion=login&nombre=${encodeURIComponent(nombre)}&pass=${encodeURIComponent(password)}`);
         const data = await res.json();
 
         if (data.ok) {
-          const yaCambio = data.cambioHecho;
-
-          if (!yaCambio) {
-            const cambiar = confirm("✅ Contraseña correcta.\n¿Quieres cambiar tu contraseña? Solo se permite una vez.");
-            if (cambiar) {
-              const nueva = prompt("Ingresa tu nueva contraseña:");
-              if (nueva) {
-                await fetch(`${apiURL}?accion=cambiar_pass&nombre=${encodeURIComponent(nombre)}&nueva=${encodeURIComponent(nueva)}`);
-                alert("🔁 Contraseña actualizada. Ya no se te volverá a preguntar.");
-              }
-            }
+          if (!data.cambioHecho) {
+            document.getElementById("modalCambio").style.display = "flex";
+          } else {
+            document.getElementById("loginPanel").style.display = "none";
+            document.getElementById("cartasPanel").style.display = "block";
+            cargarCartas(nombre);
           }
-
-          document.getElementById("loginPanel").style.display = "none";
-          document.getElementById("cartasPanel").style.display = "block";
-          cargarCartas(nombre);
         } else {
           document.getElementById("mensajeLogin").innerText = "❌ Contraseña incorrecta.";
         }
@@ -180,6 +218,22 @@
         document.getElementById("mensajeLogin").innerText = "⚠️ Error al conectar con el servidor.";
       }
     });
+
+    async function guardarNuevaClave() {
+      const nueva = document.getElementById("nuevaPass").value.trim();
+      if (!nueva) return alert("⚠️ Debes escribir una nueva contraseña.");
+
+      try {
+        await fetch(`${apiURL}?accion=cambiar_pass&nombre=${encodeURIComponent(alumnoGlobal)}&nueva=${encodeURIComponent(nueva)}`);
+        alert("✅ Contraseña cambiada correctamente.");
+        document.getElementById("modalCambio").style.display = "none";
+        document.getElementById("loginPanel").style.display = "none";
+        document.getElementById("cartasPanel").style.display = "block";
+        cargarCartas(alumnoGlobal);
+      } catch (e) {
+        alert("❌ Error al guardar la nueva contraseña.");
+      }
+    }
 
     async function cargarCartas(alumno) {
       document.getElementById("nombreAlumno").innerText = alumno;
@@ -205,10 +259,8 @@
           const img = new Image();
           img.alt = nombre;
           img.loading = "lazy";
-          img.src = carta && carta["URL Pública"] ? carta["URL Pública"] : "https://i.imgur.com/U3F4gA1.png";
-          img.onerror = () => {
-            img.src = "https://i.imgur.com/U3F4gA1.png";
-          };
+          img.src = carta?.["URL Pública"] || "https://i.imgur.com/U3F4gA1.png";
+          img.onerror = () => img.src = "https://i.imgur.com/U3F4gA1.png";
 
           const info = document.createElement("div");
           info.className = "carta-info";
