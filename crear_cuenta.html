@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>CAOS - Crear Cuenta</title>
+  <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Comic Neue', cursive;
+      background-image: repeating-linear-gradient(45deg, #000 0px, #000 1px, transparent 1px, transparent 6px);
+      background-size: 100% 100%;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 700px;
+      margin: 40px auto;
+      background: white;
+      border: 3px solid black;
+      box-shadow: 8px 8px 0 black;
+      padding: 20px;
+    }
+    .titulo {
+      font-size: 40px;
+      font-weight: bold;
+      text-align: center;
+      border: 3px dashed black;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    label, input, button {
+      font-size: 16px;
+      display: block;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    input {
+      padding: 8px;
+      border: 2px solid black;
+      box-shadow: 3px 3px 0 black;
+    }
+    button {
+      background: white;
+      padding: 10px;
+      border: 2px solid black;
+      box-shadow: 3px 3px 0 black;
+      cursor: pointer;
+    }
+    .cursos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 5px;
+      max-height: 250px;
+      overflow-y: auto;
+      border: 2px dashed black;
+      padding: 10px;
+    }
+    .curso-item {
+      display: flex;
+      align-items: center;
+    }
+    .curso-item input {
+      width: auto;
+      margin-right: 8px;
+    }
+    footer {
+      border: 3px solid black;
+      box-shadow: 4px 4px 0 black;
+      padding: 15px;
+      margin-top: 40px;
+      text-align: center;
+      background: white;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="titulo">Crear Cuenta</div>
+    <label>Correo electrónico:
+      <input type="email" id="usuarioRegistro">
+    </label>
+    <label>Contraseña de seguridad (profesor):
+      <input type="password" id="claveSeguridad">
+    </label>
+    <label>Contraseña nueva:
+      <input type="password" id="nuevaClave">
+    </label>
+
+    <label>Cursos a cargo:</label>
+    <div id="contenedorCursos" class="cursos-grid"></div>
+
+    <button id="btnRegistro">Crear cuenta</button>
+  </div>
+
+  <script>
+    const apiUrl = 'https://script.google.com/macros/s/AKfycbwuNchPFTW2nCQThMFq2LMngQ8gQHay_hww8kmWZf0D8znqw3K1S_V3KpZBVOVv1_nE/exec';
+    const contenedorCursos = document.getElementById("contenedorCursos");
+
+    const cursos = [];
+    const basico = ["1ro", "2do", "3ro", "4to", "5to", "6to", "7mo", "8vo"];
+    const medio = ["1ro", "2do", "3ro", "4to"];
+    const letras = ["A", "B", "C"];
+
+    basico.forEach(n => letras.forEach(l => cursos.push(`${n} Básico ${l}`)));
+    medio.forEach(n => letras.forEach(l => cursos.push(`${n} Medio ${l}`)));
+
+    cursos.forEach(curso => {
+      const div = document.createElement("div");
+      div.className = "curso-item";
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.value = curso;
+      const label = document.createElement("label");
+      label.textContent = curso;
+      div.appendChild(checkbox);
+      div.appendChild(label);
+      contenedorCursos.appendChild(div);
+    });
+
+    document.getElementById("btnRegistro").addEventListener("click", async () => {
+      const usuario = document.getElementById("usuarioRegistro").value.trim().toLowerCase();
+      const claveSeguridad = document.getElementById("claveSeguridad").value.trim();
+      const nuevaClave = document.getElementById("nuevaClave").value.trim();
+      const cursosSeleccionados = Array.from(contenedorCursos.querySelectorAll("input:checked")).map(c => c.value).join(",");
+
+      if (claveSeguridad !== "profecaos123") {
+        return alert("❌ La contraseña de seguridad es incorrecta.");
+      }
+
+      if (!usuario || !nuevaClave || cursosSeleccionados.length === 0) {
+        return alert("Completa todos los campos.");
+      }
+
+      const crearRes = await fetch(`${apiUrl}?accion=crear_profesor&usuario=${encodeURIComponent(usuario)}&nueva=${encodeURIComponent(nuevaClave)}&cursos=${encodeURIComponent(cursosSeleccionados)}`);
+      const crearData = await crearRes.json();
+
+      if (!crearData.ok) {
+        return alert("❌ Error: ya existe ese usuario.");
+      }
+
+      alert("✅ Cuenta creada. Redirigiendo al panel...");
+      window.location.href = `index.html?usuario=${encodeURIComponent(usuario)}`;
+    });
+  </script>
+
+  <footer>
+    © 2025 CAOS. Sitio desarrollado por Benjamín González.
+  </footer>
+</body>
+</html>
