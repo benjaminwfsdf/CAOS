@@ -41,6 +41,20 @@
       padding: 10px;
       border-top: 2px dashed black;
     }
+
+    #volverBtn {
+      display: inline-block;
+      background-color: white;
+      color: black;
+      border: 2px solid black;
+      box-shadow: 4px 4px 0 black;
+      padding: 10px 20px;
+      font-family: 'Rock Salt', cursive;
+      font-size: 18px;
+      cursor: pointer;
+      text-decoration: none;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
@@ -75,7 +89,7 @@
     <div id="resumenEstudiante" style="margin-top: 30px;"></div>
 
     <div style="margin-top: 30px; text-align: center;">
-      <a id="volverBtn" href="#">⬅ Volver al menú principal</a>
+      <button id="volverBtn">⬅ Volver al menú principal</button>
     </div>
   </div>
 
@@ -85,15 +99,14 @@
     const alumno = params.get("alumno");
     const usuario = params.get("usuario");
 
-    // Validar sesión
     if (!usuario) {
       window.location.href = "../login.html";
     }
 
-    // Configurar botón volver con sesión
-    document.getElementById("volverBtn").href = `../index.html?usuario=${encodeURIComponent(usuario)}`;
+    document.getElementById("volverBtn").onclick = () => {
+      window.location.href = `../index.html?usuario=${encodeURIComponent(usuario)}`;
+    };
 
-    // Mostrar estudiante
     const select = document.getElementById("estudianteSelect");
     if (alumno) {
       select.innerHTML = `<option selected>${alumno}</option>`;
