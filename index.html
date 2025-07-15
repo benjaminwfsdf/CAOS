@@ -64,7 +64,7 @@
     }
 
     .fila {
-      display:flex;
+      display: flex;
       justify-content: space-between;
       align-items: center;
       margin: 10px 0;
@@ -108,16 +108,14 @@
             <option>Selecciona un curso</option>
           </select>
         </label>
-        <a id="btnEditarCursos" href="#">
-          <button>Editar Cursos</button>
-        </a>
+        <a id="btnEditarCursos" href="#"><button>Editar Cursos</button></a>
       </div>
     </div>
 
     <div class="bloque">
       <label>Alumno:
         <select id="alumnoSelect"><option>Selecciona un estudiante</option></select>
-      </label>  
+      </label>
 
       <div class="fila">
         <span>////////////////</span>
@@ -135,11 +133,18 @@
     </div>
 
     <a id="btnAutorizar" href="#" class="autorizar">Autorizar uso</a>
+
+    <!-- BOTÓN DE CIERRE DE AÑO ESCOLAR -->
+    <div style="text-align: center; margin-top: 20px;">
+      <button id="btnCierreAno" class="autorizar" style="max-width: 300px; margin: 0 auto;">
+        📅 Cierre de Año Escolar
+      </button>
+    </div>
   </div>
 
   <footer style="border: 3px solid black; box-shadow: 4px 4px 0 black; padding: 15px; margin-top: 40px; text-align: center; font-size: 0.9em; background: white; max-width: 600px; margin-left: auto; margin-right: auto;">
     © 2025 CAOS. Todos los derechos reservados. <br>
-    Sitio desarrollado por Benjamín González. <br>
+    Sitio desarrollado por Benjamín González.
   </footer>
 
   <script>
@@ -153,6 +158,7 @@
       const btnEditarCursos = document.getElementById('btnEditarCursos');
       const qrContainer = document.getElementById('qrContainer');
       const qrImage = document.getElementById('qrImage');
+      const btnCierreAno = document.getElementById('btnCierreAno');
 
       const usuario = new URLSearchParams(window.location.search).get("usuario") || "";
 
@@ -249,9 +255,18 @@
         }
       });
 
-      // Enlace a editar cursos manteniendo sesión
+      btnCierreAno.addEventListener("click", function () {
+        window.location.href = `panel_profesor/cierre_ano_escolar.html?usuario=${usuario}`;
+      });
+
       btnEditarCursos.href = `panel_profesor/cargar_excel_estudiantes.html?usuario=${usuario}`;
     });
+
+    // Redirección si no hay sesión
+    const usuario = new URLSearchParams(window.location.search).get("usuario");
+    if (!usuario) {
+      window.location.href = "login.html";
+    }
   </script>
 </body>
 </html>

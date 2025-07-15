@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Agregar Estudiantes</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     body {
       font-family: 'Rock Salt', cursive;
@@ -36,7 +37,7 @@
       margin-top: 20px;
     }
 
-    select, input[type="text"], button {
+    select, input[type="text"], input[type="file"], button {
       font-family: inherit;
       font-size: 16px;
       padding: 8px;
@@ -52,6 +53,27 @@
       padding: 10px;
       border: 2px dashed black;
       background-color: #eee;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+
+    table th, table td {
+      border: 1px solid black;
+      padding: 8px;
+      text-align: left;
+    }
+
+    .acciones button {
+      padding: 4px 10px;
+      font-size: 14px;
+      cursor: pointer;
+      border: 2px solid black;
+      background-color: white;
+      box-shadow: 2px 2px 0 black;
     }
 
     .volver {
@@ -75,13 +97,29 @@
 <div class="panel">
   <h1>Agregar Estudiantes</h1>
 
-  <label for="cursoSelect">Selecciona el curso:</label>
-  <select id="cursoSelect"></select>
+  <label>Sube un archivo .xlsx o .csv (con columnas: Curso, Nombre del estudiante):</label>
+  <input type="file" id="archivoEstudiantes" accept=".csv, .xlsx, .xls">
 
-  <label for="nombreInput">Nombre del estudiante:</label>
-  <input type="text" id="nombreInput" placeholder="Ej: Juanito Pérez">
+  <label>Lista de estudiantes:</label>
+  <table id="tablaEstudiantes">
+    <thead>
+    <tr>
+      <th>Nombre del estudiante</th>
+      <th>Curso</th>
+      <th>Eliminar</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+      <td><input type="text" class="nombre-estudiante" placeholder="Ej: Juan Pérez"></td>
+      <td><input type="text" class="curso-estudiante" placeholder="Ej: 1ro Medio A"></td>
+      <td class="acciones"><button onclick="eliminarFila(this)">❌</button></td>
+    </tr>
+    </tbody>
+  </table>
 
-  <button id="guardarBtn">Guardar estudiante</button>
+  <button onclick="agregarFila()">➕ Agregar fila</button>
+  <button onclick="guardarTodos()">💾 Guardar todos</button>
 
   <div id="mensaje" class="mensaje" style="display: none;"></div>
 
@@ -93,64 +131,76 @@
 <script>
   const apiUrl = "https://script.google.com/macros/s/AKfycbxomBS4kpyZcwIl38bjHbNhH0i7hASugNfiRL19SkkPNAMmW5cJHuwXnCO3RI6WFi7Rlg/exec";
   const usuario = new URLSearchParams(window.location.search).get("usuario") || "";
-
-  // Si no hay usuario, redirigir al login
-  if (!usuario) {
-    window.location.href = "../login.html";
-  }
-
-  // Agregar redirección con sesión
+  if (!usuario) window.location.href = "../login.html";
   document.getElementById("volverBtn").href = `../index.html?usuario=${encodeURIComponent(usuario)}`;
 
-  // Generar cursos
-  const cursos = [];
-  const niveles = [
-    "1ro Básico", "2do Básico", "3ro Básico", "4to Básico",
-    "5to Básico", "6to Básico", "7mo Básico", "8vo Básico",
-    "1ro Medio", "2do Medio", "3ro Medio", "4to Medio"
-  ];
-  const letras = ["A", "B", "C"];
+  function agregarFila(nombre = "", curso = "") {
+    const fila = document.createElement("tr");
+    fila.innerHTML = `
+      <td><input type="text" class="nombre-estudiante" value="${nombre}" placeholder="Ej: Juan Pérez"></td>
+      <td><input type="text" class="curso-estudiante" value="${curso}" placeholder="Ej: 1ro Medio A"></td>
+      <td class="acciones"><button onclick="eliminarFila(this)">❌</button></td>
+    `;
+    document.querySelector("#tablaEstudiantes tbody").appendChild(fila);
+  }
 
-  niveles.forEach(nivel => {
-    letras.forEach(letra => cursos.push(`${nivel} ${letra}`));
-  });
+  function eliminarFila(boton) {
+    boton.closest("tr").remove();
+  }
 
-  const cursoSelect = document.getElementById("cursoSelect");
-  cursos.forEach(curso => {
-    const opt = document.createElement("option");
-    opt.textContent = curso;
-    cursoSelect.appendChild(opt);
-  });
-
-  document.getElementById("guardarBtn").addEventListener("click", async () => {
-    const curso = cursoSelect.value;
-    const nombre = document.getElementById("nombreInput").value.trim();
+  async function guardarTodos() {
+    const nombres = document.querySelectorAll(".nombre-estudiante");
+    const cursos = document.querySelectorAll(".curso-estudiante");
     const mensaje = document.getElementById("mensaje");
+    let errores = [], exitos = [];
 
-    if (!nombre) {
-      alert("Por favor escribe un nombre.");
-      return;
+    for (let i = 0; i < nombres.length; i++) {
+      const nombre = nombres[i].value.trim();
+      const curso = cursos[i].value.trim();
+      if (!nombre || !curso) continue;
+
+      try {
+        const res = await fetch(`${apiUrl}?accion=agregar_estudiante&curso=${encodeURIComponent(curso)}&nombre=${encodeURIComponent(nombre)}`);
+        const json = await res.json();
+        if (json.exito) exitos.push(nombre);
+        else errores.push(nombre);
+      } catch {
+        errores.push(nombre);
+      }
     }
 
-    try {
-      const res = await fetch(`${apiUrl}?accion=agregar_estudiante&curso=${encodeURIComponent(curso)}&nombre=${encodeURIComponent(nombre)}`);
-      const json = await res.json();
+    mensaje.style.display = "block";
+    mensaje.innerHTML = "";
+    if (exitos.length) mensaje.innerHTML += `✅ Estudiantes guardados:<br>${exitos.join("<br>")}`;
+    if (errores.length) mensaje.innerHTML += `<br><br>❌ Fallaron:<br>${errores.join("<br>")}`;
+  }
 
-      if (json.exito) {
-        mensaje.style.display = "block";
-        mensaje.innerHTML = `
-          ✅ Estudiante agregado:<br>
-          <strong>Nombre:</strong> ${json.nombre}<br>
-          <strong>Curso:</strong> ${json.curso}<br>
-          <strong>URL Perfil:</strong> <a href="${json.urlPerfil}" target="_blank">${json.urlPerfil}</a>
-        `;
-        document.getElementById("nombreInput").value = "";
-      } else {
-        alert("Error desde el servidor: " + json.error);
-      }
-    } catch (err) {
-      alert("Error al guardar estudiante.");
-      console.error(err);
+  document.getElementById("archivoEstudiantes").addEventListener("change", function () {
+    const archivo = this.files[0];
+    if (!archivo) return;
+
+    const reader = new FileReader();
+    if (archivo.name.endsWith(".csv")) {
+      reader.onload = function (e) {
+        const lines = e.target.result.split("\n");
+        lines.forEach(line => {
+          const [curso, nombre] = line.split(",").map(x => x.trim());
+          if (curso && nombre) agregarFila(nombre, curso);
+        });
+      };
+      reader.readAsText(archivo);
+    } else {
+      reader.onload = function (e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+        const hoja = workbook.Sheets[workbook.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json(hoja, { header: 1 });
+        json.slice(1).forEach(fila => {
+          const [curso, nombre] = fila;
+          if (curso && nombre) agregarFila(nombre, curso);
+        });
+      };
+      reader.readAsArrayBuffer(archivo);
     }
   });
 </script>
