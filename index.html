@@ -68,6 +68,8 @@
       justify-content: space-between;
       align-items: center;
       margin: 10px 0;
+      flex-wrap: wrap;
+      gap: 10px;
     }
 
     .qr-box {
@@ -108,7 +110,8 @@
             <option>Selecciona un curso</option>
           </select>
         </label>
-        <a id="btnEditarCursos" href="#"><button>Editar Cursos</button></a>
+        <a id="btnEditarEstudiantes" href="#"><button> Cargar estudiantes</button></a>
+        <a id="btnEditarCursosCargo" href="#"><button> Editar cursos a cargo</button></a>
       </div>
     </div>
 
@@ -137,7 +140,7 @@
     <!-- BOTÓN DE CIERRE DE AÑO ESCOLAR -->
     <div style="text-align: center; margin-top: 20px;">
       <button id="btnCierreAno" class="autorizar" style="max-width: 300px; margin: 0 auto;">
-        📅 Cierre de Año Escolar
+         Cierre de Año Escolar
       </button>
     </div>
   </div>
@@ -155,7 +158,8 @@
       const btnAleatoria = document.getElementById('btnAleatoria');
       const btnEspecifica = document.getElementById('btnEspecifica');
       const btnAutorizar = document.getElementById('btnAutorizar');
-      const btnEditarCursos = document.getElementById('btnEditarCursos');
+      const btnEditarEstudiantes = document.getElementById('btnEditarEstudiantes');
+      const btnEditarCursosCargo = document.getElementById('btnEditarCursosCargo');
       const qrContainer = document.getElementById('qrContainer');
       const qrImage = document.getElementById('qrImage');
       const btnCierreAno = document.getElementById('btnCierreAno');
@@ -259,7 +263,8 @@
         window.location.href = `panel_profesor/cierre_ano_escolar.html?usuario=${usuario}`;
       });
 
-      btnEditarCursos.href = `panel_profesor/cargar_excel_estudiantes.html?usuario=${usuario}`;
+      btnEditarEstudiantes.href = `panel_profesor/cargar_excel_estudiantes.html?usuario=${usuario}`;
+      btnEditarCursosCargo.href = `panel_profesor/editar_cursos.html?usuario=${usuario}`;
     });
 
     // Redirección si no hay sesión
