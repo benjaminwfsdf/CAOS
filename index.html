@@ -103,17 +103,19 @@
     <div class="titulo">CAOS</div>
     <p class="subtitulo">(CARTAS ANTI ORDEN EN LA SALA)</p>
 
-    <div class="bloque">
-      <div class="fila">
-        <label>Curso:
-          <select id="cursoSelect">
-            <option>Selecciona un curso</option>
-          </select>
-        </label>
-        <a id="btnEditarEstudiantes" href="#"><button> Cargar estudiantes</button></a>
-        <a id="btnEditarCursosCargo" href="#"><button> Editar cursos a cargo</button></a>
-      </div>
-    </div>
+   <!-- Reemplaza en la sección del HTML: -->
+<div class="bloque">
+  <div class="fila">
+    <label>Curso:
+      <select id="cursoSelect">
+        <option>Selecciona un curso</option>
+      </select>
+    </label>
+    <button id="btnEditarEstudiantes">📥 Cargar estudiantes</button>
+    <button id="btnEditarCursosCargo">✏️ Editar cursos a cargo</button>
+  </div>
+</div>
+
 
     <div class="bloque">
       <label>Alumno:
@@ -263,8 +265,14 @@
         window.location.href = `panel_profesor/cierre_ano_escolar.html?usuario=${usuario}`;
       });
 
-      btnEditarEstudiantes.href = `panel_profesor/cargar_excel_estudiantes.html?usuario=${usuario}`;
-      btnEditarCursosCargo.href = `panel_profesor/editar_cursos.html?usuario=${usuario}`;
+     document.getElementById("btnEditarEstudiantes").addEventListener("click", () => {
+  window.location.href = `panel_profesor/cargar_excel_estudiantes.html?usuario=${usuario}`;
+});
+
+document.getElementById("btnEditarCursosCargo").addEventListener("click", () => {
+  window.location.href = `panel_profesor/editar_cursos.html?usuario=${usuario}`;
+});
+
     });
 
     // Redirección si no hay sesión
