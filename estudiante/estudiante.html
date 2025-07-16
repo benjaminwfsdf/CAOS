@@ -154,14 +154,18 @@
 <body>
 
   <!-- Panel de login -->
-  <div class="panel" id="loginPanel">
-    <div class="titulo">🔐 Ingreso restringido</div>
-    <form id="loginForm">
-      <input type="password" id="password" placeholder="Ingresa tu contraseña" required><br><br>
-      <button type="submit">Entrar</button>
-    </form>
-    <div id="mensajeLogin"></div>
-  </div>
+  <!-- Panel de login -->
+<div class="panel" id="loginPanel" style="max-width: 90%; margin: 20px auto;">
+  <div class="titulo">🔐 Ingreso restringido</div>
+  <form id="loginForm" style="display: flex; flex-direction: column; gap: 10px;">
+    <input type="password" id="password" placeholder="Ingresa tu contraseña" required
+      style="padding: 12px; font-size: 18px; border: 2px solid black; box-sizing: border-box; width: 100%;">
+    <button type="submit"
+      style="padding: 12px; font-size: 18px; border: 2px solid black; box-shadow: 3px 3px 0 black; background: white; cursor: pointer;">Entrar</button>
+  </form>
+  <div id="mensajeLogin" style="color: red; margin-top: 10px; text-align: center;"></div>
+</div>
+
 
   <!-- Panel de cartas -->
   <div class="panel" id="cartasPanel" style="display: none;">
