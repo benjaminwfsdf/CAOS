@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CAOS - Mis Cartas</title>
   <style>
     body {
@@ -149,23 +150,62 @@
       margin-top: 10px;
       cursor: pointer;
     }
+
+    /* RESPONSIVE */
+    @media screen and (max-width: 600px) {
+      .titulo {
+        font-size: 28px;
+      }
+
+      .subtitulo {
+        font-size: 20px;
+      }
+
+      .carta {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+
+      .carta img {
+        width: 100%;
+        margin: 0 0 10px 0;
+      }
+
+      .carta-info {
+        font-size: 16px;
+      }
+
+      .boton-canje {
+        font-size: 20px;
+        width: 100%;
+        margin-top: 10px;
+      }
+
+      .descripcion {
+        font-size: 18px;
+      }
+
+      #loginForm input, #loginForm button {
+        font-size: 16px;
+        padding: 10px;
+      }
+    }
   </style>
 </head>
 <body>
 
   <!-- Panel de login -->
-  <!-- Panel de login -->
-<div class="panel" id="loginPanel" style="max-width: 90%; margin: 20px auto;">
-  <div class="titulo">🔐 Ingreso restringido</div>
-  <form id="loginForm" style="display: flex; flex-direction: column; gap: 10px;">
-    <input type="password" id="password" placeholder="Ingresa tu contraseña" required
-      style="padding: 12px; font-size: 18px; border: 2px solid black; box-sizing: border-box; width: 100%;">
-    <button type="submit"
-      style="padding: 12px; font-size: 18px; border: 2px solid black; box-shadow: 3px 3px 0 black; background: white; cursor: pointer;">Entrar</button>
-  </form>
-  <div id="mensajeLogin" style="color: red; margin-top: 10px; text-align: center;"></div>
-</div>
-
+  <div class="panel" id="loginPanel" style="max-width: 90%; margin: 20px auto;">
+    <div class="titulo">🔐 Ingreso restringido</div>
+    <form id="loginForm" style="display: flex; flex-direction: column; gap: 10px;">
+      <input type="password" id="password" placeholder="Ingresa tu contraseña" required
+        style="padding: 12px; font-size: 18px; border: 2px solid black; box-sizing: border-box; width: 100%;">
+      <button type="submit"
+        style="padding: 12px; font-size: 18px; border: 2px solid black; box-shadow: 3px 3px 0 black; background: white; cursor: pointer;">Entrar</button>
+    </form>
+    <div id="mensajeLogin" style="color: red; margin-top: 10px; text-align: center;"></div>
+  </div>
 
   <!-- Panel de cartas -->
   <div class="panel" id="cartasPanel" style="display: none;">
@@ -241,7 +281,6 @@
 
     async function cargarCartas(alumno) {
       document.getElementById("nombreAlumno").innerText = alumno;
-
       const apiCartas = "https://script.google.com/macros/s/AKfycbzp3kpcaQqnf-o6kDB_7Vo5YPNVPRvQXIhVSPFfp5Clt95-zEBFSf7JmeBAD9DgDiA/exec";
 
       try {
@@ -297,7 +336,6 @@
           div.appendChild(descripcion);
           contenedor.appendChild(div);
         });
-
       } catch (error) {
         console.error(error);
         document.getElementById("cartasContainer").innerText = "Error al cargar las cartas.";
