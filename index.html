@@ -103,19 +103,17 @@
     <div class="titulo">CAOS</div>
     <p class="subtitulo">(CARTAS ANTI ORDEN EN LA SALA)</p>
 
-   <!-- Reemplaza en la sección del HTML: -->
-<div class="bloque">
-  <div class="fila">
-    <label>Curso:
-      <select id="cursoSelect">
-        <option>Selecciona un curso</option>
-      </select>
-    </label>
-    <button id="btnEditarEstudiantes">📥 Cargar estudiantes</button>
-    <button id="btnEditarCursosCargo">✏️ Editar cursos a cargo</button>
-  </div>
-</div>
-
+    <div class="bloque">
+      <div class="fila">
+        <label>Curso:
+          <select id="cursoSelect">
+            <option>Selecciona un curso</option>
+          </select>
+        </label>
+        <button id="btnEditarEstudiantes">📥 Cargar estudiantes</button>
+        <button id="btnEditarCursosCargo">✏️ Editar cursos a cargo</button>
+      </div>
+    </div>
 
     <div class="bloque">
       <label>Alumno:
@@ -139,7 +137,6 @@
 
     <a id="btnAutorizar" href="#" class="autorizar">Autorizar uso</a>
 
-    <!-- BOTÓN DE CIERRE DE AÑO ESCOLAR -->
     <div style="text-align: center; margin-top: 20px;">
       <button id="btnCierreAno" class="autorizar" style="max-width: 300px; margin: 0 auto;">
          Cierre de Año Escolar
@@ -153,6 +150,11 @@
   </footer>
 
   <script>
+    const usuario = new URLSearchParams(window.location.search).get("usuario");
+    if (!usuario) {
+      window.location.href = "login.html";
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
       const apiUrl = 'https://script.google.com/macros/s/AKfycbzXzq67mlTZTX3T_fx9EXXrrIIE2BwfhIweQS78iQQS5X28KcuwhpPw5wF24TplEeRdEA/exec';
       const cursoSelect = document.getElementById('cursoSelect');
@@ -166,8 +168,6 @@
       const qrImage = document.getElementById('qrImage');
       const btnCierreAno = document.getElementById('btnCierreAno');
 
-      const usuario = new URLSearchParams(window.location.search).get("usuario") || "";
-
       try {
         const response = await fetch(`${apiUrl}?accion=obtener_cursos_profesor&usuario=${encodeURIComponent(usuario)}`);
         const data = await response.json();
@@ -179,7 +179,6 @@
           data.cursos.forEach(rawCurso => {
             let cursoMostrado = "";
             const match = rawCurso.match(/^(\d+)(?:º|\s)?\s?(Básico|Medio)\s([ABC])$/);
-
             if (match) {
               const grado = parseInt(match[1]);
               const nivel = match[2];
@@ -192,22 +191,25 @@
             } else {
               cursoMostrado = rawCurso;
             }
-
             const option = document.createElement('option');
             option.textContent = cursoMostrado;
             option.value = rawCurso;
             cursoSelect.appendChild(option);
           });
-        } else {
-          alert("No tienes cursos asignados o hubo un error al obtenerlos.");
+
+          const cursoGuardado = localStorage.getItem("cursoSeleccionado");
+          if (cursoGuardado) {
+            cursoSelect.value = cursoGuardado;
+            cursoSelect.dispatchEvent(new Event("change"));
+          }
         }
       } catch (error) {
-        console.error("Error al cargar cursos:", error);
-        alert("No se pudieron cargar los cursos.");
+        alert("Error al cargar cursos.");
       }
 
       cursoSelect.addEventListener('change', async () => {
         const curso = cursoSelect.value;
+        localStorage.setItem("cursoSeleccionado", curso);
         alumnoSelect.innerHTML = '<option>Selecciona un estudiante</option>';
         qrContainer.style.display = "none";
         qrImage.src = '';
@@ -217,17 +219,14 @@
         try {
           const response = await fetch(`${apiUrl}?accion=obtener_estudiantes&curso=${encodeURIComponent(curso)}`);
           const data = await response.json();
-
           if (!data.ok || !data.estudiantes) throw new Error();
-
           data.estudiantes.forEach(nombre => {
             const option = document.createElement('option');
             option.textContent = nombre;
             alumnoSelect.appendChild(option);
           });
-        } catch (error) {
-          console.error("Error al cargar estudiantes:", error);
-          alert("No se pudieron cargar los estudiantes.");
+        } catch {
+          alert("Error al cargar estudiantes.");
         }
       });
 
@@ -237,49 +236,33 @@
           const encoded = encodeURIComponent(alumno);
           btnAleatoria.querySelector('button').disabled = false;
           btnEspecifica.querySelector('button').disabled = false;
-
           btnAleatoria.href = `panel_profesor/reparto_carta_aleatoria.html?alumno=${encoded}&usuario=${usuario}`;
           btnEspecifica.href = `panel_profesor/reparto_carta_especifica.html?alumno=${encoded}&usuario=${usuario}`;
           btnAutorizar.href = `panel_profesor/validar_canje_CAOS.html?alumno=${encoded}&usuario=${usuario}`;
-
-          const perfilURL = `https://caos-stpn.vercel.app/estudiante/estudiante.html?alumno=${encoded}`;
-          qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(perfilURL)}&size=100x100`;
+          qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent("https://caos-stpn.vercel.app/estudiante/estudiante.html?alumno=" + encoded)}&size=100x100`;
           qrContainer.style.display = "block";
-        } else {
-          qrContainer.style.display = "none";
-          qrImage.src = '';
-          btnAleatoria.querySelector('button').disabled = true;
-          btnEspecifica.querySelector('button').disabled = true;
-          btnAutorizar.href = '#';
         }
       });
 
-      btnAutorizar.addEventListener("click", function(event) {
+      btnAutorizar.addEventListener("click", function (event) {
         if (btnAutorizar.href.endsWith("#")) {
           event.preventDefault();
           alert("Debes seleccionar un estudiante antes de autorizar uso.");
         }
       });
 
-      btnCierreAno.addEventListener("click", function () {
+      btnCierreAno.onclick = () => {
         window.location.href = `panel_profesor/cierre_ano_escolar.html?usuario=${usuario}`;
-      });
+      };
 
-     document.getElementById("btnEditarEstudiantes").addEventListener("click", () => {
-  window.location.href = `panel_profesor/cargar_excel_estudiantes.html?usuario=${usuario}`;
-});
+      btnEditarEstudiantes.onclick = () => {
+        window.location.href = `panel_profesor/cargar_excel_estudiantes.html?usuario=${usuario}`;
+      };
 
-document.getElementById("btnEditarCursosCargo").addEventListener("click", () => {
-  window.location.href = `panel_profesor/editar_cursos.html?usuario=${usuario}`;
-});
-
+      btnEditarCursosCargo.onclick = () => {
+        window.location.href = `panel_profesor/editar_cursos.html?usuario=${usuario}`;
+      };
     });
-
-    // Redirección si no hay sesión
-    const usuario = new URLSearchParams(window.location.search).get("usuario");
-    if (!usuario) {
-      window.location.href = "login.html";
-    }
   </script>
 </body>
 </html>
