@@ -72,15 +72,6 @@
       gap: 10px;
     }
 
-    .qr-box {
-      border: 2px solid black;
-      text-align: center;
-      margin-top: 20px;
-      padding: 10px;
-      box-shadow: 4px 4px 0 black;
-      display: none;
-    }
-
     .autorizar {
       margin-top: 20px;
       display: block;
@@ -130,11 +121,6 @@
       </div>
     </div>
 
-    <div class="qr-box" id="qrContainer">
-      <p><strong>Código QR del estudiante</strong></p>
-      <img id="qrImage" src="" alt="QR Personalizado" style="width:100px;height:100px;">
-    </div>
-
     <a id="btnAutorizar" href="#" class="autorizar">Autorizar uso</a>
 
     <div style="text-align: center; margin-top: 20px;">
@@ -164,8 +150,6 @@
       const btnAutorizar = document.getElementById('btnAutorizar');
       const btnEditarEstudiantes = document.getElementById('btnEditarEstudiantes');
       const btnEditarCursosCargo = document.getElementById('btnEditarCursosCargo');
-      const qrContainer = document.getElementById('qrContainer');
-      const qrImage = document.getElementById('qrImage');
       const btnCierreAno = document.getElementById('btnCierreAno');
 
       try {
@@ -197,22 +181,22 @@
             cursoSelect.appendChild(option);
           });
 
-          const cursoGuardado = localStorage.getItem("cursoSeleccionado");
-          if (cursoGuardado) {
-            cursoSelect.value = cursoGuardado;
-            cursoSelect.dispatchEvent(new Event("change"));
-          }
+          // Se elimina la restauración automática de curso guardado
+          // (antes: leer cursoGuardado y disparar change)
         }
       } catch (error) {
         alert("Error al cargar cursos.");
       }
 
+      // Autorizar uso no depende del alumno: fijo desde el inicio solo con usuario
+      btnAutorizar.href = `panel_profesor/validar_canje_CAOS.html?usuario=${usuario}`;
+
       cursoSelect.addEventListener('change', async () => {
         const curso = cursoSelect.value;
         localStorage.setItem("cursoSeleccionado", curso);
         alumnoSelect.innerHTML = '<option>Selecciona un estudiante</option>';
-        qrContainer.style.display = "none";
-        qrImage.src = '';
+
+        // Deshabilitar repartir cartas hasta elegir alumno
         btnAleatoria.querySelector('button').disabled = true;
         btnEspecifica.querySelector('button').disabled = true;
 
@@ -234,20 +218,16 @@
         const alumno = alumnoSelect.value;
         if (alumno && alumno !== 'Selecciona un estudiante') {
           const encoded = encodeURIComponent(alumno);
+          // Habilitar SOLO los de repartir cartas y setear sus href con alumno
           btnAleatoria.querySelector('button').disabled = false;
           btnEspecifica.querySelector('button').disabled = false;
           btnAleatoria.href = `panel_profesor/reparto_carta_aleatoria.html?alumno=${encoded}&usuario=${usuario}`;
           btnEspecifica.href = `panel_profesor/reparto_carta_especifica.html?alumno=${encoded}&usuario=${usuario}`;
-          btnAutorizar.href = `panel_profesor/validar_canje_CAOS.html?alumno=${encoded}&usuario=${usuario}`;
-          qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent("https://caos-stpn.vercel.app/estudiante/estudiante.html?alumno=" + encoded)}&size=100x100`;
-          qrContainer.style.display = "block";
-        }
-      });
-
-      btnAutorizar.addEventListener("click", function (event) {
-        if (btnAutorizar.href.endsWith("#")) {
-          event.preventDefault();
-          alert("Debes seleccionar un estudiante antes de autorizar uso.");
+        } else {
+          btnAleatoria.querySelector('button').disabled = true;
+          btnEspecifica.querySelector('button').disabled = true;
+          btnAleatoria.href = '#';
+          btnEspecifica.href = '#';
         }
       });
 
@@ -255,6 +235,7 @@
         window.location.href = `panel_profesor/cierre_ano_escolar.html?usuario=${usuario}`;
       };
 
+      // Estos dos YA no dependen de curso ni alumno
       btnEditarEstudiantes.onclick = () => {
         window.location.href = `panel_profesor/cargar_excel_estudiantes.html?usuario=${usuario}`;
       };
