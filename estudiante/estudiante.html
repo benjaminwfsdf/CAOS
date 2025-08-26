@@ -4,6 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CAOS - Mis Cartas</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0b0b0c">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CAOS">
+
   <style>
     body {
       font-family: 'Rock Salt', cursive;
@@ -12,197 +21,45 @@
       background-color: #fff;
       margin: 20px;
     }
+    .panel { background-color: #fff; border: 3px solid #000; padding: 20px; box-shadow: 8px 8px 0 #000; max-width: 900px; margin: 0 auto; }
+    .titulo { font-size: 40px; font-weight: bold; text-align: center; border: 3px dashed #000; padding: 10px; background-color: #fff; margin-bottom: 10px; }
+    .subtitulo { font-size: 25px; font-weight: bold; text-align: center; margin-bottom: 20px; }
+    .carta { border: 2px solid #000; padding: 15px; margin-bottom: 25px; display: flex; align-items: flex-start; justify-content: space-between; box-shadow: 4px 4px 0 #000; background-color: #fff; flex-wrap: wrap; }
+    .carta img { width: 200px; height: auto; margin-right: 40px; }
+    .carta-info { font-family: Arial, sans-serif; flex: 1; font-size: 18px; }
+    .cantidad { font-weight: bold; font-size: 30px; margin-top: 5px; }
+    .boton-canje { padding: 10px 16px; background-color: #fff; border: 2px solid #000; box-shadow: 3px 3px 0 #000; font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: 25px; color: #000; cursor: pointer; margin-left: auto; align-self: flex-end; }
+    .boton-canje:disabled { background-color: #eee; color: #aaa; cursor: not-allowed; }
+    .descripcion { display: none; font-family: Arial, sans-serif; font-size: 30px; line-height: 1.4; margin-top: 10px; color: #000; width: 100%; }
+    footer { border: 3px solid #000; box-shadow: 4px 4px 0 #000; padding: 15px; margin-top: 40px; text-align: center; font-size: .9em; background: #fff; max-width: 600px; margin-left: auto; margin-right: auto; }
 
-    .panel {
-      background-color: white;
-      border: 3px solid black;
-      padding: 20px;
-      box-shadow: 8px 8px 0 black;
-      max-width: 800px;
-      margin: 0 auto;
-    }
+    #modalCambio { display: none; position: fixed; inset: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,.7); z-index: 9999; align-items: center; justify-content: center; }
+    #modalCambio .contenido { background: #fff; border: 3px solid #000; box-shadow: 6px 6px 0 #000; padding: 20px; text-align: center; font-family: 'Comic Neue', cursive; width: 90%; max-width: 350px; }
+    #modalCambio input { padding: 10px; font-size: 18px; width: 90%; border: 2px solid #000; }
+    #modalCambio button { padding: 10px 20px; font-size: 18px; border: 2px solid #000; box-shadow: 3px 3px 0 #000; background: #fff; margin-top: 10px; cursor: pointer; }
 
-    .titulo {
-      font-size: 40px;
-      font-weight: bold;
-      text-align: center;
-      border: 3px dashed black;
-      padding: 10px;
-      background-color: white;
-      margin-bottom: 10px;
-    }
-
-    .subtitulo {
-      font-size: 25px;
-      font-weight: bold;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .carta {
-      border: 2px solid black;
-      padding: 15px;
-      margin-bottom: 25px;
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      box-shadow: 4px 4px 0 black;
-      background-color: white;
-      flex-wrap: wrap;
-    }
-
-    .carta img {
-      width: 200px;
-      height: auto;
-      margin-right: 40px;
-    }
-
-    .carta-info {
-      font-family: Arial, sans-serif;
-      flex: 1;
-      font-size: 18px;
-    }
-
-    .cantidad {
-      font-weight: bold;
-      font-size: 30px;
-      margin-top: 5px;
-    }
-
-    .boton-canje {
-      padding: 10px 16px;
-      background-color: white;
-      border: 2px solid black;
-      box-shadow: 3px 3px 0 black;
-      font-family: Arial, Helvetica, sans-serif;
-      font-weight: bold;
-      font-size: 25px;
-      color: black;
-      cursor: pointer;
-      margin-left: auto;
-      align-self: flex-end;
-    }
-
-    .boton-canje:disabled {
-      background-color: #eee;
-      color: #aaa;
-      cursor: not-allowed;
-    }
-
-    .descripcion {
-      display: none;
-      font-family: Arial, sans-serif;
-      font-size: 30px;
-      line-height: 1.4;
-      margin-top: 10px;
-      color: black;
-      width: 100%;
-    }
-
-    footer {
-      border: 3px solid black;
-      box-shadow: 4px 4px 0 black;
-      padding: 15px;
-      margin-top: 40px;
-      text-align: center;
-      font-size: 0.9em;
-      background: white;
-      max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    #modalCambio {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background: rgba(0, 0, 0, 0.7);
-      z-index: 9999;
-      align-items: center;
-      justify-content: center;
-    }
-
-    #modalCambio .contenido {
-      background: white;
-      border: 3px solid black;
-      box-shadow: 6px 6px 0 black;
-      padding: 20px;
-      text-align: center;
-      font-family: 'Comic Neue', cursive;
-      width: 90%;
-      max-width: 350px;
-    }
-
-    #modalCambio input {
-      padding: 10px;
-      font-size: 18px;
-      width: 90%;
-      border: 2px solid black;
-    }
-
-    #modalCambio button {
-      padding: 10px 20px;
-      font-size: 18px;
-      border: 2px solid black;
-      box-shadow: 3px 3px 0 black;
-      background: white;
-      margin-top: 10px;
-      cursor: pointer;
-    }
-
-    /* RESPONSIVE */
-    @media screen and (max-width: 600px) {
-      .titulo {
-        font-size: 28px;
-      }
-
-      .subtitulo {
-        font-size: 20px;
-      }
-
-      .carta {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-      }
-
-      .carta img {
-        width: 50%;
-        margin: 0 0 10px 0;
-      }
-
-      .carta-info {
-        font-size: 16px;
-      }
-
-      .boton-canje {
-        font-size: 20px;
-        width: 100%;
-        margin-top: 10px;
-      }
-
-      .descripcion {
-        font-size: 18px;
-      }
-
-      #loginForm input, #loginForm button {
-        font-size: 16px;
-        padding: 10px;
-      }
+    @media (max-width: 600px) {
+      .titulo { font-size: 28px; }
+      .subtitulo { font-size: 20px; }
+      .carta { flex-direction: column; align-items: center; text-align: center; }
+      .carta img { width: 50%; margin: 0 0 10px 0; }
+      .carta-info { font-size: 16px; }
+      .boton-canje { font-size: 20px; width: 100%; margin-top: 10px; }
+      .descripcion { font-size: 18px; }
+      #loginForm input, #loginForm button { font-size: 16px; padding: 10px; }
     }
   </style>
 </head>
 <body>
 
   <!-- Panel de login -->
-  <div class="panel" id="loginPanel" style="max-width: 90%; margin: 20px auto;">
+  <div class="panel" id="loginPanel" style="max-width: 95%; margin: 20px auto;">
     <div class="titulo">🔐 Ingreso restringido</div>
     <form id="loginForm" style="display: flex; flex-direction: column; gap: 10px;">
       <input type="password" id="password" placeholder="Ingresa tu contraseña" required
-        style="padding: 12px; font-size: 18px; border: 2px solid black; box-sizing: border-box; width: 100%;">
+        style="padding: 12px; font-size: 18px; border: 2px solid #000; box-sizing: border-box; width: 100%;">
       <button type="submit"
-        style="padding: 12px; font-size: 18px; border: 2px solid black; box-shadow: 3px 3px 0 black; background: white; cursor: pointer;">Entrar</button>
+        style="padding: 12px; font-size: 18px; border: 2px solid #000; box-shadow: 3px 3px 0 #000; background: #fff; cursor: pointer;">Entrar</button>
     </form>
     <div id="mensajeLogin" style="color: red; margin-top: 10px; text-align: center;"></div>
   </div>
@@ -231,6 +88,14 @@
   </footer>
 
   <script>
+    // ====== PWA: registra el Service Worker ======
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js');
+      });
+    }
+
+    // ====== App lógica ======
     const apiURL = "https://script.google.com/macros/s/AKfycbx_PzzXwJS06r93h_U0syl7UUzXwSbwU1ZK7B3FFMzgKh0Pgydu2GmQ1TDoGPTxhry1Ew/exec";
     let alumnoGlobal = "";
 
@@ -359,5 +224,13 @@
       }
     }
   </script>
+  <script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js');
+  });
+}
+</script>
+
 </body>
 </html>
