@@ -13,6 +13,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CAOS">
 
+  <!-- Fuentes (opcional, para que se vea igual en todos) -->
+  <link href="https://fonts.googleapis.com/css2?family=Rock+Salt&family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
+
   <style>
     body {
       font-family: 'Rock Salt', cursive;
@@ -55,6 +58,22 @@
   <!-- Panel de login -->
   <div class="panel" id="loginPanel" style="max-width: 95%; margin: 20px auto;">
     <div class="titulo">🔐 Ingreso restringido</div>
+
+    <!-- Si no llega ?alumno= y no hay memoria, pedimos el nombre -->
+    <div id="alumnoWrap" style="display:none; margin-bottom:10px; display:grid; gap:10px;">
+      <input
+        type="text"
+        id="alumnoNombre"
+        placeholder="Ingresa tu nombre y apellido"
+        style="padding: 12px; font-size: 18px; border: 2px solid #000; box-sizing: border-box; width: 100%;"
+      />
+      <button type="button"
+        onclick="localStorage.removeItem('alumno'); document.getElementById('alumnoNombre').value='';"
+        style="padding:10px; font-size:14px; border:2px solid #000; box-shadow:3px 3px 0 #000; background:#fff; cursor:pointer; justify-self:start;">
+        Limpiar nombre guardado
+      </button>
+    </div>
+
     <form id="loginForm" style="display: flex; flex-direction: column; gap: 10px;">
       <input type="password" id="password" placeholder="Ingresa tu contraseña" required
         style="padding: 12px; font-size: 18px; border: 2px solid #000; box-sizing: border-box; width: 100%;">
@@ -88,10 +107,10 @@
   </footer>
 
   <script>
-    // ====== PWA: registra el Service Worker ======
+    // ====== PWA: registra el Service Worker (una sola vez) ======
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./service-worker.js');
+        navigator.serviceWorker.register('service-worker.js');
       });
     }
 
@@ -99,16 +118,45 @@
     const apiURL = "https://script.google.com/macros/s/AKfycbx_PzzXwJS06r93h_U0syl7UUzXwSbwU1ZK7B3FFMzgKh0Pgydu2GmQ1TDoGPTxhry1Ew/exec";
     let alumnoGlobal = "";
 
+    // Lee alumno de URL o memoria; si no hay, muestra input para pedirlo
+    function obtenerAlumno() {
+      const params = new URLSearchParams(location.search);
+      const desdeURL = params.get("alumno");
+
+      if (desdeURL) {
+        const limpio = decodeURIComponent(desdeURL).trim();
+        if (limpio) localStorage.setItem("alumno", limpio);
+        return limpio;
+      }
+
+      const guardado = (localStorage.getItem("alumno") || "").trim();
+      if (guardado) return guardado;
+
+      // No hay URL ni guardado -> pedimos nombre
+      document.getElementById("alumnoWrap").style.display = "grid";
+      return "";
+    }
+
     document.getElementById("loginForm").addEventListener("submit", async function (e) {
       e.preventDefault();
-      const password = document.getElementById("password").value;
-      const nombre = new URLSearchParams(window.location.search).get("alumno");
-      alumnoGlobal = nombre;
 
-      if (!nombre) return alert("Nombre de estudiante no detectado en la URL.");
+      // Resuelve el alumno (URL -> memoria -> input)
+      let alumno = obtenerAlumno();
+      if (!alumno) {
+        const tmp = (document.getElementById("alumnoNombre").value || "").trim();
+        if (!tmp) {
+          alert("⚠️ Ingresa tu nombre y apellido.");
+          return;
+        }
+        alumno = tmp;
+        localStorage.setItem("alumno", alumno);
+      }
+      alumnoGlobal = alumno;
+
+      const password = document.getElementById("password").value;
 
       try {
-        const res = await fetch(`${apiURL}?accion=login&nombre=${encodeURIComponent(nombre)}&pass=${encodeURIComponent(password)}`);
+        const res = await fetch(`${apiURL}?accion=login&nombre=${encodeURIComponent(alumno)}&pass=${encodeURIComponent(password)}`);
         const data = await res.json();
 
         if (data.ok) {
@@ -117,7 +165,7 @@
           } else {
             document.getElementById("loginPanel").style.display = "none";
             document.getElementById("cartasPanel").style.display = "block";
-            cargarCartas(nombre);
+            cargarCartas(alumno);
           }
         } else {
           document.getElementById("mensajeLogin").innerText = "❌ Contraseña incorrecta.";
@@ -143,6 +191,8 @@
         alert("❌ Error al guardar la nueva contraseña.");
       }
     }
+    // para que el botón del modal funcione
+    window.guardarNuevaClave = guardarNuevaClave;
 
     async function cargarCartas(alumno) {
       document.getElementById("nombreAlumno").innerText = alumno;
@@ -155,7 +205,7 @@
         const resImagenes = await fetch(`${apiCartas}?accion=imagenes`);
         const dataImagenes = await resImagenes.json();
 
-        const conteo = dataCartas.conteo;
+        const conteo = dataCartas.conteo || {};
         const contenedor = document.getElementById("cartasContainer");
         contenedor.innerHTML = "";
 
@@ -183,8 +233,8 @@
           boton.innerText = "Solicitar Canje";
           boton.disabled = cantidad < 1;
           boton.onclick = async () => {
-            const confirmacion = confirm(`¿Confirmas solicitar el canje de '${nombre}'?`);
-            if (!confirmacion) return;
+            const ok = confirm(`¿Confirmas solicitar el canje de '${nombre}'?`);
+            if (!ok) return;
             const url = `${apiCartas}?accion=solicitar_canje&alumno=${encodeURIComponent(alumno)}&carta=${encodeURIComponent(nombre)}`;
             const res = await fetch(url);
             const texto = await res.text();
@@ -192,7 +242,7 @@
           };
 
           div.onclick = () => {
-            descripcion.style.display = (descripcion.style.display === "none") ? "block" : "none";
+            descripcion.style.display = (descripcion.style.display === "none" || !descripcion.style.display) ? "block" : "none";
           };
 
           div.appendChild(img);
@@ -224,13 +274,5 @@
       }
     }
   </script>
-  <script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('service-worker.js');
-  });
-}
-</script>
-
 </body>
 </html>
