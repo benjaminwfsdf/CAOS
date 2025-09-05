@@ -5,86 +5,84 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CAOS - Mis Cartas</title>
 
-  <!-- PWA -->
-  <link rel="manifest" href="manifest.json">
+  <!-- PWA (opcional pero recomendado) -->
+  <link rel="manifest" href="../manifest.json">
   <meta name="theme-color" content="#0b0b0c">
-  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CAOS">
 
-  <!-- Fuentes (opcional, para que se vea igual en todos) -->
+  <!-- Fuentes -->
   <link href="https://fonts.googleapis.com/css2?family=Rock+Salt&family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
 
   <style>
-    body {
-      font-family: 'Rock Salt', cursive;
-      font-weight: 700;
-      text-shadow: 0 0 1px black;
-      background-color: #fff;
-      margin: 20px;
-    }
-    .panel { background-color: #fff; border: 3px solid #000; padding: 20px; box-shadow: 8px 8px 0 #000; max-width: 900px; margin: 0 auto; }
-    .titulo { font-size: 40px; font-weight: bold; text-align: center; border: 3px dashed #000; padding: 10px; background-color: #fff; margin-bottom: 10px; }
-    .subtitulo { font-size: 25px; font-weight: bold; text-align: center; margin-bottom: 20px; }
-    .carta { border: 2px solid #000; padding: 15px; margin-bottom: 25px; display: flex; align-items: flex-start; justify-content: space-between; box-shadow: 4px 4px 0 #000; background-color: #fff; flex-wrap: wrap; }
-    .carta img { width: 200px; height: auto; margin-right: 40px; }
-    .carta-info { font-family: Arial, sans-serif; flex: 1; font-size: 18px; }
-    .cantidad { font-weight: bold; font-size: 30px; margin-top: 5px; }
-    .boton-canje { padding: 10px 16px; background-color: #fff; border: 2px solid #000; box-shadow: 3px 3px 0 #000; font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: 25px; color: #000; cursor: pointer; margin-left: auto; align-self: flex-end; }
-    .boton-canje:disabled { background-color: #eee; color: #aaa; cursor: not-allowed; }
-    .descripcion { display: none; font-family: Arial, sans-serif; font-size: 30px; line-height: 1.4; margin-top: 10px; color: #000; width: 100%; }
-    footer { border: 3px solid #000; box-shadow: 4px 4px 0 #000; padding: 15px; margin-top: 40px; text-align: center; font-size: .9em; background: #fff; max-width: 600px; margin-left: auto; margin-right: auto; }
+    body{font-family:'Rock Salt',cursive;font-weight:700;text-shadow:0 0 1px #000;background:#fff;margin:20px}
+    .panel{background:#fff;border:3px solid #000;padding:20px;box-shadow:8px 8px 0 #000;max-width:900px;margin:0 auto}
+    .titulo{font-size:40px;font-weight:700;text-align:center;border:3px dashed #000;padding:10px;background:#fff;margin-bottom:10px}
+    .subtitulo{font-size:25px;font-weight:700;text-align:center;margin-bottom:20px}
+    .carta{border:2px solid #000;padding:15px;margin-bottom:25px;display:flex;align-items:flex-start;justify-content:space-between;box-shadow:4px 4px 0 #000;background:#fff;flex-wrap:wrap}
+    .carta img{width:200px;height:auto;margin-right:40px}
+    .carta-info{font-family:Arial, sans-serif;flex:1;font-size:18px}
+    .cantidad{font-weight:700;font-size:30px;margin-top:5px}
+    .boton-canje{padding:10px 16px;background:#fff;border:2px solid #000;box-shadow:3px 3px 0 #000;font-family:Arial, Helvetica, sans-serif;font-weight:700;font-size:25px;color:#000;cursor:pointer;margin-left:auto;align-self:flex-end}
+    .boton-canje:disabled{background:#eee;color:#aaa;cursor:not-allowed}
+    .descripcion{display:none;font-family:Arial, sans-serif;font-size:30px;line-height:1.4;margin-top:10px;color:#000;width:100%}
+    footer{border:3px solid #000;box-shadow:4px 4px 0 #000;padding:15px;margin-top:40px;text-align:center;font-size:.9em;background:#fff;max-width:600px;margin-left:auto;margin-right:auto}
 
-    #modalCambio { display: none; position: fixed; inset: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,.7); z-index: 9999; align-items: center; justify-content: center; }
-    #modalCambio .contenido { background: #fff; border: 3px solid #000; box-shadow: 6px 6px 0 #000; padding: 20px; text-align: center; font-family: 'Comic Neue', cursive; width: 90%; max-width: 350px; }
-    #modalCambio input { padding: 10px; font-size: 18px; width: 90%; border: 2px solid #000; }
-    #modalCambio button { padding: 10px 20px; font-size: 18px; border: 2px solid #000; box-shadow: 3px 3px 0 #000; background: #fff; margin-top: 10px; cursor: pointer; }
+    /* Inputs */
+    .textin{padding:12px;font-size:18px;border:2px solid #000;box-sizing:border-box;width:100%}
+    .btn{padding:12px;font-size:18px;border:2px solid #000;box-shadow:3px 3px 0 #000;background:#fff;cursor:pointer}
 
-    @media (max-width: 600px) {
-      .titulo { font-size: 28px; }
-      .subtitulo { font-size: 20px; }
-      .carta { flex-direction: column; align-items: center; text-align: center; }
-      .carta img { width: 50%; margin: 0 0 10px 0; }
-      .carta-info { font-size: 16px; }
-      .boton-canje { font-size: 20px; width: 100%; margin-top: 10px; }
-      .descripcion { font-size: 18px; }
-      #loginForm input, #loginForm button { font-size: 16px; padding: 10px; }
+    /* Sugerencias de nombres */
+    #sugerencias{display:none;margin-top:8px}
+    .sug{display:inline-block;margin:4px 6px 0 0;padding:6px 10px;border:2px solid #000;background:#fff;box-shadow:3px 3px 0 #000;cursor:pointer;font-family:Arial, sans-serif;font-weight:700}
+    .sug:hover{background:#f3f3f3}
+
+    /* Modal */
+    #modalCambio{display:none;position:fixed;inset:0;width:100vw;height:100vh;background:rgba(0,0,0,.7);z-index:9999;align-items:center;justify-content:center}
+    #modalCambio .contenido{background:#fff;border:3px solid #000;box-shadow:6px 6px 0 #000;padding:20px;text-align:center;font-family:'Comic Neue', cursive;width:90%;max-width:350px}
+    #modalCambio input{padding:10px;font-size:18px;width:90%;border:2px solid #000}
+    #modalCambio button{padding:10px 20px;font-size:18px;border:2px solid #000;box-shadow:3px 3px 0 #000;background:#fff;margin-top:10px;cursor:pointer}
+
+    @media (max-width:600px){
+      .titulo{font-size:28px}
+      .subtitulo{font-size:20px}
+      .carta{flex-direction:column;align-items:center;text-align:center}
+      .carta img{width:50%;margin:0 0 10px}
+      .carta-info{font-size:16px}
+      .boton-canje{font-size:20px;width:100%;margin-top:10px}
+      .descripcion{font-size:18px}
+      #loginForm input,#loginForm button{font-size:16px;padding:10px}
     }
   </style>
 </head>
 <body>
 
   <!-- Panel de login -->
-  <div class="panel" id="loginPanel" style="max-width: 95%; margin: 20px auto;">
+  <div class="panel" id="loginPanel" style="max-width:95%;margin:20px auto;">
     <div class="titulo">🔐 Ingreso restringido</div>
 
-    <!-- Si no llega ?alumno= y no hay memoria, pedimos el nombre -->
-    <div id="alumnoWrap" style="display:none; margin-bottom:10px; display:grid; gap:10px;">
-      <input
-        type="text"
-        id="alumnoNombre"
-        placeholder="Ingresa tu nombre y apellido"
-        style="padding: 12px; font-size: 18px; border: 2px solid #000; box-sizing: border-box; width: 100%;"
-      />
-      <button type="button"
-        onclick="localStorage.removeItem('alumno'); document.getElementById('alumnoNombre').value='';"
-        style="padding:10px; font-size:14px; border:2px solid #000; box-shadow:3px 3px 0 #000; background:#fff; cursor:pointer; justify-self:start;">
+    <!-- Campo de nombre (si no llega en URL ni está guardado) -->
+    <div id="alumnoWrap" style="display:none;margin-bottom:10px;display:grid;gap:10px;">
+      <input id="alumnoNombre" class="textin" type="text" placeholder="Ingresa tus dos nombres y dos apellidos (cualquier orden)">
+      <div id="sugerencias"></div>
+      <button type="button" class="btn" style="justify-self:start"
+        onclick="localStorage.removeItem('alumno');document.getElementById('alumnoNombre').value='';document.getElementById('sugerencias').style.display='none';">
         Limpiar nombre guardado
       </button>
     </div>
 
-    <form id="loginForm" style="display: flex; flex-direction: column; gap: 10px;">
-      <input type="password" id="password" placeholder="Ingresa tu contraseña" required
-        style="padding: 12px; font-size: 18px; border: 2px solid #000; box-sizing: border-box; width: 100%;">
-      <button type="submit"
-        style="padding: 12px; font-size: 18px; border: 2px solid #000; box-shadow: 3px 3px 0 #000; background: #fff; cursor: pointer;">Entrar</button>
+    <form id="loginForm" style="display:flex;flex-direction:column;gap:10px;">
+      <input type="password" id="password" class="textin" placeholder="Ingresa tu contraseña" required>
+      <button type="submit" class="btn">Entrar</button>
     </form>
-    <div id="mensajeLogin" style="color: red; margin-top: 10px; text-align: center;"></div>
+
+    <div id="mensajeLogin" style="color:red;margin-top:10px;text-align:center;"></div>
   </div>
 
   <!-- Panel de cartas -->
-  <div class="panel" id="cartasPanel" style="display: none;">
+  <div class="panel" id="cartasPanel" style="display:none;">
     <div class="titulo">CAOS (Cartas Anti Orden en la Sala)</div>
     <div class="subtitulo" id="nombreAlumno">Cargando estudiante...</div>
     <div id="cartasContainer">Cargando cartas...</div>
@@ -107,28 +105,30 @@
   </footer>
 
   <script>
-    // ====== PWA: registra el Service Worker (una sola vez) ======
+    // ====== PWA (opcional) ======
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('service-worker.js');
-      });
+      window.addEventListener('load', () => navigator.serviceWorker.register('../service-worker.js'));
     }
 
-    // ====== App lógica ======
-    const apiURL = "https://script.google.com/macros/s/AKfycbx_PzzXwJS06r93h_U0syl7UUzXwSbwU1ZK7B3FFMzgKh0Pgydu2GmQ1TDoGPTxhry1Ew/exec";
+    // ====== Config ======
+    // API principal (login / cambiar_pass / resolver_alumno)
+    const apiURL    = "https://script.google.com/macros/s/AKfycbxmU3eiiTe69ouewbLl4znzk2-ML4U-AfIoiGH2Kkj_4Uz55gv2B9QRH-kdqvDw-Dq5ZQ/exec";
+    // API de cartas e imágenes
+    const apiCartas = "https://script.google.com/macros/s/AKfycbzp3kpcaQqnf-o6kDB_7Vo5YPNVPRvQXIhVSPFfp5Clt95-zEBFSf7JmeBAD9DgDiA/exec";
+
     let alumnoGlobal = "";
 
     // Lee alumno de URL o memoria; si no hay, muestra input para pedirlo
-    function obtenerAlumno() {
+    function obtenerAlumnoInicial() {
       const params = new URLSearchParams(location.search);
       const desdeURL = params.get("alumno");
-
       if (desdeURL) {
         const limpio = decodeURIComponent(desdeURL).trim();
-        if (limpio) localStorage.setItem("alumno", limpio);
-        return limpio;
+        if (limpio) {
+          localStorage.setItem("alumno", limpio);
+          return limpio;
+        }
       }
-
       const guardado = (localStorage.getItem("alumno") || "").trim();
       if (guardado) return guardado;
 
@@ -137,38 +137,90 @@
       return "";
     }
 
+    // Muestra sugerencias clicables
+    function pintarSugerencias(lista) {
+      const box = document.getElementById("sugerencias");
+      if (!lista || !lista.length) { box.style.display = "none"; box.innerHTML = ""; return; }
+      box.innerHTML = "";
+      lista.forEach(n => {
+        const chip = document.createElement("span");
+        chip.className = "sug";
+        chip.textContent = n;
+        chip.onclick = () => {
+          document.getElementById("alumnoNombre").value = n;
+          box.style.display = "none";
+          box.innerHTML = "";
+        };
+        box.appendChild(chip);
+      });
+      box.style.display = "block";
+    }
+
+    // Resuelve nombre contra API (cualquier orden/tilde/mayúsculas)
+    async function resolverAlumno(nombreEntrada) {
+      const url = `${apiURL}?accion=resolver_alumno&nombre=${encodeURIComponent(nombreEntrada)}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      return data;
+    }
+
+    // LOGIN
     document.getElementById("loginForm").addEventListener("submit", async function (e) {
       e.preventDefault();
+      const pass = document.getElementById("password").value;
 
-      // Resuelve el alumno (URL -> memoria -> input)
-      let alumno = obtenerAlumno();
+      // 1) Determinar nombre (URL/memoria o pedirlo)
+      let alumno = obtenerAlumnoInicial();
       if (!alumno) {
         const tmp = (document.getElementById("alumnoNombre").value || "").trim();
         if (!tmp) {
-          alert("⚠️ Ingresa tu nombre y apellido.");
+          alert("⚠️ Ingresa tus nombres y apellidos.");
           return;
         }
-        alumno = tmp;
-        localStorage.setItem("alumno", alumno);
+        // 2) Resolver nombre con API (para encontrar el canónico)
+        try {
+          const r = await resolverAlumno(tmp);
+          if (r.ok && r.alumno) {
+            alumno = r.alumno;
+            localStorage.setItem("alumno", alumno);
+            pintarSugerencias([]); // limpia sugerencias
+          } else {
+            // Mostrar sugerencias si hay
+            if (r.sugerencias && r.sugerencias.length) {
+              pintarSugerencias(r.sugerencias);
+              document.getElementById("mensajeLogin").innerText = "Sugerencias encontradas. Toca tu nombre y vuelve a intentar.";
+            } else {
+              pintarSugerencias([]);
+              document.getElementById("mensajeLogin").innerText = "Nombre no encontrado. Revisa la ortografía.";
+            }
+            return;
+          }
+        } catch (err) {
+          document.getElementById("mensajeLogin").innerText = "Error de conexión al resolver el nombre.";
+          return;
+        }
       }
+
       alumnoGlobal = alumno;
 
-      const password = document.getElementById("password").value;
-
+      // 3) Hacer login con contraseña
       try {
-        const res = await fetch(`${apiURL}?accion=login&nombre=${encodeURIComponent(alumno)}&pass=${encodeURIComponent(password)}`);
+        const urlLogin = `${apiURL}?accion=login&nombre=${encodeURIComponent(alumno)}&pass=${encodeURIComponent(pass)}`;
+        const res = await fetch(urlLogin);
         const data = await res.json();
 
         if (data.ok) {
           if (!data.cambioHecho) {
+            // Primera vez: obligar a cambiar contraseña
             document.getElementById("modalCambio").style.display = "flex";
           } else {
+            // Ya cambió antes: pasar directo
             document.getElementById("loginPanel").style.display = "none";
             document.getElementById("cartasPanel").style.display = "block";
             cargarCartas(alumno);
           }
         } else {
-          document.getElementById("mensajeLogin").innerText = "❌ Contraseña incorrecta.";
+          document.getElementById("mensajeLogin").innerText = "❌ Contraseña incorrecta o nombre inválido.";
         }
       } catch (error) {
         console.error(error);
@@ -176,27 +228,34 @@
       }
     });
 
+    // Cambiar contraseña (primera vez)
     async function guardarNuevaClave() {
       const nueva = document.getElementById("nuevaPass").value.trim();
-      if (!nueva) return alert("⚠️ Debes escribir una nueva contraseña.");
+      if (!nueva) { alert("⚠️ Debes escribir una nueva contraseña."); return; }
 
       try {
-        await fetch(`${apiURL}?accion=cambiar_pass&nombre=${encodeURIComponent(alumnoGlobal)}&nueva=${encodeURIComponent(nueva)}`);
-        alert("✅ Contraseña cambiada correctamente.");
-        document.getElementById("modalCambio").style.display = "none";
-        document.getElementById("loginPanel").style.display = "none";
-        document.getElementById("cartasPanel").style.display = "block";
-        cargarCartas(alumnoGlobal);
+        const url = `${apiURL}?accion=cambiar_pass&nombre=${encodeURIComponent(alumnoGlobal)}&nueva=${encodeURIComponent(nueva)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (data && data.ok) {
+          alert("✅ Contraseña cambiada correctamente.");
+          document.getElementById("modalCambio").style.display = "none";
+          document.getElementById("loginPanel").style.display = "none";
+          document.getElementById("cartasPanel").style.display = "block";
+          cargarCartas(alumnoGlobal);
+        } else {
+          alert("❌ No se pudo guardar la nueva contraseña.");
+        }
       } catch (e) {
         alert("❌ Error al guardar la nueva contraseña.");
       }
     }
-    // para que el botón del modal funcione
     window.guardarNuevaClave = guardarNuevaClave;
 
+    // Cartas
     async function cargarCartas(alumno) {
       document.getElementById("nombreAlumno").innerText = alumno;
-      const apiCartas = "https://script.google.com/macros/s/AKfycbzp3kpcaQqnf-o6kDB_7Vo5YPNVPRvQXIhVSPFfp5Clt95-zEBFSf7JmeBAD9DgDiA/exec";
 
       try {
         const resCartas = await fetch(`${apiCartas}?alumno=${encodeURIComponent(alumno)}`);
@@ -211,6 +270,7 @@
 
         Object.entries(conteo).forEach(([nombre, cantidad]) => {
           const carta = dataImagenes.find(img => img.Nombre === nombre);
+
           const div = document.createElement("div");
           div.className = "carta";
 
@@ -232,7 +292,8 @@
           boton.className = "boton-canje";
           boton.innerText = "Solicitar Canje";
           boton.disabled = cantidad < 1;
-          boton.onclick = async () => {
+          boton.onclick = async (ev) => {
+            ev.stopPropagation();
             const ok = confirm(`¿Confirmas solicitar el canje de '${nombre}'?`);
             if (!ok) return;
             const url = `${apiCartas}?accion=solicitar_canje&alumno=${encodeURIComponent(alumno)}&carta=${encodeURIComponent(nombre)}`;
@@ -242,7 +303,8 @@
           };
 
           div.onclick = () => {
-            descripcion.style.display = (descripcion.style.display === "none" || !descripcion.style.display) ? "block" : "none";
+            descripcion.style.display =
+              (descripcion.style.display === "none" || !descripcion.style.display) ? "block" : "none";
           };
 
           div.appendChild(img);
@@ -259,18 +321,18 @@
 
     function obtenerDescripcion(nombre) {
       switch (nombre) {
-        case "Perro Bomba": return "Evade pregunta y cárgala a un(a) compañero(a)";
-        case "Pinta Mono": return "Evita una sanción o pide una anotación positiva.";
-        case "Kodama": return "Junta dos y evita una tarea.";
-        case "Niño Chocolate": return "Puedes comer en clase.";
-        case "1UP": return "0,5 décimas para una nota.";
-        case "Violeta Parra": return "Eres DJ durante una actividad o usa audífonos.";
-        case "El Reto": return "Puedes subir un punto en una nota con una tarea extra.";
-        case "BME": return "Puedes utilizar tu celular para buscar información en una actividad.";
-        case "GAMER": return "Juega con tu celular si terminaste la actividad.";
-        case "Iluminati": return "Puedes elegir la carta que desees dentro del mazo.";
-        case "Leftraru": return "Pepiwiñoimi tami tuwvn.";
-        default: return "Sin descripción disponible para esta carta.";
+        case "Perro Bomba":      return "Evade pregunta y cárgala a un(a) compañero(a)";
+        case "Pinta Mono":       return "Evita una sanción o pide una anotación positiva.";
+        case "Kodama":           return "Junta dos y evita una tarea.";
+        case "Niño Chocolate":   return "Puedes comer en clase.";
+        case "1UP":              return "0,5 décimas para una nota.";
+        case "Violeta Parra":    return "Eres DJ durante una actividad o usa audífonos.";
+        case "El Reto":          return "Puedes subir un punto en una nota con una tarea extra.";
+        case "BME":              return "Puedes utilizar tu celular para buscar información en una actividad.";
+        case "GAMER":            return "Juega con tu celular si terminaste la actividad.";
+        case "Iluminati":        return "Puedes elegir la carta que desees dentro del mazo.";
+        case "Leftraru":         return "Pepiwiñoimi tami tuwvn.";
+        default:                 return "Sin descripción disponible para esta carta.";
       }
     }
   </script>
