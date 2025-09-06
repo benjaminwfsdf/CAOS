@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <!-- PWA -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0b0b0c">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CAOS">
+
   <meta charset="UTF-8">
   <title>CAOS - Estética Panel</title>
   <link rel="stylesheet" href="style-caos.css">
@@ -245,5 +253,13 @@
       };
     });
   </script>
+  <script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js');
+  });
+}
+</script>
+
 </body>
 </html>

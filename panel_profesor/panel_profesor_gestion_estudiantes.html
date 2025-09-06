@@ -2,6 +2,16 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <!-- PWA (desde subcarpeta) -->
+<link rel="manifest" href="../manifest.json">
+<meta name="theme-color" content="#0b0b0c">
+
+<!-- iOS -->
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CAOS">
+
     <meta charset="UTF-8">
     <title>Panel Profesor CAOS - Gestión de Estudiantes</title>
     <style>
@@ -105,5 +115,14 @@
   Sitio desarrollado por Benjamín González. <br>
  
 </footer>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    // ¡OJO! barra inicial -> ruta absoluta al SW en la RAÍZ
+    navigator.serviceWorker.register('/service-worker.js', { scope: '/' });
+  });
+}
+</script>
+
 </body>
 </html>
