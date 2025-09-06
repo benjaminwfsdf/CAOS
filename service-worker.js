@@ -1,5 +1,5 @@
 // /service-worker.js — ámbito raíz
-const VERSION = 'v2.1.0';
+const VERSION = 'v2.1.1';
 const STATIC_CACHE = `static-${VERSION}`;
 const RUNTIME_CACHE = `runtime-${VERSION}`;
 
@@ -98,4 +98,31 @@ self.addEventListener('fetch', (event) => {
       return res;
     }).catch(() => caches.match(req))
   );
+});
+
+// Dentro de tu service-worker.js
+const API_CACHE = 'api-cache-v1';
+
+// SWR para GET a tu Apps Script
+self.addEventListener('fetch', (event) => {
+  const req = event.request;
+  const url = new URL(req.url);
+
+  // solo GET y solo a script.google.com
+  if (req.method === 'GET' && /script\.google\.com/.test(url.hostname)) {
+    event.respondWith((async () => {
+      const cache = await caches.open(API_CACHE);
+      const cached = await cache.match(req);
+      const networkFetch = fetch(req).then(res => {
+        // Clonar y guardar si OK
+        if (res && res.status === 200) {
+          cache.put(req, res.clone());
+        }
+        return res;
+      }).catch(() => cached);
+
+      // Devuelve caché rápido si existe; si no, espera red
+      return cached || networkFetch;
+    })());
+  }
 });

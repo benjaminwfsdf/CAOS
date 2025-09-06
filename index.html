@@ -2,12 +2,12 @@
 <html lang="es">
 <head>
   <!-- PWA -->
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#0b0b0c">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="CAOS">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0b0b0c">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CAOS">
 
   <meta charset="UTF-8">
   <title>CAOS - Estética Panel</title>
@@ -21,80 +21,15 @@
       background-image: repeating-linear-gradient(45deg, #000 0px, #000 1px, transparent 1px, transparent 6px);
       background-size: 100% 100%;
     }
-
-    .panel {
-      background-color: white;
-      border: 3px solid black;
-      padding: 20px;
-      box-shadow: 8px 8px 0 black;
-      max-width: 800px;
-      margin: 0 auto;
-    }
-
-    .titulo {
-      font-size: 40px;
-      font-weight: bold;
-      text-align: center;
-      border: 3px dashed black;
-      padding: 15px;
-      background-color: white;
-      clip-path: polygon(0 0, 90% 0, 100% 10%, 100% 90%, 90% 100%, 0 100%);
-      margin-bottom: 5px;
-    }
-
-    .subtitulo {
-      text-align: center;
-      font-size: 20px;
-      font-weight: bold;
-      margin-bottom: 20px;
-    }
-
-    .bloque {
-      border: 2px solid black;
-      box-shadow: 5px 5px 0 black;
-      padding: 15px;
-      background-color: white;
-      margin-bottom: 20px;
-    }
-
-    label, select, button {
-      font-family: inherit;
-      font-size: 16px;
-    }
-
-    select, button {
-      border: 2px solid black;
-      background: white;
-      padding: 8px;
-      margin-right: 5px;
-      box-shadow: 3px 3px 0 black;
-      cursor: pointer;
-    }
-
-    .fila {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin: 10px 0;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .autorizar {
-      margin-top: 20px;
-      display: block;
-      width: 100%;
-      font-size: 16px;
-      padding: 12px;
-      background: white;
-      border: 3px solid black;
-      box-shadow: 4px 4px 0 black;
-      text-transform: uppercase;
-      text-align: center;
-      text-decoration: none;
-      color: black;
-      font-family: 'Rock Salt', cursive;
-    }
+    .panel { background-color: white; border: 3px solid black; padding: 20px; box-shadow: 8px 8px 0 black; max-width: 800px; margin: 0 auto; }
+    .titulo { font-size: 40px; font-weight: bold; text-align: center; border: 3px dashed black; padding: 15px; background-color: white; clip-path: polygon(0 0, 90% 0, 100% 10%, 100% 90%, 90% 100%, 0 100%); margin-bottom: 5px; }
+    .subtitulo { text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px; }
+    .bloque { border: 2px solid black; box-shadow: 5px 5px 0 black; padding: 15px; background-color: white; margin-bottom: 20px; }
+    label, select, button, input { font-family: inherit; font-size: 16px; }
+    select, button, input[type="text"] { border: 2px solid black; background: white; padding: 8px; margin-right: 5px; box-shadow: 3px 3px 0 black; }
+    .fila { display: flex; justify-content: space-between; align-items: center; margin: 10px 0; flex-wrap: wrap; gap: 10px; }
+    .autorizar { margin-top: 20px; display: block; width: 100%; font-size: 16px; padding: 12px; background: white; border: 3px solid black; box-shadow: 4px 4px 0 black; text-transform: uppercase; text-align: center; text-decoration: none; color: black; font-family: 'Rock Salt', cursive; }
+    small.muted { color:#333; opacity:.8; font-family: Arial, sans-serif; }
   </style>
 </head>
 <body>
@@ -112,12 +47,16 @@
         <button id="btnEditarEstudiantes">📥 Cargar estudiantes</button>
         <button id="btnEditarCursosCargo">✏️ Editar cursos a cargo</button>
       </div>
+      <small class="muted" id="statusCursos"></small>
     </div>
 
     <div class="bloque">
-      <label>Alumno:
-        <select id="alumnoSelect"><option>Selecciona un estudiante</option></select>
-      </label>
+      <div class="fila" style="gap:8px;">
+        <label style="flex:1 1 220px">Alumno:
+          <select id="alumnoSelect" style="min-width:220px;"><option>Selecciona un estudiante</option></select>
+        </label>
+        <input id="buscarAlumno" type="text" placeholder="Buscar alumno…" style="flex:1 1 180px;">
+      </div>
 
       <div class="fila">
         <span>////////////////</span>
@@ -127,6 +66,7 @@
         <span>////////////////</span>
         <a id="btnEspecifica" href="#"><button disabled>Asignar carta específica</button></a>
       </div>
+      <small class="muted" id="statusAlumnos"></small>
     </div>
 
     <a id="btnAutorizar" href="#" class="autorizar">Autorizar uso</a>
@@ -144,122 +84,227 @@
   </footer>
 
   <script>
+    // === Parámetros y rutas ===
     const usuario = new URLSearchParams(window.location.search).get("usuario");
-    if (!usuario) {
-      window.location.href = "login.html";
+    if (!usuario) { window.location.href = "login.html"; }
+    const apiUrl = "https://script.google.com/macros/s/AKfycbwkdGN5y_wtAQTfxhzQmkpazwdfx_RrYAOwJtm3S4RdFCqnROdrKVMygzhd1ai_lTifRQ/exec";
+
+    // === UI refs ===
+    const cursoSelect = document.getElementById('cursoSelect');
+    const alumnoSelect = document.getElementById('alumnoSelect');
+    const buscarAlumno = document.getElementById('buscarAlumno');
+    const btnAleatoria = document.getElementById('btnAleatoria');
+    const btnEspecifica = document.getElementById('btnEspecifica');
+    const btnAutorizar = document.getElementById('btnAutorizar');
+    const btnEditarEstudiantes = document.getElementById('btnEditarEstudiantes');
+    const btnEditarCursosCargo = document.getElementById('btnEditarCursosCargo');
+    const btnCierreAno = document.getElementById('btnCierreAno');
+    const statusCursos = document.getElementById('statusCursos');
+    const statusAlumnos = document.getElementById('statusAlumnos');
+
+    // === Navegación fija ===
+    btnAutorizar.href = `panel_profesor/validar_canje_CAOS.html?usuario=${encodeURIComponent(usuario)}`;
+    btnEditarEstudiantes.onclick = () => location.href = `panel_profesor/cargar_excel_estudiantes.html?usuario=${encodeURIComponent(usuario)}`;
+    btnEditarCursosCargo.onclick = () => location.href = `panel_profesor/editar_cursos.html?usuario=${encodeURIComponent(usuario)}`;
+    btnCierreAno.onclick = () => location.href = `panel_profesor/cierre_ano_escolar.html?usuario=${encodeURIComponent(usuario)}`;
+
+    // === Caché local (5 min) ===
+    const TTL = 5 * 60 * 1000;
+    const now = () => Date.now();
+
+    function getCache(key) {
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return null;
+        const obj = JSON.parse(raw);
+        if (!obj || !obj.ts || !obj.data) return null;
+        if ((now() - obj.ts) > TTL) return null;
+        return obj.data;
+      } catch { return null; }
+    }
+    function setCache(key, data) {
+      try { localStorage.setItem(key, JSON.stringify({ ts: now(), data })); } catch {}
     }
 
-    document.addEventListener('DOMContentLoaded', async () => {
-      const apiUrl = 'https://script.google.com/macros/s/AKfycbyYjFKCs_3n6vTakpuJuusrFqRh3ynK_59ZNjo5Eoef68lGHADBmxFunkZ9dILTLReicg/exec';
-      const cursoSelect = document.getElementById('cursoSelect');
-      const alumnoSelect = document.getElementById('alumnoSelect');
-      const btnAleatoria = document.getElementById('btnAleatoria');
-      const btnEspecifica = document.getElementById('btnEspecifica');
-      const btnAutorizar = document.getElementById('btnAutorizar');
-      const btnEditarEstudiantes = document.getElementById('btnEditarEstudiantes');
-      const btnEditarCursosCargo = document.getElementById('btnEditarCursosCargo');
-      const btnCierreAno = document.getElementById('btnCierreAno');
+    // === AbortControllers para evitar “colisiones” ===
+    let cursosCtrl = null;
+    let alumnosCtrl = null;
 
-      try {
-        const response = await fetch(`${apiUrl}?accion=obtener_cursos_profesor&usuario=${encodeURIComponent(usuario)}`);
-        const data = await response.json();
-
-        if (data.ok) {
-          const sufijos = ["ro", "do", "ro", "to", "to", "to", "mo", "vo"];
-          const medios = ["1ro", "2do", "3ro", "4to"];
-
-          data.cursos.forEach(rawCurso => {
-            let cursoMostrado = "";
-            const match = rawCurso.match(/^(\d+)(?:º|\s)?\s?(Básico|Medio)\s([ABC])$/);
-            if (match) {
-              const grado = parseInt(match[1]);
-              const nivel = match[2];
-              const letra = match[3];
-              if (nivel === "Básico") {
-                cursoMostrado = `${grado}${sufijos[grado - 1]} Básico ${letra}`;
-              } else {
-                cursoMostrado = `${medios[grado - 1]} Medio ${letra}`;
-              }
-            } else {
-              cursoMostrado = rawCurso;
-            }
-            const option = document.createElement('option');
-            option.textContent = cursoMostrado;
-            option.value = rawCurso;
-            cursoSelect.appendChild(option);
-          });
-
-          // Se elimina la restauración automática de curso guardado
-          // (antes: leer cursoGuardado y disparar change)
-        }
-      } catch (error) {
-        alert("Error al cargar cursos.");
+    // === Carga de cursos con SWR (stale-while-revalidate) ===
+    async function cargarCursos() {
+      const cacheKey = `cursos:${usuario}`;
+      const cached = getCache(cacheKey);
+      if (cached && Array.isArray(cached)) {
+        pintarCursos(cached);
+        statusCursos.textContent = "Cursos (caché, actualizando…)";
+        // actualiza en segundo plano
+        fetchCursos(true);
+      } else {
+        statusCursos.textContent = "Cargando cursos…";
+        await fetchCursos(false);
       }
 
-      // Autorizar uso no depende del alumno: fijo desde el inicio solo con usuario
-      btnAutorizar.href = `panel_profesor/validar_canje_CAOS.html?usuario=${usuario}`;
+      async function fetchCursos(background) {
+        if (cursosCtrl) cursosCtrl.abort();
+        cursosCtrl = new AbortController();
+        try {
+          const r = await fetch(`${apiUrl}?accion=obtener_cursos_profesor&usuario=${encodeURIComponent(usuario)}`, { signal: cursosCtrl.signal });
+          const data = await r.json();
+          if (data.ok) {
+            setCache(cacheKey, data.cursos || []);
+            pintarCursos(data.cursos || []);
+            statusCursos.textContent = background ? "Cursos actualizados." : "";
+          } else {
+            if (!background) statusCursos.textContent = "Error al cargar cursos.";
+          }
+        } catch (err) {
+          if (!background) statusCursos.textContent = "Error de red al cargar cursos.";
+        }
+      }
+    }
 
-      cursoSelect.addEventListener('change', async () => {
+    function pintarCursos(cursos) {
+      // Limpia
+      cursoSelect.innerHTML = '<option>Selecciona un curso</option>';
+
+      const sufijos = ["ro", "do", "ro", "to", "to", "to", "mo", "vo"];
+      const medios = ["1ro", "2do", "3ro", "4to"];
+
+      (cursos || []).forEach(rawCurso => {
+        let cursoMostrado = "";
+        const match = rawCurso.match(/^(\d+)(?:º|\s)?\s?(Básico|Medio)\s([ABC])$/);
+        if (match) {
+          const grado = parseInt(match[1]);
+          const nivel = match[2];
+          const letra = match[3];
+          if (nivel === "Básico") cursoMostrado = `${grado}${sufijos[grado - 1]} Básico ${letra}`;
+          else cursoMostrado = `${medios[grado - 1]} Medio ${letra}`;
+        } else {
+          cursoMostrado = rawCurso;
+        }
+        const option = document.createElement('option');
+        option.textContent = cursoMostrado;
+        option.value = rawCurso;
+        cursoSelect.appendChild(option);
+      });
+    }
+
+    // === Carga de alumnos con SWR + búsqueda local ===
+    async function cargarAlumnos(curso) {
+      const cacheKey = `alumnos:${curso}`;
+      const cached = getCache(cacheKey);
+      if (cached && Array.isArray(cached)) {
+        pintarAlumnos(cached);
+        statusAlumnos.textContent = "Alumnos (caché, actualizando…)";
+        fetchAlumnos(curso, true);
+      } else {
+        statusAlumnos.textContent = "Cargando alumnos…";
+        await fetchAlumnos(curso, false);
+      }
+
+      async function fetchAlumnos(curso, background) {
+        if (alumnosCtrl) alumnosCtrl.abort();
+        alumnosCtrl = new AbortController();
+        try {
+          const url = `${apiUrl}?accion=obtener_estudiantes&curso=${encodeURIComponent(curso)}`;
+          const r = await fetch(url, { signal: alumnosCtrl.signal });
+          const data = await r.json();
+          if (data.ok && Array.isArray(data.estudiantes)) {
+            setCache(cacheKey, data.estudiantes);
+            // Si el usuario no ha tecleado búsqueda, repintamos
+            if (!buscarAlumno.value.trim()) {
+              pintarAlumnos(data.estudiantes);
+            }
+            statusAlumnos.textContent = background ? "Alumnos actualizados." : "";
+          } else {
+            if (!background) statusAlumnos.textContent = "Error al cargar estudiantes.";
+          }
+        } catch (_) {
+          if (!background) statusAlumnos.textContent = "Error de red al cargar estudiantes.";
+        }
+      }
+    }
+
+    function pintarAlumnos(lista) {
+      const alumnoSelPrev = alumnoSelect.value;
+      alumnoSelect.innerHTML = '<option>Selecciona un estudiante</option>';
+      (lista || []).forEach(nombre => {
+        const option = document.createElement('option');
+        option.textContent = nombre;
+        alumnoSelect.appendChild(option);
+      });
+      // re-selecciona si coincide
+      if (alumnoSelPrev) alumnoSelect.value = alumnoSelPrev;
+
+      // Deshabilita reparto hasta elegir alumno válido
+      setRepartoHabilitado(false);
+    }
+
+    function setRepartoHabilitado(on) {
+      btnAleatoria.querySelector('button').disabled = !on;
+      btnEspecifica.querySelector('button').disabled = !on;
+      if (!on) {
+        btnAleatoria.href = '#';
+        btnEspecifica.href = '#';
+      }
+    }
+
+    // === Eventos ===
+    document.addEventListener('DOMContentLoaded', async () => {
+      await cargarCursos();
+
+      cursoSelect.addEventListener('change', () => {
         const curso = cursoSelect.value;
         localStorage.setItem("cursoSeleccionado", curso);
-        alumnoSelect.innerHTML = '<option>Selecciona un estudiante</option>';
+        buscarAlumno.value = "";
+        cargarAlumnos(curso);
+      });
 
-        // Deshabilitar repartir cartas hasta elegir alumno
-        btnAleatoria.querySelector('button').disabled = true;
-        btnEspecifica.querySelector('button').disabled = true;
-
-        try {
-          const response = await fetch(`${apiUrl}?accion=obtener_estudiantes&curso=${encodeURIComponent(curso)}`);
-          const data = await response.json();
-          if (!data.ok || !data.estudiantes) throw new Error();
-          data.estudiantes.forEach(nombre => {
-            const option = document.createElement('option');
-            option.textContent = nombre;
-            alumnoSelect.appendChild(option);
-          });
-        } catch {
-          alert("Error al cargar estudiantes.");
-        }
+      // Filtro local sobre lo ya cargado
+      buscarAlumno.addEventListener('input', () => {
+        const curso = cursoSelect.value;
+        const cacheKey = `alumnos:${curso}`;
+        const lista = getCache(cacheKey) || [];
+        const q = buscarAlumno.value.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const filtrados = !q
+          ? lista
+          : lista.filter(n => {
+              const f = n.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+              return q.split(/\s+/).every(tok => f.includes(tok));
+            });
+        pintarAlumnos(filtrados);
       });
 
       alumnoSelect.addEventListener('change', () => {
         const alumno = alumnoSelect.value;
         if (alumno && alumno !== 'Selecciona un estudiante') {
           const encoded = encodeURIComponent(alumno);
-          // Habilitar SOLO los de repartir cartas y setear sus href con alumno
-          btnAleatoria.querySelector('button').disabled = false;
-          btnEspecifica.querySelector('button').disabled = false;
-          btnAleatoria.href = `panel_profesor/reparto_carta_aleatoria.html?alumno=${encoded}&usuario=${usuario}`;
-          btnEspecifica.href = `panel_profesor/reparto_carta_especifica.html?alumno=${encoded}&usuario=${usuario}`;
+          setRepartoHabilitado(true);
+          btnAleatoria.href = `panel_profesor/reparto_carta_aleatoria.html?alumno=${encoded}&usuario=${encodeURIComponent(usuario)}`;
+          btnEspecifica.href = `panel_profesor/reparto_carta_especifica.html?alumno=${encoded}&usuario=${encodeURIComponent(usuario)}`;
         } else {
-          btnAleatoria.querySelector('button').disabled = true;
-          btnEspecifica.querySelector('button').disabled = true;
-          btnAleatoria.href = '#';
-          btnEspecifica.href = '#';
+          setRepartoHabilitado(false);
         }
       });
 
-      btnCierreAno.onclick = () => {
-        window.location.href = `panel_profesor/cierre_ano_escolar.html?usuario=${usuario}`;
-      };
-
-      // Estos dos YA no dependen de curso ni alumno
-      btnEditarEstudiantes.onclick = () => {
-        window.location.href = `panel_profesor/cargar_excel_estudiantes.html?usuario=${usuario}`;
-      };
-
-      btnEditarCursosCargo.onclick = () => {
-        window.location.href = `panel_profesor/editar_cursos.html?usuario=${usuario}`;
-      };
+      // Restaura último curso usado (si existe en lista)
+      const ultimo = localStorage.getItem("cursoSeleccionado");
+      if (ultimo) {
+        cursoSelect.value = ultimo;
+        if (cursoSelect.value === ultimo) {
+          cargarAlumnos(ultimo);
+        }
+      }
     });
   </script>
-  <script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js');
-  });
-}
-</script>
 
+  <!-- SW global (si ya lo tenías, mantenlo) -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js');
+      });
+    }
+  </script>
 </body>
 </html>
