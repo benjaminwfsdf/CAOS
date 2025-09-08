@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <meta charset="UTF-8" />
+  <title>Validar Canje de Cartas - CAOS</title>
+
+  <!-- Fuentes -->
   <link href="https://fonts.googleapis.com/css2?family=Rock+Salt&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
 
   <!-- PWA (desde subcarpeta) -->
@@ -12,71 +16,95 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CAOS">
+  <!-- Evita tintes azules automáticos en iOS -->
   <meta name="format-detection" content="telephone=no, date=no, address=no, email=no, url=no">
 
-  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
-  <title>Validar Canje de Cartas - CAOS</title>
-  <link rel="stylesheet" href="../style-caos.css">
-  <link rel="stylesheet" href="../style-caos-legible.css"><!-- NUEVO -->
+  <!-- ==================== CAOS Mobile v2 (pack común) ==================== -->
   <style>
-    body {
-      font-family: 'Rock Salt', cursive;
-      padding: 20px;
-      margin: 0;
-      background: repeating-linear-gradient(45deg, #000 0px, #000 1px, transparent 1px, transparent 6px);
-      padding-bottom: env(safe-area-inset-bottom);
+    :root{
+      --ink:#000; --paper:#fff; --shadow:8px 8px 0 var(--ink);
+      --r:18px; --pad:16px;
     }
-    .panel.caos-relative {
-      border: 3px solid black;
-      padding: 20px;
-      box-shadow: 6px 6px 0 black;
-      background-color: white;
-      max-width: 800px;
-      margin: auto;
-      width: min(100% - 24px, 800px);
-      position: relative; /* necesario para globos */
-    }
-    h1 {
-      text-align: center;
-      font-size: clamp(22px, 6vw, 30px);
-      border: 3px dashed black;
-      padding: 10px;
-      margin-bottom: 20px;
-      background-color: white;
+    *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+    html,body{max-width:100%; overflow-x:hidden}
+    body{
+      margin:0;
+      padding:env(safe-area-inset-top) 12px calc(16px + env(safe-area-inset-bottom)) 12px;
+      background:var(--paper);
+      color:var(--ink);
+      background-image:repeating-linear-gradient(45deg, rgba(0,0,0,.12) 0px, rgba(0,0,0,.12) 1px, transparent 1px, transparent 6px);
+      background-attachment:fixed;
+      font-family:'Rock Salt',cursive;
     }
 
-    .table-responsive{ overflow-x: auto; -webkit-overflow-scrolling: touch; border: 2px dashed #000; padding: 6px; margin-top: 12px; background: #fff; }
-    table { width: 100%; border-collapse: collapse; min-width: 520px; }
-    th, td { border: 1px solid black; padding: 8px; text-align: center; white-space: nowrap; }
+    /* Shell tipo app */
+    .panel{max-width:900px;margin:14px auto;background:var(--paper);border:3px solid var(--ink);
+      border-radius:var(--r);box-shadow:var(--shadow);padding:var(--pad);position:relative}
+    .panel.caos-relative{position:relative}
 
-    button {
-      font-family: inherit; font-size: 14px; padding: 10px 12px; border: 2px solid black; box-shadow: 2px 2px 0 black; background-color: white; cursor: pointer; min-height: 44px;
-    }
-    #volverBtn{
-      text-decoration: none; font-family: inherit; font-size: 16px; padding: 12px 20px; border: 3px solid black; background-color: white; box-shadow: 4px 4px 0 black; display: inline-block; min-height:44px; line-height: 1.2;
-    }
-
-    @media (max-width: 768px){
-      body{ padding: 14px; }
-      .panel{ padding: 14px; box-shadow: 5px 5px 0 #000; }
+    /* Títulos */
+    h1,.titulo{
+      font-size:clamp(22px,6.8vw,32px); font-weight:700; text-align:center;
+      border:3px dashed var(--ink); border-radius:14px; padding:12px; margin:0 0 10px 0;
+      background:var(--paper); clip-path:polygon(0 0,90% 0,100% 10%,100% 90%,90% 100%,0 100%);
     }
 
-    /* Globos / Onomato (igual que antes) */
-    .bubble{ position:absolute; z-index:999; max-width:320px; background:#fff; color:#000; border:3px solid #000; box-shadow:6px 6px 0 #000; padding:12px 14px; font-weight:700; line-height:1.2; border-radius:14px; transform:translate(-50%,-110%) scale(0.98); opacity:0; pointer-events:none; animation:bubble-in 250ms ease-out forwards, bubble-out 3s 2.4s ease-in forwards; }
-    .bubble::after{ content:""; position:absolute; bottom:-18px; left:50%; transform:translateX(-50%) rotate(8deg); width:24px; height:24px; background:#fff; border-left:3px solid #000; border-bottom:3px solid #000; box-shadow:6px 6px 0 #000; clip-path:polygon(0 0,100% 0,100% 100%); }
-    .bubble--ok{ border-color:#09b37a; box-shadow:6px 6px 0 #09b37a; }
-    .bubble--warn{ border-color:#f59e0b; box-shadow:6px 6px 0 #f59e0b; }
-    .bubble--error{ border-color:#e02424; box-shadow:6px 6px 0 #e02424; }
-    @keyframes bubble-in{ to{ opacity:1; transform:translate(-50%,-110%) scale(1);} }
-    @keyframes bubble-out{ to{ opacity:0; transform:translate(-50%,-130%) scale(0.96);} }
+    /* Controles táctiles accesibles (heredarán los botones y enlaces con clase .autorizar) */
+    label,select,button,input,textarea{font-family:'Comic Neue',cursive; font-size:16px}
+    select,button,input[type="text"],input[type="file"],input[type="email"],input[type="password"],textarea{
+      width:100%; min-height:48px; border:2px solid var(--ink); border-radius:12px;
+      background:var(--paper); padding:12px 14px; box-shadow:3px 3px 0 var(--ink); color:var(--ink)
+    }
+    button, .btn, .autorizar{
+      display:inline-block; text-align:center; border:3px solid var(--ink); border-radius:14px;
+      box-shadow:4px 4px 0 var(--ink); background:var(--paper); color:var(--ink);
+      font-weight:700; letter-spacing:.3px; cursor:pointer; padding:12px 16px; min-height:44px;
+    }
+    button:active, .autorizar:active { transform: translateY(1px); box-shadow:3px 3px 0 var(--ink) }
 
-    .onomato{ position:absolute; z-index:998; font-weight:900; letter-spacing:2px; font-size:28px; color:#33e6a4; -webkit-text-stroke:2px #000; text-shadow:6px 6px 0 #09b37a; transform:translate(-50%,-50%) scale(0.6) rotate(-6deg); opacity:0; pointer-events:none; animation:ono-pop 520ms ease-out forwards; }
-    .onomato--ok{ color:#33e6a4; text-shadow:6px 6px 0 #09b37a; }
-    .onomato--error{ color:#ff6b6b; text-shadow:6px 6px 0 #e02424; }
-    .onomato--wow{ color:#ffd45a; text-shadow:6px 6px 0 #f59e0b; }
-    @keyframes ono-pop{ 20%{ opacity:1; transform:translate(-50%,-50%) scale(1.1) rotate(2deg); } 60%{ transform:translate(-50%,-54%) scale(1) rotate(-2deg); } 100%{ opacity:0; transform:translate(-50%,-60%) scale(0.9) rotate(0deg); } }
+    /* Tabla responsive */
+    .table-responsive{overflow-x:auto;-webkit-overflow-scrolling:touch;border:2px dashed var(--ink);
+      padding:6px;margin-top:12px;background:#fff;border-radius:12px}
+    table{width:100%;border-collapse:collapse;min-width:560px}
+    th,td{border:1px solid var(--ink);padding:10px 12px;text-align:center;white-space:nowrap}
+
+    /* Footers */
+    footer{max-width:700px;margin:10px auto 18px;padding:12px;background:var(--paper);
+      border:3px solid var(--ink);border-radius:14px;box-shadow:4px 4px 0 var(--ink);
+      text-align:center;font:700 12px/1.3 Arial, sans-serif}
+
+    /* Focus accesible */
+    :focus-visible{outline:3px dashed var(--ink); outline-offset:2px}
+
+    /* Globos / onomato (reutilizamos tus clases) */
+    .bubble{position:absolute;z-index:999;max-width:320px;background:#fff;color:#000;border:3px solid #000;
+      box-shadow:6px 6px 0 #000;padding:12px 14px;font-weight:700;line-height:1.2;border-radius:14px;
+      transform:translate(-50%,-110%) scale(.98);opacity:0;pointer-events:none;
+      animation:bubble-in .25s ease-out forwards, bubble-out 3s 2.4s ease-in forwards}
+    .bubble::after{content:"";position:absolute;bottom:-18px;left:50%;transform:translateX(-50%) rotate(8deg);
+      width:24px;height:24px;background:#fff;border-left:3px solid #000;border-bottom:3px solid #000;
+      box-shadow:6px 6px 0 #000;clip-path:polygon(0 0,100% 0,100% 100%)}
+    .bubble--ok{border-color:#09b37a;box-shadow:6px 6px 0 #09b37a}
+    .bubble--warn{border-color:#f59e0b;box-shadow:6px 6px 0 #f59e0b}
+    .bubble--error{border-color:#e02424;box-shadow:6px 6px 0 #e02424}
+    @keyframes bubble-in{to{opacity:1;transform:translate(-50%,-110%) scale(1)}}
+    @keyframes bubble-out{to{opacity:0;transform:translate(-50%,-130%) scale(.96)}}
+    .onomato{position:absolute;z-index:998;font-weight:900;letter-spacing:2px;font-size:28px;color:#33e6a4;
+      -webkit-text-stroke:2px #000;text-shadow:6px 6px 0 #09b37a;transform:translate(-50%,-50%) scale(.6) rotate(-6deg);
+      opacity:0;pointer-events:none;animation:ono-pop 520ms ease-out forwards}
+    .onomato--error{color:#ff6b6b;text-shadow:6px 6px 0 #e02424}
+    .onomato--wow{color:#ffd45a;text-shadow:6px 6px 0 #f59e0b}
+    @keyframes ono-pop{20%{opacity:1;transform:translate(-50%,-50%) scale(1.1) rotate(2deg)}
+      60%{transform:translate(-50%,-54%) scale(1) rotate(-2deg)}
+      100%{opacity:0;transform:translate(-50%,-60%) scale(.9) rotate(0)}}
+
+    /* Compactar botones en celdas en pantallas pequeñas (opcional) */
+    td button{ min-width:44px }
+    @media (max-width:480px){
+      td button{ padding:8px 10px; font-size:15px }
+    }
   </style>
 </head>
 <body>
@@ -85,15 +113,38 @@
 
     <div id="solicitudesContainer">Cargando solicitudes...</div>
 
-    <div style="margin-top: 30px; text-align: center;">
-      <a id="volverBtn" href="#">⬅ Volver al menú principal</a>
+    <div style="margin-top: 18px; text-align: center;">
+      <a id="volverBtn" class="autorizar" href="#">⬅ Volver al menú principal</a>
     </div>
   </div>
 
   <script>
     // Utilidades globos/onomato
-    function showBubble(anchorEl, texto, tipo='ok'){ const panel = anchorEl.closest('.caos-relative') || document.body; const rect = anchorEl.getBoundingClientRect(); const parentRect = panel.getBoundingClientRect(); const b = document.createElement('div'); b.className = `bubble bubble--${tipo}`; b.setAttribute('role','status'); b.setAttribute('aria-live','polite'); b.textContent = texto; b.style.left = (rect.left - parentRect.left + rect.width/2) + 'px'; b.style.top  = (rect.top  - parentRect.top) + 'px'; panel.appendChild(b); setTimeout(()=> b.remove(), 3200); }
-    function showOnomato(anchorEl, texto='¡POW!', estilo='ok'){ const panel = anchorEl.closest('.caos-relative') || document.body; const rect = anchorEl.getBoundingClientRect(); const parentRect = panel.getBoundingClientRect(); const o = document.createElement('div'); o.className = `onomato onomato--${estilo}`; o.textContent = texto; o.style.left = (rect.left - parentRect.left + rect.width/2) + 'px'; o.style.top  = (rect.top  - parentRect.top - 30) + 'px'; panel.appendChild(o); setTimeout(()=> o.remove(), 600); }
+    function showBubble(anchorEl, texto, tipo='ok'){
+      const panel = anchorEl.closest('.caos-relative') || document.body;
+      const rect = anchorEl.getBoundingClientRect();
+      const parentRect = panel.getBoundingClientRect();
+      const b = document.createElement('div');
+      b.className = `bubble bubble--${tipo}`;
+      b.setAttribute('role','status'); b.setAttribute('aria-live','polite');
+      b.textContent = texto;
+      b.style.left = (rect.left - parentRect.left + rect.width/2) + 'px';
+      b.style.top  = (rect.top  - parentRect.top) + 'px';
+      panel.appendChild(b);
+      setTimeout(()=> b.remove(), 3200);
+    }
+    function showOnomato(anchorEl, texto='¡POW!', estilo='ok'){
+      const panel = anchorEl.closest('.caos-relative') || document.body;
+      const rect = anchorEl.getBoundingClientRect();
+      const parentRect = panel.getBoundingClientRect();
+      const o = document.createElement('div');
+      o.className = `onomato onomato--${estilo}`;
+      o.textContent = texto;
+      o.style.left = (rect.left - parentRect.left + rect.width/2) + 'px';
+      o.style.top  = (rect.top  - parentRect.top - 30) + 'px';
+      panel.appendChild(o);
+      setTimeout(()=> o.remove(), 600);
+    }
 
     const API_URL = "https://script.google.com/macros/s/AKfycbxZ5pH12xvU9-jnibxM5Uosjk0ntBNt_gONtGuhVM_s4jFE9j8lWJpDLicgG71fcd2B/exec";
     const params = new URLSearchParams(window.location.search);
@@ -212,11 +263,12 @@
     cargarSolicitudes();
   </script>
 
-  <footer style="border: 3px solid black; box-shadow: 4px 4px 0 black; padding: 15px; margin: 40px auto 0; text-align: center; font-size: 0.9em; background: white; max-width: 600px; width: min(100% - 24px, 600px);">
+  <footer>
     © 2025 CAOS. Todos los derechos reservados. <br>
     Sitio desarrollado por Benjamín González.
   </footer>
 
+  <!-- SW global -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
