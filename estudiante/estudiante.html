@@ -19,6 +19,8 @@
   <meta name="apple-mobile-web-app-title" content="CAOS Alumno">
 
   <!-- Fuentes -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Rock+Salt&family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
 
   <style>
@@ -246,7 +248,7 @@
   </div>
 
   <footer>
-    © 2025 CAOS. Todos los derechos reservados. —
+    © 2025 CAOS. Todos los derechos reservados. — 
     Desarrollado por Benjamín González — Ilustraciones: Constanza Cayul.
   </footer>
 
@@ -258,7 +260,7 @@
       });
     }
 
-    /* ===== Utils: Globos y Onomatopeyas (sin cambios funcionales) ===== */
+    /* ===== Utils: Globos y Onomatopeyas ===== */
     function showBubble(anchorEl, texto, tipo='ok'){
       const panel = anchorEl.closest('.panel') || document.querySelector('.panel');
       const rect = anchorEl.getBoundingClientRect();
@@ -284,11 +286,80 @@
       setTimeout(()=> o.remove(), 600);
     }
 
-    /* ===== Config y lógica original (SIN CAMBIOS) ===== */
+    /* ===== Config original ===== */
     const apiURL    = "https://script.google.com/macros/s/AKfycbxmU3eiiTe69ouewbLl4znzk2-ML4U-AfIoiGH2Kkj_4Uz55gv2B9QRH-kdqvDw-Dq5ZQ/exec";
-    const apiCartas = "https://script.google.com/macros/s/AKfycbzp3kpcaQqnf-o6kDB_7Vo5YPNVPRvQXIhVSPFfp5Clt95-zEBFSf7JmeBAD9DgDiA/exec";
+    const apiCartas = "https://script.google.com/macros/s/AKfycbx0Xx3eEiP0uisLfcLjrBxDw2mjJOQ1NTjenqZvlnBqKGqmhU8LZ-K5XiKDSwh5OY4p/exec";
     let alumnoGlobal = "";
 
+    /* ===== NUEVO: Config polling simple para notificaciones locales ===== */
+    // Endpoint sugerido: `${apiCartas}?accion=estado_canje&alumno=...`
+    // Debe devolver algo como: { nuevo: true, mensaje: "✅ Tu canje 'Pinta Mono' fue aprobado", hash: "abc123" }
+    const NOTI_ICON = "/estudiante/icons/icon-alumno-192.png";
+    const ESTADO_API = (alumno)=> `${apiCartas}?accion=estado_canje&alumno=${encodeURIComponent(alumno)}`;
+    const STORAGE_KEY = (alumno)=> `caos:lastCanjeHash:${alumno}`;
+
+    async function pedirPermisoNotificaciones() {
+      if (!("Notification" in window)) return false;
+      if (Notification.permission === "granted") return true;
+      const p = await Notification.requestPermission();
+      return p === "granted";
+    }
+
+    let pollTimer = null;
+    let backoff = 60000; // 60s
+    const BACKOFF_MIN = 30000;
+    const BACKOFF_MAX = 5 * 60 * 1000;
+
+    function startPollingEstado(alumno){
+      stopPollingEstado();
+      const tick = async ()=>{
+        if (document.hidden) return; // solo cuando visible
+        try {
+          const res = await fetch(ESTADO_API(alumno), { cache: "no-store" });
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          const data = await res.json();
+
+          const last = localStorage.getItem(STORAGE_KEY(alumno)) || "";
+          const hash = (data && data.hash) ? String(data.hash) : "";
+
+          if (data && data.nuevo && hash && hash !== last) {
+            // Notificación local (si hay permiso)
+            if ("Notification" in window && Notification.permission === "granted") {
+              new Notification("CAOS - Canje actualizado", {
+                body: data.mensaje || "Tienes novedades de un canje.",
+                icon: NOTI_ICON,
+              });
+            } else {
+              // Fallback visual
+              const panel = document.getElementById("cartasPanel");
+              showOnomato(panel, '¡PING!', 'wow');
+              showBubble(panel, data.mensaje || "Novedades de canje", 'warn');
+            }
+            localStorage.setItem(STORAGE_KEY(alumno), hash);
+          }
+
+          // éxito: baja el backoff gradualmente
+          backoff = Math.max(BACKOFF_MIN, Math.floor(backoff * 0.75));
+        } catch (e) {
+          // error: aumenta el backoff
+          backoff = Math.min(BACKOFF_MAX, Math.floor(backoff * 1.5));
+          console.warn("[CAOS] Error consultando estado de canje:", e?.message || e);
+        } finally {
+          pollTimer = setTimeout(tick, backoff);
+        }
+      };
+      pollTimer = setTimeout(tick, 1000); // primer disparo rápido
+    }
+    function stopPollingEstado(){
+      if (pollTimer) clearTimeout(pollTimer);
+      pollTimer = null;
+    }
+    document.addEventListener("visibilitychange", ()=>{
+      if (document.hidden) return;
+      if (alumnoGlobal) startPollingEstado(alumnoGlobal);
+    });
+
+    /* ===== Lógica de alumno ===== */
     function obtenerAlumnoInicial() {
       const params = new URLSearchParams(location.search);
       const desdeURL = params.get("alumno");
@@ -389,6 +460,9 @@
             showBubble(btn, 'Acceso concedido', 'ok');
             document.getElementById("loginPanel").style.display = "none";
             document.getElementById("cartasPanel").style.display = "block";
+
+            // NUEVO: pedir permiso notificaciones y empezar a consultar estado
+            pedirPermisoNotificaciones().then(()=> startPollingEstado(alumnoGlobal));
             cargarCartas(alumno);
           }
         } else {
@@ -419,6 +493,9 @@
           document.getElementById("modalCambio").style.display = "none";
           document.getElementById("loginPanel").style.display = "none";
           document.getElementById("cartasPanel").style.display = "block";
+
+          // NUEVO: pedir permiso y arrancar polling tras el cambio de clave
+          pedirPermisoNotificaciones().then(()=> startPollingEstado(alumnoGlobal));
           cargarCartas(alumnoGlobal);
         } else {
           showOnomato(document.getElementById('nuevaPass'), '¡BANG!', 'error');
@@ -436,10 +513,10 @@
     async function cargarCartas(alumno) {
       document.getElementById("nombreAlumno").innerText = alumno;
       try {
-        const resCartas = await fetch(`${apiCartas}?alumno=${encodeURIComponent(alumno)}`);
+        const resCartas = await fetch(`${apiCartas}?alumno=${encodeURIComponent(alumno)}`, { cache: "no-store" });
         const dataCartas = await resCartas.json();
 
-        const resImagenes = await fetch(`${apiCartas}?accion=imagenes`);
+        const resImagenes = await fetch(`${apiCartas}?accion=imagenes`, { cache: "force-cache" });
         const dataImagenes = await resImagenes.json();
 
         const conteo = dataCartas.conteo || {};
@@ -464,6 +541,7 @@
           const img = new Image();
           img.alt = nombre;
           img.loading = "lazy";
+          img.decoding = "async";
           img.src = carta?.["URL Pública"] || "https://i.imgur.com/U3F4gA1.png";
           img.onerror = () => img.src = "https://i.imgur.com/U3F4gA1.png";
 
@@ -484,7 +562,7 @@
             if (!ok) return;
             const url = `${apiCartas}?accion=solicitar_canje&alumno=${encodeURIComponent(alumno)}&carta=${encodeURIComponent(nombre)}`;
             try {
-              const res = await fetch(url);
+              const res = await fetch(url, { method: "GET", keepalive: true });
               const texto = await res.text();
               showOnomato(boton, '¡POW!', 'ok');
               showBubble(boton, 'Solicitud enviada al profesor', 'ok');
