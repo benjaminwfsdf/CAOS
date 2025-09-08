@@ -1,5 +1,5 @@
 // /service-worker.js — ámbito raíz
-const VERSION = 'v2.1.4';
+const VERSION = 'v2.1.7';
 const STATIC_CACHE = `static-${VERSION}`;
 const RUNTIME_CACHE = `runtime-${VERSION}`;
 
