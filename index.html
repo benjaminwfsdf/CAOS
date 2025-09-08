@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <meta name="format-detection" content="telephone=no, date=no, address=no, email=no, url=no">
+  <title>CAOS - Estética Panel</title>
+
+  <!-- Fuentes -->
   <link href="https://fonts.googleapis.com/css2?family=Rock+Salt&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
 
   <!-- PWA -->
@@ -11,85 +19,133 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CAOS">
 
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <!-- Evita azul automático de iOS -->
-  <meta name="format-detection" content="telephone=no, date=no, address=no, email=no, url=no">
-
-  <title>CAOS - Estética Panel</title>
+  <!-- Tus estilos base (si los usas en otros módulos) -->
   <link rel="stylesheet" href="style-caos.css">
-  <link rel="stylesheet" href="style-caos-legible.css"><!-- NUEVO -->
+  <link rel="stylesheet" href="style-caos-legible.css">
 
   <style>
-    /* ====== Base existente ====== */
-    body {
-      background-color: #fff;
-      color: #000;
-      font-family: 'Rock Salt', cursive;
-      margin: 20px;
-      background-image: repeating-linear-gradient(45deg, #000 0px, #000 1px, transparent 1px, transparent 6px);
-      background-size: 100% 100%;
-      padding-bottom: env(safe-area-inset-bottom);
+    :root{
+      --ink:#000;
+      --paper:#fff;
+      --shadow:8px 8px 0 var(--ink);
+      --radius:18px;
+      --pad:16px;
     }
-    .panel { background-color: white; border: 3px solid black; padding: 20px; box-shadow: 8px 8px 0 black; max-width: 800px; margin: 0 auto; }
-    .titulo { font-size: 40px; font-weight: bold; text-align: center; border: 3px dashed black; padding: 15px; background-color: white; clip-path: polygon(0 0, 90% 0, 100% 10%, 100% 90%, 90% 100%, 0 100%); margin-bottom: 5px; }
-    .subtitulo { text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px; }
-    .bloque { border: 2px solid black; box-shadow: 5px 5px 0 black; padding: 15px; background-color: white; margin-bottom: 20px; }
-    label, select, button, input { font-family: inherit; font-size: 16px; }
-    select, button, input[type="text"] { border: 2px solid black; background: white; padding: 8px; margin-right: 5px; box-shadow: 3px 3px 0 black; }
-    .fila { display: flex; justify-content: space-between; align-items: center; margin: 10px 0; flex-wrap: wrap; gap: 10px; }
-    .autorizar { margin-top: 20px; display: block; width: 100%; font-size: 16px; padding: 12px; background: white; border: 3px solid black; box-shadow: 4px 4px 0 black; text-transform: uppercase; text-align: center; text-decoration: none; color: black; font-family: 'Rock Salt', cursive; }
-    small.muted { color:#333; opacity:.8; font-family: Arial, sans-serif; }
-
-    footer { }
-
-    /* ====== Accesibilidad/tacto ====== */
-    button, .autorizar, select, input[type="text"]{
-      min-height: 44px;
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      padding:env(safe-area-inset-top) 12px calc(16px + env(safe-area-inset-bottom)) 12px;
+      background:var(--paper);
+      color:var(--ink);
+      background-image:repeating-linear-gradient(45deg,var(--ink) 0px,var(--ink) 1px,transparent 1px,transparent 6px);
+      background-attachment:fixed;
+      font-family:'Rock Salt',cursive;
+      -webkit-tap-highlight-color:transparent;
     }
+
+    /* Shell tipo app */
+    .panel{
+      max-width:900px; margin:14px auto;
+      background:var(--paper);
+      border:3px solid var(--ink);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:var(--pad);
+      position:relative; /* globos */
+    }
+    .titulo{
+      font-size:clamp(24px,7vw,36px);
+      font-weight:700;
+      text-align:center;
+      border:3px dashed var(--ink);
+      border-radius:14px;
+      padding:12px;
+      margin:0 0 6px 0;
+      background:var(--paper);
+      clip-path: polygon(0 0, 90% 0, 100% 10%, 100% 90%, 90% 100%, 0 100%);
+    }
+    .subtitulo{
+      text-align:center;
+      font-size:clamp(14px,3.8vw,18px);
+      font-weight:700;
+      margin:2px 0 12px 0;
+      letter-spacing:.5px;
+    }
+
+    .bloque{
+      border:2px solid var(--ink);
+      border-radius:14px;
+      box-shadow:5px 5px 0 var(--ink);
+      padding:14px;
+      background:var(--paper);
+      margin-bottom:14px;
+    }
+
+    /* Fila adaptable */
+    .fila{
+      display:flex; flex-wrap:wrap; gap:12px; align-items:center;
+      margin:10px 0;
+    }
+    .fila > label, .fila > a, .fila > button, .fila > input, .fila > span{
+      flex:1 1 100%;
+    }
+
+    /* Controles táctiles */
+    label, select, button, input{ font-family:inherit; font-size:16px }
+    select, button, input[type="text"]{
+      width:100%;
+      min-height:48px;
+      border:2px solid var(--ink);
+      border-radius:12px;
+      background:var(--paper);
+      padding:12px 14px;
+      box-shadow:3px 3px 0 var(--ink);
+      color:var(--ink);
+    }
+    input#buscarAlumno{ font-family:'Comic Neue', cursive; }
+
+    /* Botones de acción tipo “llamada” */
+    .autorizar{
+      display:block; width:100%;
+      text-align:center; text-decoration:none; text-transform:uppercase;
+      border:3px solid var(--ink); border-radius:14px;
+      box-shadow:4px 4px 0 var(--ink);
+      background:var(--paper); color:var(--ink);
+      font-family:'Rock Salt', cursive;
+      font-weight:700; letter-spacing:1px;
+      padding:14px; min-height:48px; font-size:16px;
+      margin-top:10px;
+    }
+
+    /* Etiquetas pequeñas legibles */
+    small.muted{
+      color:#222; opacity:.85; font-family:Arial, sans-serif;
+      display:block; margin-top:6px;
+    }
+
+    /* Layout sensible */
+    @media (min-width:720px){
+      .fila--dos > *{ flex:1 1 calc(50% - 12px) }
+    }
+
+    /* Footer */
+    footer{
+      max-width:700px; margin:10px auto 18px; padding:12px;
+      background:var(--paper);
+      border:3px solid var(--ink); border-radius:14px;
+      box-shadow:4px 4px 0 var(--ink);
+      text-align:center; font:700 12px/1.3 Arial, sans-serif;
+    }
+
+    /* Accesibilidad */
     button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible{
-      outline: 3px dashed #000; outline-offset: 2px;
+      outline:3px dashed var(--ink); outline-offset:2px;
     }
+    html, body{max-width:100%; overflow-x:hidden}
 
-    /* ====== Ajustes responsive ====== */
-    @media (max-width: 900px){
-      .panel{ max-width: 720px; }
-    }
-    @media (max-width: 768px){
-      body{ margin: 12px; }
-      .panel{ padding: 14px; box-shadow: 6px 6px 0 black; }
-      .titulo{ font-size: clamp(24px, 6vw, 36px); padding: 12px; }
-      .subtitulo{ font-size: clamp(14px, 3.8vw, 18px); }
-      .bloque{ padding: 12px; box-shadow: 4px 4px 0 black; }
-      .fila{ gap: 12px; }
-
-      .fila > label, 
-      .fila > a,
-      .fila > button,
-      .fila > input,
-      .fila > span {
-        flex: 1 1 100%;
-      }
-      #cursoSelect, #alumnoSelect, #buscarAlumno{
-        width: 100%;
-        margin-right: 0;
-      }
-      #btnEditarEstudiantes, #btnEditarCursosCargo{
-        width: 100%;
-      }
-      .autorizar{ font-size: 15px; padding: 14px; }
-    }
-
-    @media (max-width: 420px){
-      .panel{ padding: 12px; }
-      .titulo{ font-size: clamp(22px, 7.5vw, 30px); }
-      .subtitulo{ font-size: 14px; }
-    }
-
-    html, body{ max-width:100%; overflow-x:hidden; }
-
-    /* ====== Globos de diálogo (cómic) ====== */
-    .caos-relative { position: relative; }
+    /* Globos (igual que los tuyos) */
+    .caos-relative{position:relative}
     .bubble{
       position:absolute; z-index:999; max-width:320px; background:#fff; color:#000;
       border:3px solid #000; box-shadow:6px 6px 0 #000; padding:12px 14px; font-weight:700; line-height:1.2;
@@ -101,38 +157,35 @@
       width:24px; height:24px; background:#fff; border-left:3px solid #000; border-bottom:3px solid #000;
       box-shadow:6px 6px 0 #000; clip-path:polygon(0 0,100% 0,100% 100%);
     }
-    
-    .bubble--ok{ border-color:#09b37a; box-shadow:6px 6px 0 #09b37a; }
-    .bubble--warn{ border-color:#f59e0b; box-shadow:6px 6px 0 #f59e0b; }
-    .bubble--error{ border-color:#e02424; box-shadow:6px 6px 0 #e02424; }
-    @keyframes bubble-in{ to{ opacity:1; transform:translate(-50%,-110%) scale(1);} }
-    @keyframes bubble-out{ to{ opacity:0; transform:translate(-50%,-130%) scale(0.96);} }
+    .bubble--ok{ border-color:#09b37a; box-shadow:6px 6px 0 #09b37a }
+    .bubble--warn{ border-color:#f59e0b; box-shadow:6px 6px 0 #f59e0b }
+    .bubble--error{ border-color:#e02424; box-shadow:6px 6px 0 #e02424 }
+    @keyframes bubble-in{ to{ opacity:1; transform:translate(-50%,-110%) scale(1)} }
+    @keyframes bubble-out{ to{ opacity:0; transform:translate(-50%,-130%) scale(0.96)} }
 
-    /* ====== Onomatopeyas ====== */
     .onomato{
       position:absolute; z-index:998; font-weight:900; letter-spacing:2px; font-size:28px; color:#33e6a4;
       -webkit-text-stroke:2px #000; text-shadow:6px 6px 0 #09b37a;
       transform:translate(-50%,-50%) scale(0.6) rotate(-6deg); opacity:0; pointer-events:none;
       animation:ono-pop 520ms ease-out forwards;
     }
-    .onomato--ok{ color:#33e6a4; text-shadow:6px 6px 0 #09b37a; }
-    .onomato--error{ color:#ff6b6b; text-shadow:6px 6px 0 #e02424; }
-    .onomato--wow{ color:#ffd45a; text-shadow:6px 6px 0 #f59e0b; }
+    .onomato--error{ color:#ff6b6b; text-shadow:6px 6px 0 #e02424 }
+    .onomato--wow{ color:#ffd45a; text-shadow:6px 6px 0 #f59e0b }
     @keyframes ono-pop{
-      20%{ opacity:1; transform:translate(-50%,-50%) scale(1.1) rotate(2deg); }
-      60%{ transform:translate(-50%,-54%) scale(1) rotate(-2deg); }
-      100%{ opacity:0; transform:translate(-50%,-60%) scale(0.9) rotate(0deg); }
+      20%{ opacity:1; transform:translate(-50%,-50%) scale(1.1) rotate(2deg) }
+      60%{ transform:translate(-50%,-54%) scale(1) rotate(-2deg) }
+      100%{ opacity:0; transform:translate(-50%,-60%) scale(0.9) rotate(0deg) }
     }
-    
   </style>
 </head>
 <body>
-  <div class="panel caos-relative">
-    <div class="titulo">CAOS</div>
+  <main class="panel caos-relative">
+    <h1 class="titulo">CAOS</h1>
     <p class="subtitulo">(CARTAS ANTI ORDEN EN LA SALA)</p>
 
-    <div class="bloque">
-      <div class="fila">
+    <!-- Bloque cursos -->
+    <section class="bloque">
+      <div class="fila fila--dos">
         <label>Curso:
           <select id="cursoSelect">
             <option>Selecciona un curso</option>
@@ -142,43 +195,49 @@
         <button id="btnEditarCursosCargo">✏️ Editar cursos a cargo</button>
       </div>
       <small class="muted" id="statusCursos"></small>
-    </div>
+    </section>
 
-    <div class="bloque">
-      <div class="fila" style="gap:8px;">
-        <label style="flex:1 1 220px">Alumno:
-          <select id="alumnoSelect" style="min-width:220px;"><option>Selecciona un estudiante</option></select>
+    <!-- Bloque alumnos -->
+    <section class="bloque">
+      <div class="fila fila--dos">
+        <label style="flex:1 1 260px">Alumno:
+          <select id="alumnoSelect" style="min-width:220px;">
+            <option>Selecciona un estudiante</option>
+          </select>
         </label>
-        <input id="buscarAlumno" type="text" placeholder="Buscar alumno…" style="flex:1 1 180px;">
+        <input id="buscarAlumno" type="text" inputmode="search" placeholder="Buscar alumno…">
       </div>
 
       <div class="fila">
-        <span>////////////////</span>
-        <a id="btnAleatoria" href="#"><button id="btnAleatoriaInner" disabled>Asignar carta aleatoria</button></a>
+        <span aria-hidden="true">////////////////</span>
+        <a id="btnAleatoria" href="#">
+          <button id="btnAleatoriaInner" disabled>Asignar carta aleatoria</button>
+        </a>
       </div>
       <div class="fila">
-        <span>////////////////</span>
-        <a id="btnEspecifica" href="#"><button id="btnEspecificaInner" disabled>Asignar carta específica</button></a>
+        <span aria-hidden="true">////////////////</span>
+        <a id="btnEspecifica" href="#">
+          <button id="btnEspecificaInner" disabled>Asignar carta específica</button>
+        </a>
       </div>
       <small class="muted" id="statusAlumnos"></small>
-    </div>
+    </section>
 
     <a id="btnAutorizar" href="#" class="autorizar">Autorizar uso</a>
 
-    <div style="text-align: center; margin-top: 20px;">
-      <button id="btnCierreAno" class="autorizar" style="max-width: 300px; margin: 0 auto;">
-         Cierre de Año Escolar
+    <div style="text-align:center; margin-top:12px">
+      <button id="btnCierreAno" class="autorizar" style="max-width:320px; margin:0 auto;">
+        Cierre de Año Escolar
       </button>
     </div>
-  </div>
+  </main>
 
-  <footer style="border: 3px solid black; box-shadow: 4px 4px 0 black; padding: 15px; margin-top: 40px; text-align: center; font-size: 0.9em; background: white; max-width: 600px; margin-left: auto; margin-right: auto; width: min(100% - 24px, 600px);">
-    © 2025 CAOS. Todos los derechos reservados. <br>
-    Sitio desarrollado por Benjamín González.
+  <footer>
+    © 2025 CAOS. Todos los derechos reservados. — Sitio desarrollado por Benjamín González.
   </footer>
 
   <script>
-    // === Utilidades: globos y onomatopeyas ===
+    // === Globos / onomatopeyas (igual que tenías) ===
     function showBubble(anchorEl, texto, tipo='ok'){
       const panel = anchorEl.closest('.caos-relative') || document.body;
       const rect = anchorEl.getBoundingClientRect();
@@ -205,12 +264,12 @@
       setTimeout(()=> o.remove(), 600);
     }
 
-    // === Parámetros y rutas ===
+    // === Parámetros / rutas (sin cambios) ===
     const usuario = new URLSearchParams(window.location.search).get("usuario");
     if (!usuario) { window.location.href = "login.html"; }
     const apiUrl = "https://script.google.com/macros/s/AKfycbwkdGN5y_wtAQTfxhzQmkpazwdfx_RrYAOwJtm3S4RdFCqnROdrKVMygzhd1ai_lTifRQ/exec";
 
-    // === UI refs ===
+    // === Refs ===
     const cursoSelect = document.getElementById('cursoSelect');
     const alumnoSelect = document.getElementById('alumnoSelect');
     const buscarAlumno = document.getElementById('buscarAlumno');
@@ -225,240 +284,163 @@
     const statusCursos = document.getElementById('statusCursos');
     const statusAlumnos = document.getElementById('statusAlumnos');
 
-    // === Navegación fija ===
+    // Navegación fija (igual)
     btnAutorizar.href = `panel_profesor/validar_canje_CAOS.html?usuario=${encodeURIComponent(usuario)}`;
     btnEditarEstudiantes.onclick = () => location.href = `panel_profesor/cargar_excel_estudiantes.html?usuario=${encodeURIComponent(usuario)}`;
     btnEditarCursosCargo.onclick = () => location.href = `panel_profesor/editar_cursos.html?usuario=${encodeURIComponent(usuario)}`;
     btnCierreAno.onclick = () => location.href = `panel_profesor/cierre_ano_escolar.html?usuario=${encodeURIComponent(usuario)}`;
 
-    // === Caché local (5 min) ===
+    // Caché local (5 min)
     const TTL = 5 * 60 * 1000;
     const now = () => Date.now();
-
-    function getCache(key) {
-      try {
-        const raw = localStorage.getItem(key);
-        if (!raw) return null;
-        const obj = JSON.parse(raw);
-        if (!obj || !obj.ts || !obj.data) return null;
-        if ((now() - obj.ts) > TTL) return null;
-        return obj.data;
-      } catch { return null; }
+    function getCache(key){
+      try{ const raw = localStorage.getItem(key); if(!raw) return null;
+        const o = JSON.parse(raw); if(!o || !o.ts || !o.data) return null;
+        if((now()-o.ts)>TTL) return null; return o.data;
+      }catch{ return null }
     }
-    function setCache(key, data) {
-      try { localStorage.setItem(key, JSON.stringify({ ts: now(), data })); } catch {}
-    }
+    function setCache(key,data){ try{ localStorage.setItem(key, JSON.stringify({ts:now(), data})) }catch{} }
 
-    // === AbortControllers para evitar “colisiones” ===
-    let cursosCtrl = null;
-    let alumnosCtrl = null;
+    let cursosCtrl=null, alumnosCtrl=null;
 
-    // === Carga de cursos con SWR (stale-while-revalidate) ===
-    async function cargarCursos() {
-      const cacheKey = `cursos:${usuario}`;
-      const cached = getCache(cacheKey);
-      if (cached && Array.isArray(cached)) {
-        pintarCursos(cached);
-        statusCursos.textContent = "Cursos (caché, actualizando…)";
-        fetchCursos(true);
-      } else {
-        statusCursos.textContent = "Cargando cursos…";
-        await fetchCursos(false);
+    // Cursos con SWR
+    async function cargarCursos(){
+      const cacheKey=`cursos:${usuario}`;
+      const cached=getCache(cacheKey);
+      if(cached && Array.isArray(cached)){
+        pintarCursos(cached); statusCursos.textContent="Cursos (caché, actualizando…)"; fetchCursos(true);
+      }else{
+        statusCursos.textContent="Cargando cursos…"; await fetchCursos(false);
       }
-
-      async function fetchCursos(background) {
-        if (cursosCtrl) cursosCtrl.abort();
-        cursosCtrl = new AbortController();
-        try {
-          const r = await fetch(`${apiUrl}?accion=obtener_cursos_profesor&usuario=${encodeURIComponent(usuario)}`, { signal: cursosCtrl.signal });
-          const data = await r.json();
-          if (data.ok) {
-            setCache(cacheKey, data.cursos || []);
-            pintarCursos(data.cursos || []);
-            statusCursos.textContent = background ? "Cursos actualizados." : "Cursos listos.";
-            if (!background) {
-              showOnomato(cursoSelect, '¡POW!', 'ok');
-              showBubble(cursoSelect, '✅ Cursos cargados', 'ok');
-            }
-          } else {
-            if (!background) {
-              statusCursos.textContent = "Error al cargar cursos.";
-              showOnomato(cursoSelect, '¡BANG!', 'error');
-              showBubble(cursoSelect, '❌ Error al cargar cursos', 'error');
-            }
+      async function fetchCursos(background){
+        if(cursosCtrl) cursosCtrl.abort();
+        cursosCtrl=new AbortController();
+        try{
+          const r=await fetch(`${apiUrl}?accion=obtener_cursos_profesor&usuario=${encodeURIComponent(usuario)}`,{signal:cursosCtrl.signal});
+          const data=await r.json();
+          if(data.ok){
+            setCache(cacheKey,data.cursos||[]);
+            pintarCursos(data.cursos||[]);
+            statusCursos.textContent=background?"Cursos actualizados.":"Cursos listos.";
+            if(!background){ showOnomato(cursoSelect,'¡POW!','ok'); showBubble(cursoSelect,'✅ Cursos cargados','ok'); }
+          }else if(!background){
+            statusCursos.textContent="Error al cargar cursos."; showOnomato(cursoSelect,'¡BANG!','error'); showBubble(cursoSelect,'❌ Error al cargar cursos','error');
           }
-        } catch (err) {
-          if (!background) {
-            statusCursos.textContent = "Error de red al cargar cursos.";
-            showOnomato(cursoSelect, '¡BANG!', 'error');
-            showBubble(cursoSelect, '❌ Error de red', 'error');
-          }
+        }catch(e){
+          if(!background){ statusCursos.textContent="Error de red al cargar cursos."; showOnomato(cursoSelect,'¡BANG!','error'); showBubble(cursoSelect,'❌ Error de red','error'); }
         }
       }
     }
-
-    function pintarCursos(cursos) {
-      cursoSelect.innerHTML = '<option>Selecciona un curso</option>';
-
-      const sufijos = ["ro", "do", "ro", "to", "to", "to", "mo", "vo"];
-      const medios = ["1ro", "2do", "3ro", "4to"];
-
-      (cursos || []).forEach(rawCurso => {
-        let cursoMostrado = "";
-        const match = rawCurso.match(/^(\d+)(?:º|\s)?\s?(Básico|Medio)\s([ABC])$/);
-        if (match) {
-          const grado = parseInt(match[1]);
-          const nivel = match[2];
-          const letra = match[3];
-          if (nivel === "Básico") cursoMostrado = `${grado}${sufijos[grado - 1]} Básico ${letra}`;
-          else cursoMostrado = `${medios[grado - 1]} Medio ${letra}`;
-        } else {
-          cursoMostrado = rawCurso;
-        }
-        const option = document.createElement('option');
-        option.textContent = cursoMostrado;
-        option.value = rawCurso;
-        cursoSelect.appendChild(option);
+    function pintarCursos(cursos){
+      cursoSelect.innerHTML='<option>Selecciona un curso</option>';
+      const sufijos=["ro","do","ro","to","to","to","mo","vo"];
+      const medios=["1ro","2do","3ro","4to"];
+      (cursos||[]).forEach(raw=>{
+        let label="";
+        const m=raw.match(/^(\d+)(?:º|\s)?\s?(Básico|Medio)\s([ABC])$/);
+        if(m){
+          const grado=parseInt(m[1]); const nivel=m[2]; const letra=m[3];
+          label = nivel==="Básico" ? `${grado}${sufijos[grado-1]} Básico ${letra}` : `${medios[grado-1]} Medio ${letra}`;
+        }else{ label=raw; }
+        const opt=document.createElement('option'); opt.value=raw; opt.textContent=label; cursoSelect.appendChild(opt);
       });
     }
 
-    // === Carga de alumnos con SWR + búsqueda local ===
-    async function cargarAlumnos(curso) {
-      const cacheKey = `alumnos:${curso}`;
-      const cached = getCache(cacheKey);
-      if (cached && Array.isArray(cached)) {
-        pintarAlumnos(cached);
-        statusAlumnos.textContent = "Alumnos (caché, actualizando…)";
-        fetchAlumnos(curso, true);
-      } else {
-        statusAlumnos.textContent = "Cargando alumnos…";
-        await fetchAlumnos(curso, false);
+    // Alumnos + búsqueda local
+    async function cargarAlumnos(curso){
+      const cacheKey=`alumnos:${curso}`;
+      const cached=getCache(cacheKey);
+      if(cached && Array.isArray(cached)){
+        pintarAlumnos(cached); statusAlumnos.textContent="Alumnos (caché, actualizando…)"; fetchAlumnos(curso,true);
+      }else{
+        statusAlumnos.textContent="Cargando alumnos…"; await fetchAlumnos(curso,false);
       }
-
-      async function fetchAlumnos(curso, background) {
-        if (alumnosCtrl) alumnosCtrl.abort();
-        alumnosCtrl = new AbortController();
-        try {
-          const url = `${apiUrl}?accion=obtener_estudiantes&curso=${encodeURIComponent(curso)}`;
-          const r = await fetch(url, { signal: alumnosCtrl.signal });
-          const data = await r.json();
-          if (data.ok && Array.isArray(data.estudiantes)) {
-            setCache(cacheKey, data.estudiantes);
-            if (!buscarAlumno.value.trim()) {
-              pintarAlumnos(data.estudiantes);
-            }
-            statusAlumnos.textContent = background ? "Alumnos actualizados." : "Alumnos listos.";
-            if (!background) {
-              showOnomato(alumnoSelect, '¡POW!', 'ok');
-              showBubble(alumnoSelect, '✅ Alumnos cargados', 'ok');
-            }
-          } else {
-            if (!background) {
-              statusAlumnos.textContent = "Error al cargar estudiantes.";
-              showOnomato(alumnoSelect, '¡BANG!', 'error');
-              showBubble(alumnoSelect, '❌ Error al cargar estudiantes', 'error');
-            }
+      async function fetchAlumnos(curso,background){
+        if(alumnosCtrl) alumnosCtrl.abort();
+        alumnosCtrl=new AbortController();
+        try{
+          const r=await fetch(`${apiUrl}?accion=obtener_estudiantes&curso=${encodeURIComponent(curso)}`,{signal:alumnosCtrl.signal});
+          const data=await r.json();
+          if(data.ok && Array.isArray(data.estudiantes)){
+            setCache(cacheKey,data.estudiantes);
+            if(!buscarAlumno.value.trim()) pintarAlumnos(data.estudiantes);
+            statusAlumnos.textContent=background?"Alumnos actualizados.":"Alumnos listos.";
+            if(!background){ showOnomato(alumnoSelect,'¡POW!','ok'); showBubble(alumnoSelect,'✅ Alumnos cargados','ok'); }
+          }else if(!background){
+            statusAlumnos.textContent="Error al cargar estudiantes."; showOnomato(alumnoSelect,'¡BANG!','error'); showBubble(alumnoSelect,'❌ Error al cargar estudiantes','error');
           }
-        } catch (_) {
-          if (!background) {
-            statusAlumnos.textContent = "Error de red al cargar estudiantes.";
-            showOnomato(alumnoSelect, '¡BANG!', 'error');
-            showBubble(alumnoSelect, '❌ Error de red', 'error');
-          }
+        }catch(e){
+          if(!background){ statusAlumnos.textContent="Error de red al cargar estudiantes."; showOnomato(alumnoSelect,'¡BANG!','error'); showBubble(alumnoSelect,'❌ Error de red','error'); }
         }
       }
     }
-
-    function pintarAlumnos(lista) {
-      const alumnoSelPrev = alumnoSelect.value;
-      alumnoSelect.innerHTML = '<option>Selecciona un estudiante</option>';
-      (lista || []).forEach(nombre => {
-        const option = document.createElement('option');
-        option.textContent = nombre;
-        alumnoSelect.appendChild(option);
-      });
-      if (alumnoSelPrev) alumnoSelect.value = alumnoSelPrev;
+    function pintarAlumnos(lista){
+      const prev=alumnoSelect.value;
+      alumnoSelect.innerHTML='<option>Selecciona un estudiante</option>';
+      (lista||[]).forEach(n=>{ const o=document.createElement('option'); o.textContent=n; alumnoSelect.appendChild(o); });
+      if(prev) alumnoSelect.value=prev;
       setRepartoHabilitado(false);
     }
 
-    function setRepartoHabilitado(on) {
-      btnAleatoriaInner.disabled = !on;
-      btnEspecificaInner.disabled = !on;
-      if (!on) {
-        btnAleatoria.href = '#';
-        btnEspecifica.href = '#';
-      }
+    function setRepartoHabilitado(on){
+      btnAleatoriaInner.disabled=!on; btnEspecificaInner.disabled=!on;
+      if(!on){ btnAleatoria.href='#'; btnEspecifica.href='#'; }
     }
 
-    // === Eventos ===
-    document.addEventListener('DOMContentLoaded', async () => {
+    // Eventos
+    document.addEventListener('DOMContentLoaded', async ()=>{
       await cargarCursos();
 
-      cursoSelect.addEventListener('change', () => {
-        const curso = cursoSelect.value;
+      cursoSelect.addEventListener('change', ()=>{
+        const curso=cursoSelect.value;
         localStorage.setItem("cursoSeleccionado", curso);
-        buscarAlumno.value = "";
-        cargarAlumnos(curso);
+        buscarAlumno.value=""; cargarAlumnos(curso);
       });
 
-      // Filtro local sobre lo ya cargado
-      buscarAlumno.addEventListener('input', () => {
-        const curso = cursoSelect.value;
-        const cacheKey = `alumnos:${curso}`;
-        const lista = getCache(cacheKey) || [];
-        const q = buscarAlumno.value.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        const filtrados = !q
-          ? lista
-          : lista.filter(n => {
-              const f = n.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-              return q.split(/\s+/).every(tok => f.includes(tok));
-            });
+      buscarAlumno.addEventListener('input', ()=>{
+        const curso=cursoSelect.value;
+        const lista=getCache(`alumnos:${curso}`)||[];
+        const q=buscarAlumno.value.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+        const filtrados=!q?lista:lista.filter(n=>{
+          const f=n.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+          return q.split(/\s+/).every(tok=>f.includes(tok));
+        });
         pintarAlumnos(filtrados);
       });
 
-      alumnoSelect.addEventListener('change', () => {
-        const alumno = alumnoSelect.value;
-        if (alumno && alumno !== 'Selecciona un estudiante') {
-          const encoded = encodeURIComponent(alumno);
+      alumnoSelect.addEventListener('change', ()=>{
+        const alumno=alumnoSelect.value;
+        if(alumno && alumno!=='Selecciona un estudiante'){
+          const encoded=encodeURIComponent(alumno);
           setRepartoHabilitado(true);
-          btnAleatoria.href = `panel_profesor/reparto_carta_aleatoria.html?alumno=${encoded}&usuario=${encodeURIComponent(usuario)}`;
-          btnEspecifica.href = `panel_profesor/reparto_carta_especifica.html?alumno=${encoded}&usuario=${encodeURIComponent(usuario)}`;
-
-          // feedback visual
-          showOnomato(alumnoSelect, '¡POW!', 'ok');
-          showBubble(alumnoSelect, `🎓 ${alumno} seleccionado. Acciones habilitadas.`, 'ok');
-        } else {
+          btnAleatoria.href=`panel_profesor/reparto_carta_aleatoria.html?alumno=${encoded}&usuario=${encodeURIComponent(usuario)}`;
+          btnEspecifica.href=`panel_profesor/reparto_carta_especifica.html?alumno=${encoded}&usuario=${encodeURIComponent(usuario)}`;
+          showOnomato(alumnoSelect,'¡POW!','ok'); showBubble(alumnoSelect,`🎓 ${alumno} seleccionado. Acciones habilitadas.`,'ok');
+        }else{
           setRepartoHabilitado(false);
         }
       });
 
-      // Aviso si intentan usar botones deshabilitados
       function warnIfDisabled(e, innerBtn){
-        if (innerBtn.disabled) {
+        if(innerBtn.disabled){
           e.preventDefault();
-          showOnomato(innerBtn, '¡HEY!', 'error');
-          showBubble(innerBtn, 'Selecciona un estudiante primero.', 'warn');
+          showOnomato(innerBtn,'¡HEY!','error');
+          showBubble(innerBtn,'Selecciona un estudiante primero.','warn');
         }
       }
-      btnAleatoria.addEventListener('click', (e)=> warnIfDisabled(e, btnAleatoriaInner));
-      btnEspecifica.addEventListener('click', (e)=> warnIfDisabled(e, btnEspecificaInner));
+      btnAleatoria.addEventListener('click', (e)=>warnIfDisabled(e,btnAleatoriaInner));
+      btnEspecifica.addEventListener('click', (e)=>warnIfDisabled(e,btnEspecificaInner));
 
-      // Restaura último curso usado (si existe en lista)
       const ultimo = localStorage.getItem("cursoSeleccionado");
-      if (ultimo) {
-        cursoSelect.value = ultimo;
-        if (cursoSelect.value === ultimo) {
-          cargarAlumnos(ultimo);
-        }
-      }
+      if(ultimo){ cursoSelect.value=ultimo; if(cursoSelect.value===ultimo) cargarAlumnos(ultimo); }
     });
   </script>
 
-  <!-- SW global -->
+  <!-- SW -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js');
+        navigator.serviceWorker.register('/service-worker.js?v=ui3');
       });
     }
   </script>

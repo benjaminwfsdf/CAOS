@@ -2,14 +2,17 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"
+  />
   <title>CAOS - Mis Cartas</title>
 
   <!-- PWA (ALUMNO) -->
   <link rel="manifest" href="/estudiante/manifest.json">
   <meta name="theme-color" content="#0b0b0c">
 
-  <!-- iOS / ícono y nombre específicos del alumno -->
+  <!-- iOS / ícono y nombre del alumno -->
   <link rel="apple-touch-icon" href="/estudiante/icons/icon-alumno-192.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -19,97 +22,243 @@
   <link href="https://fonts.googleapis.com/css2?family=Rock+Salt&family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
 
   <style>
-    body{font-family:'Rock Salt',cursive;font-weight:700;text-shadow:0 0 1px #000;background:#fff;margin:20px;padding-bottom: env(safe-area-inset-bottom);}
-    .panel{background:#fff;border:3px solid #000;padding:20px;box-shadow:8px 8px 0 #000;max-width:900px;margin:0 auto;position:relative;width:min(100% - 24px, 900px);}
-    .titulo{font-size:40px;font-weight:700;text-align:center;border:3px dashed #000;padding:10px;background:#fff;margin-bottom:10px}
-    .subtitulo{font-size:25px;font-weight:700;text-align:center;margin-bottom:20px}
-    .carta{border:2px solid #000;padding:15px;margin-bottom:25px;display:flex;align-items:flex-start;justify-content:space-between;box-shadow:4px 4px 0 #000;background:#fff;flex-wrap:wrap}
-    .carta img{width:200px;height:auto;margin-right:40px}
-    .carta-info{font-family:Arial, sans-serif;flex:1;font-size:18px}
-    .cantidad{font-weight:700;font-size:30px;margin-top:5px}
-    .boton-canje{padding:10px 16px;background:#fff;border:2px solid #000;box-shadow:3px 3px 0 #000;font-family:Arial, Helvetica, sans-serif;font-weight:700;font-size:25px;color:#000;cursor:pointer;margin-left:auto;align-self:flex-end; min-height:44px;}
-    .boton-canje:disabled{background:#eee;color:#aaa;cursor:not-allowed}
-    .descripcion{display:none;font-family:Arial, sans-serif;font-size:30px;line-height:1.4;margin-top:10px;color:#000;width:100%}
-    footer{border:3px solid #000;box-shadow:4px 4px 0 #000;padding:15px;margin-top:40px;text-align:center;font-size:.9em;background:#fff;max-width:600px;margin-left:auto;margin-right:auto;width:min(100% - 24px, 600px)}
-    .textin{padding:12px;font-size:18px;border:2px solid #000;box-sizing:border-box;width:100%; min-height:44px;}
-    .btn{padding:12px;font-size:18px;border:2px solid #000;box-shadow:3px 3px 0 #000;background:#fff;cursor:pointer; min-height:44px;}
+    :root{
+      --ink:#000;
+      --paper:#fff;
+      --shadow:8px 8px 0 var(--ink);
+      --radius:18px;
+      --gap:12px;
+      --pad:14px;
+      --fz-title:clamp(22px,5.6vw,32px);
+      --fz-sub:clamp(16px,4.2vw,22px);
+      --fz-body:clamp(14px,3.8vw,18px);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      padding:env(safe-area-inset-top) env(safe-area-inset-right) calc(16px + env(safe-area-inset-bottom)) env(safe-area-inset-left);
+      background:var(--paper);
+      color:var(--ink);
+      -webkit-tap-highlight-color:transparent;
+      font-family:'Rock Salt',cursive;
+      font-weight:700;
+      text-shadow:0 0 1px var(--ink);
+    }
+
+    /* Shell tipo app */
+    .app{
+      max-width:900px;margin:0 auto;
+      display:grid; gap:var(--gap);
+      padding:12px;
+    }
+    .panel{
+      background:var(--paper);
+      border:3px solid var(--ink);
+      border-radius:var(--radius);
+      padding:var(--pad);
+      box-shadow:var(--shadow);
+      position:relative; /* para globos */
+    }
+
+    /* Encabezados */
+    .titulo{
+      font-size:var(--fz-title);
+      text-align:center;
+      border:3px dashed var(--ink);
+      border-radius:14px;
+      padding:10px 12px;
+      margin:0 0 6px 0;
+      background:var(--paper);
+    }
+    .subtitulo{
+      font-size:var(--fz-sub);
+      text-align:center;
+      margin:4px 0 14px 0;
+    }
+
+    /* Inputs / botones táctiles */
+    .textin,.btn{
+      width:100%; min-height:48px;
+      border:2px solid var(--ink);
+      border-radius:12px;
+      font-family:Arial, Helvetica, sans-serif;
+      font-weight:700;
+      font-size:var(--fz-body);
+      padding:12px 14px;
+      background:var(--paper);
+      color:var(--ink);
+      box-shadow:3px 3px 0 var(--ink);
+    }
+    .btn{cursor:pointer}
+    .btn:disabled{background:#efefef;color:#9c9c9c;cursor:not-allowed}
+
+    /* Cartas (mobile-first) */
+    .carta{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+      border:2px solid var(--ink);
+      border-radius:14px;
+      padding:12px;
+      background:var(--paper);
+      box-shadow:4px 4px 0 var(--ink);
+    }
+    .carta img{
+      width:100%;
+      max-width:320px;
+      height:auto;
+      place-self:center;
+      border-radius:12px;
+    }
+    .carta-row{
+      display:flex; align-items:center; gap:10px;
+      justify-content:space-between; flex-wrap:wrap;
+    }
+    .carta-info{
+      font-family:Arial, sans-serif; font-size:var(--fz-body);
+      flex:1; min-width:180px;
+    }
+    .cantidad{font-weight:700; font-size:clamp(18px,5vw,28px); margin-top:4px}
+    .boton-canje{min-width:160px}
+
+    .descripcion{
+      display:none;
+      font-family:Arial, sans-serif;
+      font-size:clamp(16px,4.6vw,20px);
+      line-height:1.35;
+      margin-top:6px;
+      color:var(--ink);
+    }
+
+    footer{
+      border:3px solid var(--ink);
+      border-radius:14px;
+      box-shadow:4px 4px 0 var(--ink);
+      padding:12px;
+      text-align:center;
+      font-family:Arial, sans-serif;
+      font-weight:700;
+      font-size:12px;
+      background:var(--paper);
+      max-width:600px;
+      margin:4px auto 0;
+    }
+
+    /* Sugerencias nombre */
     #sugerencias{display:none;margin-top:8px}
-    .sug{display:inline-block;margin:4px 6px 0 0;padding:6px 10px;border:2px solid #000;background:#fff;box-shadow:3px 3px 0 #000;cursor:pointer;font-family:Arial, sans-serif;font-weight:700}
-    .sug:hover{background:#f3f3f3}
-    #modalCambio{display:none;position:fixed;inset:0;width:100vw;height:100vh;background:rgba(0,0,0,.7);z-index:9999;align-items:center;justify-content:center}
-    #modalCambio .contenido{background:#fff;border:3px solid #000;box-shadow:6px 6px 0 #000;padding:20px;text-align:center;font-family:'Comic Neue', cursive;width:90%;max-width:350px}
-    #modalCambio input{padding:10px;font-size:18px;width:90%;border:2px solid #000}
-    #modalCambio button{padding:10px 20px;font-size:18px;border:2px solid #000;box-shadow:3px 3px 0 #000;background:#fff;margin-top:10px;cursor:pointer}
-    .bubble{position:absolute; z-index:999; max-width:320px; background:#fff; color:#000;border:3px solid #000; box-shadow:6px 6px 0 #000; padding:12px 14px; font-weight:700; line-height:1.2;border-radius:14px; transform:translate(-50%,-110%) scale(0.98); opacity:0; pointer-events:none;animation:bubble-in 250ms ease-out forwards, bubble-out 3s 2.4s ease-in forwards;}
-    .bubble::after{content:""; position:absolute; bottom:-18px; left:50%; transform:translateX(-50%) rotate(8deg);width:24px; height:24px; background:#fff; border-left:3px solid #000; border-bottom:3px solid #000;box-shadow:6px 6px 0 #000; clip-path:polygon(0 0,100% 0,100% 100%);}
+    .sug{
+      display:inline-block;margin:4px 6px 0 0;padding:6px 10px;border:2px solid var(--ink);
+      background:var(--paper);box-shadow:3px 3px 0 var(--ink);cursor:pointer;
+      border-radius:999px;font-family:Arial,sans-serif;font-weight:700;font-size:14px;
+    }
+
+    /* Modal primera clave */
+    #modalCambio{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;align-items:center;justify-content:center}
+    #modalCambio .contenido{
+      width:92%;max-width:380px;
+      background:var(--paper);border:3px solid var(--ink);box-shadow:6px 6px 0 var(--ink);
+      border-radius:16px;padding:18px;text-align:center;font-family:'Comic Neue', cursive;
+    }
+    #modalCambio input{padding:12px;font-size:18px;width:100%;border:2px solid var(--ink);border-radius:10px}
+    #modalCambio button{padding:12px 18px;font-size:18px;border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);background:var(--paper);border-radius:12px;margin-top:12px;cursor:pointer}
+
+    /* Globos + onomatopeyas (igual lógica) */
+    .bubble{
+      position:absolute; z-index:999; max-width:320px; background:var(--paper); color:var(--ink);
+      border:3px solid var(--ink); box-shadow:6px 6px 0 var(--ink); padding:12px 14px; font-weight:700; line-height:1.2;
+      border-radius:14px; transform:translate(-50%,-110%) scale(0.98); opacity:0; pointer-events:none;
+      animation:bubble-in 250ms ease-out forwards, bubble-out 3s 2.4s ease-in forwards;
+    }
+    .bubble::after{
+      content:""; position:absolute; bottom:-18px; left:50%; transform:translateX(-50%) rotate(8deg);
+      width:24px; height:24px; background:var(--paper); border-left:3px solid var(--ink); border-bottom:3px solid var(--ink);
+      box-shadow:6px 6px 0 var(--ink); clip-path:polygon(0 0,100% 0,100% 100%);
+    }
     .bubble--ok{ border-color:#09b37a; box-shadow:6px 6px 0 #09b37a; }
     .bubble--warn{ border-color:#f59e0b; box-shadow:6px 6px 0 #f59e0b; }
     .bubble--error{ border-color:#e02424; box-shadow:6px 6px 0 #e02424; }
     @keyframes bubble-in{ to{ opacity:1; transform:translate(-50%,-110%) scale(1);} }
     @keyframes bubble-out{ to{ opacity:0; transform:translate(-50%,-130%) scale(0.96);} }
-    .onomato{position:absolute; z-index:998; font-weight:900; letter-spacing:2px; font-size:28px;-webkit-text-stroke:2px #000; transform:translate(-50%,-50%) scale(0.6) rotate(-6deg);opacity:0; pointer-events:none; animation:ono-pop 520ms ease-out forwards;}
+
+    .onomato{
+      position:absolute; z-index:998; font-weight:900; letter-spacing:2px; font-size:28px;
+      -webkit-text-stroke:2px var(--ink); transform:translate(-50%,-50%) scale(0.6) rotate(-6deg);
+      opacity:0; pointer-events:none; animation:ono-pop 520ms ease-out forwards;
+    }
     .onomato--ok{ color:#33e6a4; text-shadow:6px 6px 0 #09b37a; }
     .onomato--error{ color:#ff6b6b; text-shadow:6px 6px 0 #e02424; }
     .onomato--wow{ color:#ffd45a; text-shadow:6px 6px 0 #f59e0b; }
-    @keyframes ono-pop{20%{ opacity:1; transform:translate(-50%,-50%) scale(1.1) rotate(2deg);}60%{ transform:translate(-50%,-54%) scale(1) rotate(-2deg);}100%{ opacity:0; transform:translate(-50%,-60%) scale(0.9) rotate(0deg);} }
-    @media (max-width:600px){.titulo{font-size:28px}.subtitulo{font-size:20px}.carta{flex-direction:column;align-items:center;text-align:center}.carta img{width:60%;margin:0 0 10px}.carta-info{font-size:16px}.boton-canje{font-size:20px;width:100%;margin-top:10px}.descripcion{font-size:18px}#loginForm input,#loginForm button{font-size:16px;padding:10px}body{ margin:14px; }}
+    @keyframes ono-pop{
+      20%{ opacity:1; transform:translate(-50%,-50%) scale(1.1) rotate(2deg); }
+      60%{ transform:translate(-50%,-54%) scale(1) rotate(-2deg); }
+      100%{ opacity:0; transform:translate(-50%,-60%) scale(0.9) rotate(0deg); }
+    }
+
+    /* Desktop refinado */
+    @media (min-width:800px){
+      .carta{grid-template-columns:240px 1fr; align-items:center}
+      .carta img{width:240px}
+      .boton-canje{min-width:200px}
+    }
   </style>
 </head>
 <body>
+  <main class="app">
+    <!-- Panel de login -->
+    <section class="panel" id="loginPanel" style="margin-top:6px;">
+      <h1 class="titulo">🔐 Ingreso restringido</h1>
 
-  <!-- Panel de login -->
-  <div class="panel" id="loginPanel" style="max-width:95%;margin:20px auto;">
-    <div class="titulo">🔐 Ingreso restringido</div>
+      <!-- Campo de nombre (si no llega en URL ni está guardado) -->
+      <div id="alumnoWrap" style="display:none; margin:6px 0; display:grid; gap:10px;">
+        <input id="alumnoNombre" class="textin" type="text" placeholder="Ingresa tus dos nombres y dos apellidos (cualquier orden)">
+        <div id="sugerencias"></div>
+        <button type="button" class="btn" style="width:auto; justify-self:start"
+          onclick="localStorage.removeItem('alumno');document.getElementById('alumnoNombre').value='';document.getElementById('sugerencias').style.display='none';">
+          Limpiar nombre guardado
+        </button>
+      </div>
 
-    <div id="alumnoWrap" style="display:none;margin-bottom:10px;display:grid;gap:10px;">
-      <input id="alumnoNombre" class="textin" type="text" placeholder="Ingresa tus dos nombres y dos apellidos (cualquier orden)">
-      <div id="sugerencias"></div>
-      <button type="button" class="btn" style="justify-self:start"
-        onclick="localStorage.removeItem('alumno');document.getElementById('alumnoNombre').value='';document.getElementById('sugerencias').style.display='none';">
-        Limpiar nombre guardado
-      </button>
-    </div>
+      <form id="loginForm" style="display:grid; gap:10px;">
+        <input type="password" id="password" class="textin" placeholder="Ingresa tu contraseña" required>
+        <button type="submit" class="btn" id="btnEntrar">Entrar</button>
+      </form>
 
-    <form id="loginForm" style="display:flex;flex-direction:column;gap:10px;">
-      <input type="password" id="password" class="textin" placeholder="Ingresa tu contraseña" required>
-      <button type="submit" class="btn" id="btnEntrar">Entrar</button>
-    </form>
+      <div id="mensajeLogin" style="color:#e02424;margin-top:8px;text-align:center;font-family:Arial,sans-serif;font-weight:700;"></div>
+    </section>
 
-    <div id="mensajeLogin" style="color:red;margin-top:10px;text-align:center;"></div>
-  </div>
-
-  <!-- Panel de cartas -->
-  <div class="panel" id="cartasPanel" style="display:none;">
-    <div class="titulo">CAOS (Cartas Anti Orden en la Sala)</div>
-    <div class="subtitulo" id="nombreAlumno">Cargando estudiante...</div>
-    <div id="cartasContainer">Cargando cartas...</div>
-  </div>
+    <!-- Panel de cartas -->
+    <section class="panel" id="cartasPanel" style="display:none;">
+      <h2 class="titulo">CAOS (Cartas Anti Orden en la Sala)</h2>
+      <p class="subtitulo" id="nombreAlumno">Cargando estudiante...</p>
+      <div id="cartasContainer" style="display:grid; gap:12px;">Cargando cartas...</div>
+    </section>
+  </main>
 
   <!-- Modal de cambio de contraseña -->
   <div id="modalCambio">
     <div class="contenido">
-      <h2>🔁 Cambiar Contraseña</h2>
-      <p>Ingresa tu nueva contraseña.<br>Solo puedes hacerlo una vez.</p>
+      <h2 style="margin:0 0 8px 0;">🔁 Cambiar Contraseña</h2>
+      <p style="margin:0 0 10px 0;">Ingresa tu nueva contraseña.<br>Solo puedes hacerlo una vez.</p>
       <input type="password" id="nuevaPass" placeholder="Nueva contraseña"><br>
       <button onclick="guardarNuevaClave()">Guardar</button>
     </div>
   </div>
 
   <footer>
-    © 2025 CAOS. Todos los derechos reservados. <br>
-    Sitio desarrollado por Benjamín González. <br>
-    Ilustraciones originales por Constanza Cayul.
+    © 2025 CAOS. Todos los derechos reservados. —
+    Desarrollado por Benjamín González — Ilustraciones: Constanza Cayul.
   </footer>
 
   <script>
-    // ====== PWA (forzar actualización del SW) ======
+    /* ===== PWA (forzar actualización del SW) ===== */
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('../service-worker.js?alumno3');
+        navigator.serviceWorker.register('../service-worker.js?alumno-ui2');
       });
     }
 
-    // ====== Utils: Globos y Onomatopeyas ======
+    /* ===== Utils: Globos y Onomatopeyas (sin cambios funcionales) ===== */
     function showBubble(anchorEl, texto, tipo='ok'){
       const panel = anchorEl.closest('.panel') || document.querySelector('.panel');
       const rect = anchorEl.getBoundingClientRect();
@@ -135,7 +284,7 @@
       setTimeout(()=> o.remove(), 600);
     }
 
-    // ====== Config ======
+    /* ===== Config y lógica original (SIN CAMBIOS) ===== */
     const apiURL    = "https://script.google.com/macros/s/AKfycbxmU3eiiTe69ouewbLl4znzk2-ML4U-AfIoiGH2Kkj_4Uz55gv2B9QRH-kdqvDw-Dq5ZQ/exec";
     const apiCartas = "https://script.google.com/macros/s/AKfycbzp3kpcaQqnf-o6kDB_7Vo5YPNVPRvQXIhVSPFfp5Clt95-zEBFSf7JmeBAD9DgDiA/exec";
     let alumnoGlobal = "";
@@ -289,6 +438,7 @@
       try {
         const resCartas = await fetch(`${apiCartas}?alumno=${encodeURIComponent(alumno)}`);
         const dataCartas = await resCartas.json();
+
         const resImagenes = await fetch(`${apiCartas}?accion=imagenes`);
         const dataImagenes = await resImagenes.json();
 
@@ -298,7 +448,7 @@
 
         const nombres = Object.keys(conteo);
         if (!nombres.length) {
-          contenedor.innerHTML = "<p style='text-align:center;'>📭 No tienes cartas todavía.</p>";
+          contenedor.innerHTML = "<p style='text-align:center;font-family:Arial,sans-serif;'>📭 No tienes cartas todavía.</p>";
           showOnomato(contenedor, '¡PING!', 'wow');
           showBubble(contenedor, 'Cuando recibas cartas, aparecerán aquí', 'warn');
           return;
@@ -308,21 +458,24 @@
           const cantidad = conteo[nombre];
           const carta = dataImagenes.find(img => img.Nombre === nombre);
 
-          const div = document.createElement("div"); div.className = "carta";
-          const img = new Image(); img.alt = nombre; img.loading = "lazy";
+          const div = document.createElement("div");
+          div.className = "carta";
+
+          const img = new Image();
+          img.alt = nombre;
+          img.loading = "lazy";
           img.src = carta?.["URL Pública"] || "https://i.imgur.com/U3F4gA1.png";
           img.onerror = () => img.src = "https://i.imgur.com/U3F4gA1.png";
+
+          const row = document.createElement("div");
+          row.className = "carta-row";
 
           const info = document.createElement("div");
           info.className = "carta-info";
           info.innerHTML = `<div><strong>${nombre}</strong></div><div class="cantidad">Cantidad: ${cantidad}</div>`;
 
-          const descripcion = document.createElement("div");
-          descripcion.className = "descripcion";
-          descripcion.innerText = obtenerDescripcion(nombre);
-
           const boton = document.createElement("button");
-          boton.className = "boton-canje";
+          boton.className = "btn boton-canje";
           boton.innerText = "Solicitar Canje";
           boton.disabled = cantidad < 1;
           boton.onclick = async (ev) => {
@@ -343,13 +496,25 @@
             }
           };
 
+          const descripcion = document.createElement("div");
+          descripcion.className = "descripcion";
+          descripcion.innerText = obtenerDescripcion(nombre);
+
           div.onclick = () => {
             const visible = descripcion.style.display === "block";
             descripcion.style.display = visible ? "none" : "block";
-            if (!visible) { showOnomato(div, '¡WOW!', 'wow'); showBubble(div, 'Descripción de la carta', 'ok'); }
+            if (!visible) {
+              showOnomato(div, '¡WOW!', 'wow');
+              showBubble(div, 'Descripción de la carta', 'ok');
+            }
           };
 
-          div.appendChild(img); div.appendChild(info); div.appendChild(boton); div.appendChild(descripcion);
+          row.appendChild(info);
+          row.appendChild(boton);
+
+          div.appendChild(img);
+          div.appendChild(row);
+          div.appendChild(descripcion);
           contenedor.appendChild(div);
         });
 

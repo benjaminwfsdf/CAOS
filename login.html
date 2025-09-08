@@ -10,108 +10,67 @@
   <meta name="apple-mobile-web-app-title" content="CAOS">
 
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>CAOS - Iniciar sesión</title>
   <link href="https://fonts.googleapis.com/css2?family=Rock+Salt&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
 
-
   <style>
+    :root{--ink:#000;--paper:#fff;--radius:18px;--gap:12px;--pad:16px;--shadow:8px 8px 0 var(--ink);}
+    *{box-sizing:border-box}
     body{
-      font-family:'Comic Neue',cursive;
+      margin:0; padding:env(safe-area-inset-top) 12px calc(16px + env(safe-area-inset-bottom)) 12px;
+      font-family:'Comic Neue', cursive; color:var(--ink);
       background-image:repeating-linear-gradient(45deg,#000 0px,#000 1px,transparent 1px,transparent 6px);
-      background-size:100% 100%;
-      margin:0; padding:0 0 env(safe-area-inset-bottom);
-      color:#000;
+      background-attachment:fixed; background-size:100% 100%;
     }
     .container.caos-relative{
-      max-width:600px; margin:40px auto; background:#fff; color:#000;
-      border:3px solid #000; box-shadow:8px 8px 0 #000; padding:20px; width:min(100% - 24px,600px);
-      position:relative; /* para globos */
+      max-width:560px; margin:24px auto; background:var(--paper);
+      border:3px solid var(--ink); border-radius:var(--radius); box-shadow:var(--shadow);
+      padding:var(--pad); position:relative;
     }
-    .titulo{
-      text-align:center; font-size:40px; font-weight:bold; border:3px dashed #000;
-      padding:15px; margin-bottom:20px; background:#fff;
+    .titulo{ text-align:center; font:700 clamp(24px,7vw,36px)/1 'Rock Salt', cursive;
+      border:3px dashed var(--ink); border-radius:14px; padding:12px; background:var(--paper); margin:0 0 8px 0;}
+    label{font-weight:700; display:block; margin:12px 0 6px}
+    input,button,a.btn{
+      width:100%; min-height:48px; font-size:16px; border:2px solid var(--ink); border-radius:12px;
+      background:var(--paper); color:var(--ink); box-shadow:3px 3px 0 var(--ink); padding:12px 14px;
     }
-    label, input, button{ font-size:16px; display:block; width:100%; margin-bottom:10px; }
-    input{
-      padding:10px; border:2px solid #000; box-shadow:3px 3px 0 #000; background:#fff; color:#000;
-    }
-    button{
-      border:2px solid #000; box-shadow:3px 3px 0 #000; background:#fff; color:#000;
-      padding:12px; cursor:pointer; min-height:44px;
-    }
-    a{ text-align:center; display:block; margin-top:15px; color:#000; text-decoration:none; }
+    button{cursor:pointer}
+    .link-wrap{ text-align:center; margin-top:12px }
+    a.btn{ display:inline-block; width:auto; }
     footer{
-      border:3px solid #000; box-shadow:4px 4px 0 #000;
-      padding:15px; margin:40px auto 0; text-align:center; background:#fff; color:#000;
-      max-width:600px; width:min(100% - 24px,600px);
+      max-width:560px; margin:8px auto 0; background:var(--paper); border:3px solid var(--ink); border-radius:14px; box-shadow:4px 4px 0 var(--ink);
+      padding:12px; text-align:center; font-size:12px;
     }
-    button:focus-visible, a:focus-visible, input:focus-visible{ outline:3px dashed #000; outline-offset:2px; }
-    @media (max-width:768px){
-      .container{ margin:16px auto; padding:16px; box-shadow:6px 6px 0 #000; }
-      .titulo{ font-size:clamp(24px,7vw,36px); padding:12px; }
-    }
-
-    /* ===== Globos de diálogo (cómic) ===== */
-    .bubble{
-      position:absolute; z-index:999; max-width:280px; background:#fff; color:#000;
-      border:3px solid #000; box-shadow:6px 6px 0 #000; padding:12px 14px; font-weight:700; line-height:1.2;
-      border-radius:14px; transform:translate(-50%,-110%) scale(0.98); opacity:0; pointer-events:none;
-      animation:bubble-in 250ms ease-out forwards, bubble-out 3s 2.4s ease-in forwards;
-    }
-    .bubble::after{
-      content:""; position:absolute; bottom:-18px; left:50%; transform:translateX(-50%) rotate(8deg);
-      width:24px; height:24px; background:#fff; border-left:3px solid #000; border-bottom:3px solid #000;
-      box-shadow:6px 6px 0 #000; clip-path:polygon(0 0,100% 0,100% 100%);
-    }
-    .bubble--ok{ border-color:#09b37a; box-shadow:6px 6px 0 #09b37a; }
-    .bubble--warn{ border-color:#f59e0b; box-shadow:6px 6px 0 #f59e0b; }
-    .bubble--error{ border-color:#e02424; box-shadow:6px 6px 0 #e02424; }
-    @keyframes bubble-in{ to{ opacity:1; transform:translate(-50%,-110%) scale(1);} }
-    @keyframes bubble-out{ to{ opacity:0; transform:translate(-50%,-130%) scale(0.96);} }
-
-    /* ===== Onomatopeyas ===== */
-    .onomato{
-      position:absolute; z-index:998; font-weight:900; letter-spacing:2px; font-size:28px; color:#33e6a4;
-      -webkit-text-stroke:2px #000; text-shadow:6px 6px 0 #09b37a;
-      transform:translate(-50%,-50%) scale(0.6) rotate(-6deg); opacity:0; pointer-events:none;
-      animation:ono-pop 520ms ease-out forwards;
-    }
-    .onomato--ok{ color:#33e6a4; text-shadow:6px 6px 0 #09b37a; }
-    .onomato--error{ color:#ff6b6b; text-shadow:6px 6px 0 #e02424; }
-    .onomato--wow{ color:#ffd45a; text-shadow:6px 6px 0 #f59e0b; }
-    @keyframes ono-pop{
-      20%{ opacity:1; transform:translate(-50%,-50%) scale(1.1) rotate(2deg); }
-      60%{ transform:translate(-50%,-54%) scale(1) rotate(-2deg); }
-      100%{ opacity:0; transform:translate(-50%,-60%) scale(0.9) rotate(0deg); }
-    }
+    /* Globos / onomato (sin cambios) */
+    .bubble{position:absolute; z-index:999; max-width:280px; background:#fff; color:#000;border:3px solid #000; box-shadow:6px 6px 0 #000; padding:12px 14px; font-weight:700; line-height:1.2;border-radius:14px; transform:translate(-50%,-110%) scale(0.98); opacity:0; pointer-events:none;animation:bubble-in 250ms ease-out forwards, bubble-out 3s 2.4s ease-in forwards;}
+    .bubble::after{content:""; position:absolute; bottom:-18px; left:50%; transform:translateX(-50%) rotate(8deg); width:24px; height:24px; background:#fff; border-left:3px solid #000; border-bottom:3px solid #000;box-shadow:6px 6px 0 #000; clip-path:polygon(0 0,100% 0,100% 100%);}
+    .bubble--ok{ border-color:#09b37a; box-shadow:6px 6px 0 #09b37a; } .bubble--warn{ border-color:#f59e0b; box-shadow:6px 6px 0 #f59e0b; } .bubble--error{ border-color:#e02424; box-shadow:6px 6px 0 #e02424; }
+    @keyframes bubble-in{ to{ opacity:1; transform:translate(-50%,-110%) scale(1);} } @keyframes bubble-out{ to{ opacity:0; transform:translate(-50%,-130%) scale(0.96);} }
+    .onomato{position:absolute; z-index:998; font-weight:900; letter-spacing:2px; font-size:28px; color:#33e6a4; -webkit-text-stroke:2px #000; text-shadow:6px 6px 0 #09b37a; transform:translate(-50%,-50%) scale(0.6) rotate(-6deg); opacity:0; pointer-events:none; animation:ono-pop 520ms ease-out forwards;}
+    .onomato--error{ color:#ff6b6b; text-shadow:6px 6px 0 #e02424; } .onomato--wow{ color:#ffd45a; text-shadow:6px 6px 0 #f59e0b; }
+    @keyframes ono-pop{ 20%{ opacity:1; transform:translate(-50%,-50%) scale(1.1) rotate(2deg); } 60%{ transform:translate(-50%,-54%) scale(1) rotate(-2deg); } 100%{ opacity:0; transform:translate(-50%,-60%) scale(0.9) rotate(0deg); } }
   </style>
 </head>
 <body>
   <div class="container caos-relative">
     <div class="titulo">CAOS</div>
-    <p style="text-align:center; font-weight:bold;">(Panel del Profesor – Cartas Anti Orden)</p>
+    <p style="text-align:center; font-weight:700; margin:0 0 8px">(Panel del Profesor – Cartas Anti Orden)</p>
 
-    <label>Correo electrónico:
-      <input type="email" id="usuarioLogin" inputmode="email" autocomplete="username">
-    </label>
-    <label>Contraseña:
-      <input type="password" id="claveLogin" autocomplete="current-password">
-    </label>
+    <label for="usuarioLogin">Correo electrónico</label>
+    <input type="email" id="usuarioLogin" inputmode="email" autocomplete="username">
+
+    <label for="claveLogin">Contraseña</label>
+    <input type="password" id="claveLogin" autocomplete="current-password">
+
     <button id="btnLogin">Ingresar</button>
 
-    <div style="text-align:center; margin-top:10px;">
-      <a href="crear_cuenta.html" style="
-        display:inline-block; padding:10px 20px; border:2px solid #000; box-shadow:3px 3px 0 #000;
-        background:#fff; color:#000; text-decoration:none; font-family:inherit; font-size:16px;
-        min-height:44px; line-height:44px;">
-        ¿No tienes cuenta? Crear cuenta nueva
-      </a>
+    <div class="link-wrap">
+      <a class="btn" href="crear_cuenta.html">¿No tienes cuenta? Crear cuenta nueva</a>
     </div>
   </div>
 
   <script>
-    // Utilidades: globos y onomatopeyas
     function showBubble(anchorEl, texto, tipo='ok'){
       const panel = anchorEl.closest('.caos-relative') || document.body;
       const rect = anchorEl.getBoundingClientRect();
@@ -138,7 +97,6 @@
       setTimeout(()=> o.remove(), 600);
     }
 
-    // Lógica de login con feedback visual
     const apiUrl = 'https://script.google.com/macros/s/AKfycbwuNchPFTW2nCQThMFq2LMngQ8gQHay_hww8kmWZf0D8znqw3K1S_V3KpZBVOVv1_nE/exec';
     const btnLogin = document.getElementById("btnLogin");
 
@@ -171,14 +129,12 @@
     });
   </script>
 
-  <footer>
-    © 2025 CAOS. Sitio desarrollado por Benjamín González.
-  </footer>
+  <footer>© 2025 CAOS. Sitio desarrollado por Benjamín González.</footer>
 
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js');
+        navigator.serviceWorker.register('/service-worker.js?v=ui2');
       });
     }
   </script>
