@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <!-- PWA (desde subcarpeta) -->
+  <link href="https://fonts.googleapis.com/css2?family=Rock+Salt&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- PWA -->
   <link rel="manifest" href="../manifest.json">
   <meta name="theme-color" content="#0b0b0c">
 
@@ -10,105 +12,36 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CAOS">
+  <meta name="format-detection" content="telephone=no, date=no, address=no, email=no, url=no">
 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
   <title>Reparto Carta Específica - CAOS</title>
   <link rel="stylesheet" href="../style-caos.css">
+  <link rel="stylesheet" href="../style-caos-legible.css"><!-- NUEVO -->
   <style>
-    body {
-      font-family: 'Rock Salt', cursive;
-      padding: 20px;
-      margin: 0;
-      background: repeating-linear-gradient(45deg, #000 0px, #000 1px, transparent 1px, transparent 6px);
-      padding-bottom: env(safe-area-inset-bottom);
-    }
-    .panel.caos-relative {
-      border: 3px solid black;
-      padding: 20px;
-      box-shadow: 6px 6px 0 black;
-      background-color: white;
-      max-width: 700px;
-      margin: auto;
-      width: min(100% - 24px, 700px);
-      position: relative; /* para globos */
-    }
-    h1 {
-      text-align: center;
-      font-size: clamp(22px, 6vw, 30px);
-      border: 3px dashed black;
-      padding: 10px;
-      margin-bottom: 20px;
-      background-color: white;
-    }
-    select, button {
-      font-family: inherit;
-      font-size: 16px;
-      padding: 10px;
-      border: 2px solid black;
-      box-shadow: 3px 3px 0 black;
-      margin: 10px 0;
-      cursor: pointer;
-      background-color: white;
-      min-height:44px;
-      width:100%;
-      max-width:100%;
-    }
-    .log {
-      margin-top: 20px;
-      padding: 10px;
-      border-top: 2px dashed black;
-      word-break: break-word;
-    }
-    #volverBtn {
-      display: inline-block;
-      background-color: white;
-      color: black;
-      border: 2px solid black;
-      box-shadow: 4px 4px 0 black;
-      padding: 10px 20px;
-      font-family: 'Rock Salt', cursive;
-      font-size: 18px;
-      cursor: pointer;
-      text-decoration: none;
-      margin-top: 20px;
-      min-height:44px;
-    }
+    body { font-family: 'Rock Salt', cursive; padding: 20px; margin: 0; background: repeating-linear-gradient(45deg, #000 0px, #000 1px, transparent 1px, transparent 6px); padding-bottom: env(safe-area-inset-bottom); }
+    .panel.caos-relative { border: 3px solid black; padding: 20px; box-shadow: 6px 6px 0 black; background-color: white; max-width: 700px; margin: auto; width: min(100% - 24px, 700px); position: relative; }
+    h1 { text-align: center; font-size: clamp(22px, 6vw, 30px); border: 3px dashed black; padding: 10px; margin-bottom: 20px; background-color: white; }
+    select, button { font-family: inherit; font-size: 16px; padding: 10px; border: 2px solid black; box-shadow: 3px 3px 0 black; margin: 10px 0; cursor: pointer; background-color: white; min-height:44px; width:100%; max-width:100%; }
+    .log { margin-top: 20px; padding: 10px; border-top: 2px dashed black; word-break: break-word; }
+    #volverBtn { display: inline-block; background-color: white; color: black; border: 2px solid black; box-shadow: 4px 4px 0 black; padding: 10px 20px; font-family: 'Rock Salt', cursive; font-size: 18px; cursor: pointer; text-decoration: none; margin-top: 20px; min-height:44px; }
 
-    /* Globos */
-    .bubble{
-      position:absolute; z-index:999; max-width:320px; background:#fff; color:#000;
-      border:3px solid #000; box-shadow:6px 6px 0 #000; padding:12px 14px; font-weight:700; line-height:1.2;
-      border-radius:14px; transform:translate(-50%,-110%) scale(0.98); opacity:0; pointer-events:none;
-      animation:bubble-in 250ms ease-out forwards, bubble-out 3s 2.4s ease-in forwards;
-    }
-    .bubble::after{
-      content:""; position:absolute; bottom:-18px; left:50%; transform:translateX(-50%) rotate(8deg);
-      width:24px; height:24px; background:#fff; border-left:3px solid #000; border-bottom:3px solid #000;
-      box-shadow:6px 6px 0 #000; clip-path:polygon(0 0,100% 0,100% 100%);
-    }
+    /* Globos / Onomato igual que antes */
+    .bubble{ position:absolute; z-index:999; max-width:320px; background:#fff; color:#000; border:3px solid #000; box-shadow:6px 6px 0 #000; padding:12px 14px; font-weight:700; line-height:1.2; border-radius:14px; transform:translate(-50%,-110%) scale(0.98); opacity:0; pointer-events:none; animation:bubble-in 250ms ease-out forwards, bubble-out 3s 2.4s ease-in forwards; }
+    .bubble::after{ content:""; position:absolute; bottom:-18px; left:50%; transform:translateX(-50%) rotate(8deg); width:24px; height:24px; background:#fff; border-left:3px solid #000; border-bottom:3px solid #000; box-shadow:6px 6px 0 #000; clip-path:polygon(0 0,100% 0,100% 100%); }
     .bubble--ok{ border-color:#09b37a; box-shadow:6px 6px 0 #09b37a; }
     .bubble--warn{ border-color:#f59e0b; box-shadow:6px 6px 0 #f59e0b; }
     .bubble--error{ border-color:#e02424; box-shadow:6px 6px 0 #e02424; }
     @keyframes bubble-in{ to{ opacity:1; transform:translate(-50%,-110%) scale(1);} }
     @keyframes bubble-out{ to{ opacity:0; transform:translate(-50%,-130%) scale(0.96);} }
 
-    /* Onomatopeyas */
-    .onomato{
-      position:absolute; z-index:998; font-weight:900; letter-spacing:2px; font-size:28px;
-      -webkit-text-stroke:2px #000;
-      transform:translate(-50%,-50%) scale(0.6) rotate(-6deg); opacity:0; pointer-events:none;
-      animation:ono-pop 520ms ease-out forwards;
-    }
+    .onomato{ position:absolute; z-index:998; font-weight:900; letter-spacing:2px; font-size:28px; -webkit-text-stroke:2px #000; transform:translate(-50%,-50%) scale(0.6) rotate(-6deg); opacity:0; pointer-events:none; animation:ono-pop 520ms ease-out forwards; }
     .onomato--ok{ color:#33e6a4; text-shadow:6px 6px 0 #09b37a; }
     .onomato--error{ color:#ff6b6b; text-shadow:6px 6px 0 #e02424; }
     .onomato--wow{ color:#ffd45a; text-shadow:6px 6px 0 #f59e0b; }
-    @keyframes ono-pop{
-      20%{ opacity:1; transform:translate(-50%,-50%) scale(1.1) rotate(2deg); }
-      60%{ transform:translate(-50%,-54%) scale(1) rotate(-2deg); }
-      100%{ opacity:0; transform:translate(-50%,-60%) scale(0.9) rotate(0deg); }
-    }
+    @keyframes ono-pop{ 20%{ opacity:1; transform:translate(-50%,-50%) scale(1.1) rotate(2deg); } 60%{ transform:translate(-50%,-54%) scale(1) rotate(-2deg); } 100%{ opacity:0; transform:translate(-50%,-60%) scale(0.9) rotate(0deg); } }
   </style>
 </head>
 <body>
@@ -148,32 +81,9 @@
   </div>
 
   <script>
-    // Utilidades: globos + onomatopeyas
-    function showBubble(anchorEl, texto, tipo='ok'){
-      const panel = anchorEl.closest('.caos-relative') || document.body;
-      const rect = anchorEl.getBoundingClientRect();
-      const parentRect = panel.getBoundingClientRect();
-      const b = document.createElement('div');
-      b.className = `bubble bubble--${tipo}`;
-      b.setAttribute('role','status'); b.setAttribute('aria-live','polite');
-      b.textContent = texto;
-      b.style.left = (rect.left - parentRect.left + rect.width/2) + 'px';
-      b.style.top  = (rect.top  - parentRect.top) + 'px';
-      panel.appendChild(b);
-      setTimeout(()=> b.remove(), 3200);
-    }
-    function showOnomato(anchorEl, texto='¡POW!', estilo='ok'){
-      const panel = anchorEl.closest('.caos-relative') || document.body;
-      const rect = anchorEl.getBoundingClientRect();
-      const parentRect = panel.getBoundingClientRect();
-      const o = document.createElement('div');
-      o.className = `onomato onomato--${estilo}`;
-      o.textContent = texto;
-      o.style.left = (rect.left - parentRect.left + rect.width/2) + 'px';
-      o.style.top  = (rect.top  - parentRect.top - 30) + 'px';
-      panel.appendChild(o);
-      setTimeout(()=> o.remove(), 600);
-    }
+    // Globos + onomato
+    function showBubble(anchorEl, texto, tipo='ok'){ const panel = anchorEl.closest('.caos-relative') || document.body; const rect = anchorEl.getBoundingClientRect(); const parentRect = panel.getBoundingClientRect(); const b = document.createElement('div'); b.className = `bubble bubble--${tipo}`; b.setAttribute('role','status'); b.setAttribute('aria-live','polite'); b.textContent = texto; b.style.left = (rect.left - parentRect.left + rect.width/2) + 'px'; b.style.top  = (rect.top  - parentRect.top) + 'px'; panel.appendChild(b); setTimeout(()=> b.remove(), 3200); }
+    function showOnomato(anchorEl, texto='¡POW!', estilo='ok'){ const panel = anchorEl.closest('.caos-relative') || document.body; const rect = anchorEl.getBoundingClientRect(); const parentRect = panel.getBoundingClientRect(); const o = document.createElement('div'); o.className = `onomato onomato--${estilo}`; o.textContent = texto; o.style.left = (rect.left - parentRect.left + rect.width/2) + 'px'; o.style.top  = (rect.top  - parentRect.top - 30) + 'px'; panel.appendChild(o); setTimeout(()=> o.remove(), 600); }
 
     const API_URL = "https://script.google.com/macros/s/AKfycbwfLuxwxhECHDAJtJzodgG-_3Qf5-OqMi00ShqSICxXFDhAWqOE-GpgqDoonkSRTQH0/exec";
     const params = new URLSearchParams(window.location.search);
@@ -198,15 +108,7 @@
       selectEst.disabled = false;
       showOnomato(selectEst, '¡POW!', 'ok');
       showBubble(selectEst, `🎓 ${alumno} listo para asignar`, 'ok');
-      (async ()=>{
-        try{
-          const data = await cargarResumenEstudiante(alumno);
-          pintarResumen(data);
-        }catch(e){
-          showOnomato(selectEst, '¡BANG!', 'error');
-          showBubble(selectEst, '❌ Error al cargar resumen', 'error');
-        }
-      })();
+      (async ()=>{ try{ const data = await cargarResumenEstudiante(alumno); pintarResumen(data); }catch(e){ showOnomato(selectEst, '¡BANG!', 'error'); showBubble(selectEst, '❌ Error al cargar resumen', 'error'); } })();
     } else {
       resumenDiv.innerHTML = `<p style="color:red;">⚠️ No se ha seleccionado ningún estudiante.</p>`;
       showOnomato(selectEst, '¡HEY!', 'error');
@@ -225,28 +127,19 @@
 
       logDiv.innerHTML += `<p>🎯 ${estudiante} recibe: <b>${carta}</b></p>`;
       guardarCartaEspecifica(estudiante, carta)
-        .then(()=> {
-          showOnomato(btnAsignar, '¡POW!', 'ok');
-          showBubble(btnAsignar, `✅ Carta asignada: ${carta}`, 'ok');
-          return cargarResumenEstudiante(estudiante);
-        })
+        .then(()=> { showOnomato(btnAsignar, '¡POW!', 'ok'); showBubble(btnAsignar, `✅ Carta asignada: ${carta}`, 'ok'); return cargarResumenEstudiante(estudiante); })
         .then((data)=> pintarResumen(data))
-        .catch(()=>{
-          showOnomato(btnAsignar, '¡BANG!', 'error');
-          showBubble(btnAsignar, '❌ Error al guardar la carta.', 'error');
-        });
+        .catch(()=>{ showOnomato(btnAsignar, '¡BANG!', 'error'); showBubble(btnAsignar, '❌ Error al guardar la carta.', 'error'); });
     }
 
     async function guardarCartaEspecifica(estudiante, carta) {
       const response = await fetch(`${API_URL}?alumno=${encodeURIComponent(estudiante)}&carta=${encodeURIComponent(carta)}`);
       return await response.text();
     }
-
     async function cargarResumenEstudiante(nombreEstudiante) {
       const response = await fetch(`${API_URL}?alumno=${encodeURIComponent(nombreEstudiante)}`);
       return await response.json();
     }
-
     function pintarResumen(data){
       if (!data || !data.alumno) return;
       resumenDiv.innerHTML = `

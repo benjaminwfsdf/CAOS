@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <link href="https://fonts.googleapis.com/css2?family=Rock+Salt&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+
   <!-- PWA -->
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#0b0b0c">
@@ -11,9 +13,13 @@
 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- Evita azul automático de iOS -->
+  <meta name="format-detection" content="telephone=no, date=no, address=no, email=no, url=no">
 
   <title>CAOS - Estética Panel</title>
   <link rel="stylesheet" href="style-caos.css">
+  <link rel="stylesheet" href="style-caos-legible.css"><!-- NUEVO -->
+
   <style>
     /* ====== Base existente ====== */
     body {
@@ -95,6 +101,7 @@
       width:24px; height:24px; background:#fff; border-left:3px solid #000; border-bottom:3px solid #000;
       box-shadow:6px 6px 0 #000; clip-path:polygon(0 0,100% 0,100% 100%);
     }
+    
     .bubble--ok{ border-color:#09b37a; box-shadow:6px 6px 0 #09b37a; }
     .bubble--warn{ border-color:#f59e0b; box-shadow:6px 6px 0 #f59e0b; }
     .bubble--error{ border-color:#e02424; box-shadow:6px 6px 0 #e02424; }
@@ -116,6 +123,7 @@
       60%{ transform:translate(-50%,-54%) scale(1) rotate(-2deg); }
       100%{ opacity:0; transform:translate(-50%,-60%) scale(0.9) rotate(0deg); }
     }
+    
   </style>
 </head>
 <body>

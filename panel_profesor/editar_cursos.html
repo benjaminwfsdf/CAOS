@@ -1,29 +1,26 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <!-- PWA (desde subcarpeta) -->
+  <meta charset="UTF-8" />
+  <title>Editar Cursos Asignados</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rock+Salt&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- PWA -->
   <link rel="manifest" href="../manifest.json">
   <meta name="theme-color" content="#0b0b0c">
-
-  <!-- iOS -->
   <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CAOS">
 
-  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Editar Cursos Asignados</title>
+
   <style>
     body {
       font-family: 'Rock Salt', cursive;
-      background-color: #fff;
-      background-image: repeating-linear-gradient(45deg, #000 0px, #000 1px, transparent 1px, transparent 6px);
-      background-size: 100% 100%;
+      background-image: repeating-linear-gradient(45deg, rgba(0,0,0,.12) 0px, rgba(0,0,0,.12) 1px, transparent 1px, transparent 6px);
+      margin: 0; padding: 20px;
       color: #000;
-      padding: 20px;
-      margin: 0;
-      padding-bottom: env(safe-area-inset-bottom);
     }
     .panel.caos-relative {
       border: 4px solid black;
@@ -32,75 +29,51 @@
       box-shadow: 8px 8px 0 black;
       max-width: 850px;
       margin: auto;
-      width: min(100% - 24px, 850px);
-      position: relative; /* globos */
+      position: relative;
     }
     h1 {
       text-align: center;
       font-size: clamp(22px, 6vw, 28px);
-      margin-bottom: 20px;
       border: 3px dashed black;
       padding: 10px;
+      margin-bottom: 20px;
+      font-family: 'Rock Salt', cursive;
     }
-    label { font-weight: bold; display: block; margin-top: 10px; }
+    label { font-weight: bold; display: block; margin-top: 10px; font-family: 'Comic Neue', sans-serif; }
     #correo {
-      width: 100%; font-size: 16px; padding: 10px; border: 2px solid black;
+      width: 100%; font-size: 18px; padding: 12px; border: 2px solid black;
       background-color: #e6f0ff; margin-top: 5px; box-shadow: 3px 3px 0 black; min-height:44px;
+      font-family: 'Comic Neue', sans-serif;
     }
     .grilla-cursos {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 12px; margin-top: 20px; margin-bottom: 20px;
+      gap: 12px; margin: 20px 0;
     }
     .tarjeta-curso {
       border: 2px solid black; padding: 10px; background-color: #fefefe; box-shadow: 4px 4px 0 black;
-      cursor: pointer; transition: transform 0.2s; user-select: none; display:flex; align-items:center;
+      cursor: pointer; display:flex; align-items:center;
+      font-family: 'Comic Neue', sans-serif;
     }
     .tarjeta-curso:hover { transform: scale(1.03); background-color: #f0f0f0; }
     .tarjeta-curso input { margin-right: 8px; transform: scale(1.2); }
     .btn {
-      display: block; margin: 10px auto; padding: 12px 24px; font-size: 16px; background-color: #fff;
-      border: 3px solid black; cursor: pointer; box-shadow: 4px 4px 0 black; font-family: inherit; min-height:44px;
-      width: 100%; max-width: 420px;
+      display: block; margin: 10px auto; padding: 14px 24px; font-size: 18px; background-color: #fff;
+      border: 3px solid black; cursor: pointer; box-shadow: 4px 4px 0 black; font-family: 'Comic Neue', sans-serif;
+      width: 100%; max-width: 420px; min-height:44px;
     }
-    .btn:hover { background-color: #f5f5f5; }
     footer {
       text-align: center; font-size: 14px; margin: 40px auto 0; border: 2px solid black; padding: 15px;
-      box-shadow: 4px 4px 0 black; background-color: white; max-width: 600px; width: min(100% - 24px, 600px);
+      box-shadow: 4px 4px 0 black; background-color: white; max-width: 600px;
     }
-
-    /* Globos */
-    .bubble{
-      position:absolute; z-index:999; max-width:320px; background:#fff; color:#000;
-      border:3px solid #000; box-shadow:6px 6px 0 #000; padding:12px 14px; font-weight:700; line-height:1.2;
-      border-radius:14px; transform:translate(-50%,-110%) scale(0.98); opacity:0; pointer-events:none;
-      animation:bubble-in 250ms ease-out forwards, bubble-out 3s 2.4s ease-in forwards;
-    }
-    .bubble::after{
-      content:""; position:absolute; bottom:-18px; left:50%; transform:translateX(-50%) rotate(8deg);
-      width:24px; height:24px; background:#fff; border-left:3px solid #000; border-bottom:3px solid #000;
-      box-shadow:6px 6px 0 #000; clip-path:polygon(0 0,100% 0,100% 100%);
-    }
-    .bubble--ok{ border-color:#09b37a; box-shadow:6px 6px 0 #09b37a; }
-    .bubble--warn{ border-color:#f59e0b; box-shadow:6px 6px 0 #f59e0b; }
-    .bubble--error{ border-color:#e02424; box-shadow:6px 6px 0 #e02424; }
-    @keyframes bubble-in{ to{ opacity:1; transform:translate(-50%,-110%) scale(1);} }
-    @keyframes bubble-out{ to{ opacity:0; transform:translate(-50%,-130%) scale(0.96);} }
-    /* Onomato */
-    .onomato{
-      position:absolute; z-index:998; font-weight:900; letter-spacing:2px; font-size:28px;
-      -webkit-text-stroke:2px #000;
-      transform:translate(-50%,-50%) scale(0.6) rotate(-6deg); opacity:0; pointer-events:none;
-      animation:ono-pop 520ms ease-out forwards;
-    }
-    .onomato--ok{ color:#33e6a4; text-shadow:6px 6px 0 #09b37a; }
-    .onomato--error{ color:#ff6b6b; text-shadow:6px 6px 0 #e02424; }
-    .onomato--wow{ color:#ffd45a; text-shadow:6px 6px 0 #f59e0b; }
-    @keyframes ono-pop{
-      20%{ opacity:1; transform:translate(-50%,-50%) scale(1.1) rotate(2deg); }
-      60%{ transform:translate(-50%,-54%) scale(1) rotate(-2deg); }
-      100%{ opacity:0; transform:translate(-50%,-60%) scale(0.9) rotate(0deg); }
-    }
+    /* Globos / Onomatopeyas */
+    .bubble{ position:absolute; background:#fff; border:3px solid #000; box-shadow:6px 6px 0 #000;
+      padding:12px 14px; font-weight:700; border-radius:14px; transform:translate(-50%,-110%);
+      animation:bubble-in 250ms ease-out forwards, bubble-out 3s 2.4s ease-in forwards; }
+    @keyframes bubble-in{ to{ opacity:1; } } @keyframes bubble-out{ to{ opacity:0; } }
+    .onomato{ position:absolute; font-weight:900; font-size:28px; -webkit-text-stroke:2px #000;
+      animation:ono-pop 520ms ease-out forwards; }
+    @keyframes ono-pop{ 20%{opacity:1;} 100%{opacity:0;} }
   </style>
 </head>
 <body>
@@ -117,49 +90,20 @@
     <button class="btn" id="btnVolver">⬅ Volver al menú principal</button>
   </div>
 
-  <footer>
-    © 2025 CAOS. Todos los derechos reservados. <br>
-    Sitio desarrollado por Benjamín González.
-  </footer>
+  <footer>© 2025 CAOS. Todos los derechos reservados.<br>Sitio desarrollado por Benjamín González.</footer>
 
   <script>
-    // Globos util
-    function showBubble(anchorEl, texto, tipo='ok'){
-      const panel = document.querySelector('.panel');
-      const rect = anchorEl.getBoundingClientRect();
-      const parentRect = panel.getBoundingClientRect();
-      const b = document.createElement('div');
-      b.className = `bubble bubble--${tipo}`;
-      b.textContent = texto;
-      b.style.left = (rect.left - parentRect.left + rect.width/2) + 'px';
-      b.style.top  = (rect.top  - parentRect.top) + 'px';
-      panel.appendChild(b);
-      setTimeout(()=> b.remove(), 3200);
-    }
-    function showOnomato(anchorEl, texto='¡POW!', estilo='ok'){
-      const panel = document.querySelector('.panel');
-      const rect = anchorEl.getBoundingClientRect();
-      const parentRect = panel.getBoundingClientRect();
-      const o = document.createElement('div');
-      o.className = `onomato onomato--${estilo}`;
-      o.textContent = texto;
-      o.style.left = (rect.left - parentRect.left + rect.width/2) + 'px';
-      o.style.top  = (rect.top  - parentRect.top - 30) + 'px';
-      panel.appendChild(o);
-      setTimeout(()=> o.remove(), 600);
-    }
-
     const urlParams = new URLSearchParams(window.location.search);
     const usuario = urlParams.get("usuario") || "";
+    document.getElementById("correo").value = usuario;
+
     const listaCursos = document.getElementById("listaCursos");
-    const correoInput = document.getElementById("correo");
     const btnGuardar = document.getElementById("btnGuardar");
     const btnVolver = document.getElementById("btnVolver");
-    correoInput.value = usuario;
 
-    const niveles = ["1ro Básico", "2do Básico", "3ro Básico", "4to Básico", "5to Básico", "6to Básico", "7mo Básico", "8vo Básico", "1ro Medio", "2do Medio", "3ro Medio", "4to Medio"];
-    const letras = ["A", "B", "C"];
-    const cursos = niveles.flatMap(nivel => letras.map(letra => `${nivel} ${letra}`));
+    const niveles = ["1ro Básico","2do Básico","3ro Básico","4to Básico","5to Básico","6to Básico","7mo Básico","8vo Básico","1ro Medio","2do Medio","3ro Medio","4to Medio"];
+    const letras = ["A","B","C"];
+    const cursos = niveles.flatMap(n => letras.map(l => `${n} ${l}`));
 
     cursos.forEach(curso => {
       const div = document.createElement("label");
@@ -169,55 +113,19 @@
     });
 
     async function guardarCambios() {
-      const seleccionados = Array.from(document.querySelectorAll(".tarjeta-curso input:checked")).map(i => i.value);
-
-      if (!usuario) {
-        showOnomato(correoInput, '¡BANG!', 'error');
-        showBubble(correoInput, 'Falta el correo del profesor.', 'error');
-        return;
-      }
-
-      if (!confirm(`¿Actualizar tus cursos a:\n\n${seleccionados.join('\n') || "ninguno"}?`)) return;
-
-      const query = new URLSearchParams({
-        accion: 'editar_cursos_profesor',
-        usuario: usuario,
-        cursos: seleccionados.join(',')
-      });
-
+      const seleccionados = Array.from(document.querySelectorAll(".tarjeta-curso input:checked")).map(i=>i.value);
+      if (!usuario) return;
+      if (!confirm(`Actualizar cursos a:\n${seleccionados.join('\n')||'ninguno'}`)) return;
+      const query = new URLSearchParams({accion:'editar_cursos_profesor', usuario, cursos: seleccionados.join(',')});
       try {
-        const res = await fetch(`https://script.google.com/macros/s/AKfycbwDNPLxj452NmqmQotRwRNxCiSBe_ugF2YNCiC-HadLS-z4y29US0jmqeMlCu5Y7dfwnQ/exec?${query.toString()}`);
+        const res = await fetch(`https://script.google.com/macros/s/AKfycbwDNPLxj452NmqmQotRwRNxCiSBe_ugF2YNCiC-HadLS-z4y29US0jmqeMlCu5Y7dfwnQ/exec?${query}`);
         const data = await res.json();
-        if (data.ok) {
-          showOnomato(btnGuardar, '¡POW!', 'ok');
-          showBubble(btnGuardar, '✅ Cursos actualizados correctamente.', 'ok');
-        } else {
-          showOnomato(btnGuardar, '¡BANG!', 'error');
-          showBubble(btnGuardar, '❌ Ocurrió un error al actualizar.', 'error');
-        }
-      } catch (e) {
-        showOnomato(btnGuardar, '¡BANG!', 'error');
-        showBubble(btnGuardar, '❌ Error de red con el servidor.', 'error');
-      }
+        alert(data.ok ? "✅ Cursos actualizados" : "❌ Error al actualizar");
+      } catch { alert("❌ Error de red"); }
     }
 
-    function volverAlPanel() {
-      if (usuario) {
-        window.location.href = `../index.html?usuario=${encodeURIComponent(usuario)}`;
-      } else {
-        window.location.href = "../index.html";
-      }
-    }
-
-    btnGuardar.addEventListener('click', guardarCambios);
-    btnVolver.addEventListener('click', volverAlPanel);
-  </script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js', { scope: '/' });
-      });
-    }
+    btnGuardar.onclick = guardarCambios;
+    btnVolver.onclick = ()=> window.location.href=`../index.html?usuario=${encodeURIComponent(usuario)}`;
   </script>
 </body>
 </html>

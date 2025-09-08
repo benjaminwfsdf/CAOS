@@ -1,0 +1,93 @@
+/* ===== Tema Legible para CAOS =====
+   Cárgalo DESPUÉS de style-caos.css (o después de tus estilos inline)
+   Mantiene estética cómic en títulos, mejora lectura en formularios/tablas.
+*/
+
+:root{
+  --caos-font-ui: "Comic Neue", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+                  Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji",
+                  "Segoe UI Emoji";
+  --caos-font-display: "Rock Salt", cursive;
+  --caos-text: #111;
+  --caos-muted: #363636;
+  color-scheme: light; /* evita tintes oscuridad auto */
+}
+
+*{ -webkit-tap-highlight-color: transparent; }
+
+a, a:link, a:visited{ color:#000 !important; }
+input, select, textarea, button, option{
+  color:#000 !important;
+  -webkit-text-fill-color:#000;
+  font-family: var(--caos-font-ui) !important;
+}
+select:disabled, option:disabled{ color:#000 !important; opacity:.75; }
+
+/* Títulos mantienen Rock Salt */
+.titulo, h1, h2, h3{
+  font-family: var(--caos-font-display);
+  letter-spacing: .3px;
+}
+.subtitulo{
+  font-family: var(--caos-font-ui);
+  font-weight: 800;
+  letter-spacing: .2px;
+}
+
+/* Fondo con rayas más sutiles para leer mejor */
+body{
+  color: var(--caos-text);
+  background-image: repeating-linear-gradient(
+    45deg, rgba(0,0,0,.12) 0px, rgba(0,0,0,.12) 1px, transparent 1px, transparent 6px
+  );
+}
+
+/* Tamaños cómodos en UI */
+label,
+input[type="text"],
+select,
+button,
+textarea,
+small,
+.muted{
+  font-size: 18px;
+  line-height: 1.35;
+  letter-spacing: .2px;
+}
+
+input[type="text"],
+select,
+textarea{
+  padding: 12px 12px;
+  border-width: 2px;
+  box-shadow: 3px 3px 0 #000;
+  background: #fff;
+}
+
+button, .autorizar{
+  padding: 12px 16px;
+  font-weight: 700;
+  text-transform: none;
+}
+
+/* Opciones del select algo más grandes */
+option{
+  font-size: 18px;
+  line-height: 1.4;
+}
+
+input::placeholder, textarea::placeholder{
+  color: #686868; opacity: .9;
+}
+
+/* Tablas más legibles */
+table{ font-family: var(--caos-font-ui); font-size: 17px; }
+th, td{ padding: 10px 12px !important; }
+
+/* Foco accesible */
+:focus-visible{ outline: 3px dashed #111 !important; outline-offset: 2px; }
+
+small.muted{ color: var(--caos-muted) !important; font-size: 14px; }
+
+/* Panel con un poco más de respiración */
+.panel{ padding: clamp(16px, 3.5vw, 24px); }

@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <meta charset="UTF-8" />
+  <title>Cierre de Año Escolar</title>
+
+  <!-- Fuentes -->
+  <link href="https://fonts.googleapis.com/css2?family=Rock+Salt&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+
   <!-- PWA (desde subcarpeta) -->
   <link rel="manifest" href="../manifest.json">
   <meta name="theme-color" content="#0b0b0c">
@@ -10,24 +16,37 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CAOS">
+  <!-- Evitar tintes azules automáticos en iOS -->
+  <meta name="format-detection" content="telephone=no, date=no, address=no, email=no, url=no">
 
-  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Cierre de Año Escolar</title>
+
   <style>
+    /* ===== Tema legible (sin perder estética) ===== */
+    :root{
+      --caos-font-ui: "Comic Neue", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+        Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      --caos-font-display: "Rock Salt", cursive;
+      --caos-text: #111;
+      --caos-muted: #363636;
+      color-scheme: light;
+    }
+    *{ -webkit-tap-highlight-color: transparent; }
+    a, a:link, a:visited{ color:#000 !important; }
+
     body {
-      font-family: 'Rock Salt', cursive;
+      font-family: var(--caos-font-display);
       background-color: #fff;
-      background-image: repeating-linear-gradient(45deg, #000 0px, #000 1px, transparent 1px, transparent 6px);
+      background-image: repeating-linear-gradient(45deg, rgba(0,0,0,.12) 0px, rgba(0,0,0,.12) 1px, transparent 1px, transparent 6px);
       background-size: 100% 100%;
-      color: #000;
+      color: var(--caos-text);
       padding: 20px;
       margin: 0;
       padding-bottom: env(safe-area-inset-bottom);
     }
     .panel.caos-relative {
       border: 3px solid black;
-      padding: 20px;
+      padding: clamp(16px, 3.5vw, 24px);
       background-color: white;
       box-shadow: 8px 8px 0 black;
       max-width: 800px;
@@ -36,26 +55,45 @@
       position: relative; /* globos */
     }
     h1 {
-      font-size: clamp(22px, 6vw, 28px);
+      font-family: var(--caos-font-display);
+      font-size: clamp(22px, 6vw, 30px);
       border: 3px dashed black;
       padding: 10px;
       background-color: white;
       clip-path: polygon(0 0, 90% 0, 100% 10%, 100% 90%, 90% 100%, 0 100%);
       text-align: center;
       margin: 0 0 16px 0;
+      letter-spacing: .3px;
+    }
+
+    /* Controles legibles */
+    label,
+    select,
+    textarea,
+    button {
+      font-family: var(--caos-font-ui) !important;
+      color: var(--caos-text) !important;
+      -webkit-text-fill-color: var(--caos-text);
+      font-size: 18px;
+      line-height: 1.35;
+      letter-spacing: .2px;
     }
     label, select, textarea, button {
-      font-family: inherit;
-      font-size: 16px;
-      padding: 10px;
+      padding: 12px;
       border: 2px solid black;
       background-color: white;
       box-shadow: 3px 3px 0 black;
       width: 100%;
       margin-top: 10px;
-      min-height:44px;
+      min-height: 44px;
     }
+    select{ min-height: 48px; }
     textarea { min-height: 140px; }
+    input::placeholder, textarea::placeholder { color: #686868; opacity: .9; }
+
+    .btn { margin-top: 15px; text-align: center; }
+    .btn button{ width:100%; max-width:480px; margin: 0 auto; display:block; font-weight: 700; }
+
     .info {
       margin-top: 15px;
       padding: 10px;
@@ -63,35 +101,49 @@
       background-color: #eee;
       font-size: 14px;
       text-align: center;
+      font-family: var(--caos-font-ui);
     }
-    .btn { margin-top: 15px; text-align: center; }
-    .btn button{ width:100%; max-width:480px; margin: 0 auto; display:block; }
     footer {
       border: 3px solid black; box-shadow: 4px 4px 0 black; padding: 15px; margin: 40px auto 0;
       text-align: center; font-size: 0.9em; background: white; max-width: 600px; width: min(100% - 24px, 600px);
+      font-family: var(--caos-font-ui);
     }
 
-    /* Globos / Onomato */
-    .bubble{ position:absolute; z-index:999; max-width:320px; background:#fff; color:#000;
+    /* Foco accesible */
+    :focus-visible{ outline: 3px dashed #111; outline-offset: 2px; }
+
+    /* ===== Globos / Onomato ===== */
+    .bubble{
+      position:absolute; z-index:999; max-width:320px; background:#fff; color:#000;
       border:3px solid #000; box-shadow:6px 6px 0 #000; padding:12px 14px; font-weight:700; line-height:1.2;
       border-radius:14px; transform:translate(-50%,-110%) scale(0.98); opacity:0; pointer-events:none;
-      animation:bubble-in 250ms ease-out forwards, bubble-out 3s 2.4s ease-in forwards; }
-    .bubble::after{ content:""; position:absolute; bottom:-18px; left:50%; transform:translateX(-50%) rotate(8deg);
+      animation:bubble-in 250ms ease-out forwards, bubble-out 3s 2.4s ease-in forwards;
+    }
+    .bubble::after{
+      content:""; position:absolute; bottom:-18px; left:50%; transform:translateX(-50%) rotate(8deg);
       width:24px; height:24px; background:#fff; border-left:3px solid #000; border-bottom:3px solid #000;
-      box-shadow:6px 6px 0 #000; clip-path:polygon(0 0,100% 0,100% 100%); }
+      box-shadow:6px 6px 0 #000; clip-path:polygon(0 0,100% 0,100% 100%);
+    }
     .bubble--ok{ border-color:#09b37a; box-shadow:6px 6px 0 #09b37a; }
     .bubble--warn{ border-color:#f59e0b; box-shadow:6px 6px 0 #f59e0b; }
     .bubble--error{ border-color:#e02424; box-shadow:6px 6px 0 #e02424; }
     @keyframes bubble-in{ to{ opacity:1; transform:translate(-50%,-110%) scale(1);} }
     @keyframes bubble-out{ to{ opacity:0; transform:translate(-50%,-130%) scale(0.96);} }
-    .onomato{ position:absolute; z-index:998; font-weight:900; letter-spacing:2px; font-size:28px; -webkit-text-stroke:2px #000;
-      transform:translate(-50%,-50%) scale(0.6) rotate(-6deg); opacity:0; pointer-events:none; animation:ono-pop 520ms ease-out forwards; }
+
+    .onomato{
+      position:absolute; z-index:998; font-weight:900; letter-spacing:2px; font-size:28px;
+      -webkit-text-stroke:2px #000;
+      transform:translate(-50%,-50%) scale(0.6) rotate(-6deg); opacity:0; pointer-events:none;
+      animation:ono-pop 520ms ease-out forwards;
+    }
     .onomato--ok{ color:#33e6a4; text-shadow:6px 6px 0 #09b37a; }
     .onomato--error{ color:#ff6b6b; text-shadow:6px 6px 0 #e02424; }
     .onomato--wow{ color:#ffd45a; text-shadow:6px 6px 0 #f59e0b; }
-    @keyframes ono-pop{ 20%{ opacity:1; transform:translate(-50%,-50%) scale(1.1) rotate(2deg); }
+    @keyframes ono-pop{
+      20%{ opacity:1; transform:translate(-50%,-50%) scale(1.1) rotate(2deg); }
       60%{ transform:translate(-50%,-54%) scale(1) rotate(-2deg); }
-      100%{ opacity:0; transform:translate(-50%,-60%) scale(0.9) rotate(0deg); } }
+      100%{ opacity:0; transform:translate(-50%,-60%) scale(0.9) rotate(0deg); }
+    }
   </style>
 </head>
 <body>
@@ -130,7 +182,7 @@
   </footer>
 
   <script>
-    // util globos
+    // ===== Utilidades: globos =====
     function showBubble(anchorEl, texto, tipo='ok'){
       const panel = document.querySelector('.panel');
       const rect = anchorEl.getBoundingClientRect();
@@ -156,6 +208,7 @@
       setTimeout(()=> o.remove(), 600);
     }
 
+    // ===== API y sesión =====
     const apiUrl = 'https://script.google.com/macros/s/AKfycbwrcsk4aVXcejfnWYZNOvRLSETCKtXAya3ZO_f0sG2cbLC81mAAaH5D4OSrxT_QYLCvkQ/exec';
     const usuario = new URLSearchParams(window.location.search).get("usuario") || "";
 
@@ -166,25 +219,29 @@
       setTimeout(()=> window.location.href = "../login.html", 900);
     }
 
-    const cursoSelect = document.getElementById("cursoSelect");
-    const volverBtn = document.getElementById("volverBtn");
-    const btnFinalizar = document.getElementById("btnFinalizar");
+    // ===== UI refs =====
+    const cursoSelect   = document.getElementById("cursoSelect");
+    const volverBtn     = document.getElementById("volverBtn");
+    const btnFinalizar  = document.getElementById("btnFinalizar");   // (fix aplicado)
     const btnEliminar4M = document.getElementById("btnEliminar4M");
     volverBtn.href = `../index.html?usuario=${encodeURIComponent(usuario)}`;
 
+    // ===== Cursos disponibles =====
     const niveles = ["1ro Básico", "2do Básico", "3ro Básico", "4to Básico", "5to Básico", "6to Básico", "7mo Básico", "8vo Básico", "1ro Medio", "2do Medio", "3ro Medio", "4to Medio"];
-    const letras = ["A", "B", "C"];
-    const cursos = niveles.flatMap(n => letras.map(l => `${n} ${l}`));
+    const letras  = ["A", "B", "C"];
+    const cursos  = niveles.flatMap(n => letras.map(l => `${n} ${l}`));
     cursos.forEach(curso => {
       const opt = document.createElement("option");
       opt.textContent = curso;
       cursoSelect.appendChild(opt);
     });
 
+    // ===== Utils =====
     function normalizarTexto(texto) {
       return texto.trim().toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
     }
 
+    // ===== Acciones =====
     async function finalizarAno() {
       const cursoActual = cursoSelect.value;
       const repetidoresTexto = document.getElementById("repetidores").value;
@@ -207,12 +264,14 @@
       const nivelActual = match[2];
       const letra = match[3];
 
+      // 4° Medio se elimina aparte
       if (nivelActual === "Medio" && grado === 4) {
         showOnomato(cursoSelect, '¡HEY!', 'error');
         showBubble(cursoSelect, 'Es 4° Medio. Usa el botón especial.', 'warn');
         return;
       }
 
+      // Avance de curso
       grado++;
       let nuevoNivel = nivelActual;
       if (nivelActual === "Básico" && grado > 8) { grado = 1; nuevoNivel = "Medio"; }
@@ -222,18 +281,22 @@
       const nuevoCurso = `${sufijo} ${nuevoNivel} ${letra}`;
 
       try {
+        // Obtener estudiantes del curso
         const res = await fetch(`${apiUrl}?accion=obtener_estudiantes&curso=${encodeURIComponent(cursoActual)}`);
         const data = await res.json();
-        if (!data.ok || !data.estudiantes) throw new Error();
+        if (!data.ok || !data.estudiantes) throw new Error("Sin datos");
 
+        // Filtrar quienes NO repiten
         const estudiantes = data.estudiantes;
         const estudiantesNorm = estudiantes.map(n => ({ original: n, normalizado: normalizarTexto(n) }));
         const estudiantesAvanzan = estudiantesNorm.filter(e => !repetidores.includes(e.normalizado));
 
+        // Confirmación
         const resumen = estudiantesAvanzan.map(e => `- ${e.original}`).join("\n");
         const confirmar = confirm(`Se avanzarán ${estudiantesAvanzan.length} estudiantes a "${nuevoCurso}":\n\n${resumen}\n\n¿Deseas continuar?`);
         if (!confirmar) return;
 
+        // Avanzar uno a uno (como estaba)
         for (const est of estudiantesAvanzan) {
           await fetch(`${apiUrl}?accion=modificar_curso_estudiante&nombre=${encodeURIComponent(est.original)}&nuevoCurso=${encodeURIComponent(nuevoCurso)}&usuario=${encodeURIComponent(usuario)}`);
         }
@@ -265,9 +328,12 @@
       }
     }
 
+    // Eventos
     document.getElementById("btnFinalizar").addEventListener('click', finalizarAno);
     document.getElementById("btnEliminar4M").addEventListener('click', eliminarCuartos);
   </script>
+
+  <!-- SW global -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
