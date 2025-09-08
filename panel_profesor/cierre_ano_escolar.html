@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
- <!-- PWA (desde subcarpeta) -->
-<link rel="manifest" href="../manifest.json">
-<meta name="theme-color" content="#0b0b0c">
+  <!-- PWA (desde subcarpeta) -->
+  <link rel="manifest" href="../manifest.json">
+  <meta name="theme-color" content="#0b0b0c">
 
-<!-- iOS -->
-<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="CAOS">
+  <!-- iOS -->
+  <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CAOS">
 
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Cierre de Año Escolar</title>
   <style>
     body {
@@ -21,33 +22,40 @@
       background-size: 100% 100%;
       color: #000;
       padding: 20px;
+      margin: 0;
+      padding-bottom: env(safe-area-inset-bottom);
     }
-    .panel {
+    .panel.caos-relative {
       border: 3px solid black;
       padding: 20px;
       background-color: white;
       box-shadow: 8px 8px 0 black;
       max-width: 800px;
       margin: auto;
+      width: min(100% - 24px, 800px);
+      position: relative; /* globos */
     }
     h1 {
-      font-size: 28px;
+      font-size: clamp(22px, 6vw, 28px);
       border: 3px dashed black;
       padding: 10px;
       background-color: white;
       clip-path: polygon(0 0, 90% 0, 100% 10%, 100% 90%, 90% 100%, 0 100%);
       text-align: center;
+      margin: 0 0 16px 0;
     }
     label, select, textarea, button {
       font-family: inherit;
       font-size: 16px;
-      padding: 8px;
+      padding: 10px;
       border: 2px solid black;
       background-color: white;
       box-shadow: 3px 3px 0 black;
       width: 100%;
       margin-top: 10px;
+      min-height:44px;
     }
+    textarea { min-height: 140px; }
     .info {
       margin-top: 15px;
       padding: 10px;
@@ -56,17 +64,38 @@
       font-size: 14px;
       text-align: center;
     }
-    .btn {
-      margin-top: 15px;
-      text-align: center;
+    .btn { margin-top: 15px; text-align: center; }
+    .btn button{ width:100%; max-width:480px; margin: 0 auto; display:block; }
+    footer {
+      border: 3px solid black; box-shadow: 4px 4px 0 black; padding: 15px; margin: 40px auto 0;
+      text-align: center; font-size: 0.9em; background: white; max-width: 600px; width: min(100% - 24px, 600px);
     }
-    button {
-      cursor: pointer;
-    }
+
+    /* Globos / Onomato */
+    .bubble{ position:absolute; z-index:999; max-width:320px; background:#fff; color:#000;
+      border:3px solid #000; box-shadow:6px 6px 0 #000; padding:12px 14px; font-weight:700; line-height:1.2;
+      border-radius:14px; transform:translate(-50%,-110%) scale(0.98); opacity:0; pointer-events:none;
+      animation:bubble-in 250ms ease-out forwards, bubble-out 3s 2.4s ease-in forwards; }
+    .bubble::after{ content:""; position:absolute; bottom:-18px; left:50%; transform:translateX(-50%) rotate(8deg);
+      width:24px; height:24px; background:#fff; border-left:3px solid #000; border-bottom:3px solid #000;
+      box-shadow:6px 6px 0 #000; clip-path:polygon(0 0,100% 0,100% 100%); }
+    .bubble--ok{ border-color:#09b37a; box-shadow:6px 6px 0 #09b37a; }
+    .bubble--warn{ border-color:#f59e0b; box-shadow:6px 6px 0 #f59e0b; }
+    .bubble--error{ border-color:#e02424; box-shadow:6px 6px 0 #e02424; }
+    @keyframes bubble-in{ to{ opacity:1; transform:translate(-50%,-110%) scale(1);} }
+    @keyframes bubble-out{ to{ opacity:0; transform:translate(-50%,-130%) scale(0.96);} }
+    .onomato{ position:absolute; z-index:998; font-weight:900; letter-spacing:2px; font-size:28px; -webkit-text-stroke:2px #000;
+      transform:translate(-50%,-50%) scale(0.6) rotate(-6deg); opacity:0; pointer-events:none; animation:ono-pop 520ms ease-out forwards; }
+    .onomato--ok{ color:#33e6a4; text-shadow:6px 6px 0 #09b37a; }
+    .onomato--error{ color:#ff6b6b; text-shadow:6px 6px 0 #e02424; }
+    .onomato--wow{ color:#ffd45a; text-shadow:6px 6px 0 #f59e0b; }
+    @keyframes ono-pop{ 20%{ opacity:1; transform:translate(-50%,-50%) scale(1.1) rotate(2deg); }
+      60%{ transform:translate(-50%,-54%) scale(1) rotate(-2deg); }
+      100%{ opacity:0; transform:translate(-50%,-60%) scale(0.9) rotate(0deg); } }
   </style>
 </head>
 <body>
-  <div class="panel">
+  <div class="panel caos-relative">
     <h1>Cierre de Año Escolar</h1>
 
     <label for="cursoSelect">Selecciona un curso:</label>
@@ -76,11 +105,11 @@
     <textarea id="repetidores" rows="5" placeholder="Ej: juan pérez&#10;ANA TORO&#10;Carlos López"></textarea>
 
     <div class="btn">
-      <button onclick="finalizarAno()">📚 Finalizar año escolar (solo este curso)</button>
+      <button id="btnFinalizar">📚 Finalizar año escolar (solo este curso)</button>
     </div>
 
     <div class="btn">
-      <button onclick="eliminarCuartos()">🗑️ Eliminar todos los 4° Medio</button>
+      <button id="btnEliminar4M">🗑️ Eliminar todos los 4° Medio</button>
     </div>
 
     <div class="info">
@@ -95,23 +124,52 @@
     </div>
   </div>
 
-  <footer style="border: 3px solid black; box-shadow: 4px 4px 0 black; padding: 15px; margin-top: 40px; text-align: center; font-size: 0.9em; background: white; max-width: 600px; margin-left: auto; margin-right: auto;">
+  <footer>
     © 2025 CAOS. Todos los derechos reservados. <br>
     Sitio desarrollado por Benjamín González.
   </footer>
 
   <script>
+    // util globos
+    function showBubble(anchorEl, texto, tipo='ok'){
+      const panel = document.querySelector('.panel');
+      const rect = anchorEl.getBoundingClientRect();
+      const parentRect = panel.getBoundingClientRect();
+      const b = document.createElement('div');
+      b.className = `bubble bubble--${tipo}`;
+      b.textContent = texto;
+      b.style.left = (rect.left - parentRect.left + rect.width/2) + 'px';
+      b.style.top  = (rect.top  - parentRect.top) + 'px';
+      panel.appendChild(b);
+      setTimeout(()=> b.remove(), 3200);
+    }
+    function showOnomato(anchorEl, texto='¡POW!', estilo='ok'){
+      const panel = document.querySelector('.panel');
+      const rect = anchorEl.getBoundingClientRect();
+      const parentRect = panel.getBoundingClientRect();
+      const o = document.createElement('div');
+      o.className = `onomato onomato--${estilo}`;
+      o.textContent = texto;
+      o.style.left = (rect.left - parentRect.left + rect.width/2) + 'px';
+      o.style.top  = (rect.top  - parentRect.top - 30) + 'px';
+      panel.appendChild(o);
+      setTimeout(()=> o.remove(), 600);
+    }
+
     const apiUrl = 'https://script.google.com/macros/s/AKfycbwrcsk4aVXcejfnWYZNOvRLSETCKtXAya3ZO_f0sG2cbLC81mAAaH5D4OSrxT_QYLCvkQ/exec';
     const usuario = new URLSearchParams(window.location.search).get("usuario") || "";
 
-    // 🔐 Protección de acceso
     if (!usuario) {
-      alert("Debes iniciar sesión para acceder a esta página.");
-      window.location.href = "../login.html";
+      const panel = document.querySelector('.panel');
+      showOnomato(panel, '¡BANG!', 'error');
+      showBubble(panel, 'Debes iniciar sesión. Redirigiendo…', 'error');
+      setTimeout(()=> window.location.href = "../login.html", 900);
     }
 
     const cursoSelect = document.getElementById("cursoSelect");
     const volverBtn = document.getElementById("volverBtn");
+    const btnFinalizar = document.getElementById("btnFinalizar");
+    const btnEliminar4M = document.getElementById("btnEliminar4M");
     volverBtn.href = `../index.html?usuario=${encodeURIComponent(usuario)}`;
 
     const niveles = ["1ro Básico", "2do Básico", "3ro Básico", "4to Básico", "5to Básico", "6to Básico", "7mo Básico", "8vo Básico", "1ro Medio", "2do Medio", "3ro Medio", "4to Medio"];
@@ -130,34 +188,36 @@
     async function finalizarAno() {
       const cursoActual = cursoSelect.value;
       const repetidoresTexto = document.getElementById("repetidores").value;
-      const repetidores = repetidoresTexto
-        .split("\n")
-        .map(n => normalizarTexto(n))
-        .filter(n => n.length > 0);
+      const repetidores = repetidoresTexto.split("\n").map(n => normalizarTexto(n)).filter(n => n.length > 0);
 
-      if (!cursoActual) return alert("Selecciona un curso válido.");
+      if (!cursoActual) {
+        showOnomato(cursoSelect, '¡HEY!', 'error');
+        showBubble(cursoSelect, 'Selecciona un curso válido.', 'warn');
+        return;
+      }
 
       const match = cursoActual.match(/^(\d+)[^\d]*(Básico|Medio)\s([ABC])$/i);
-      if (!match) return alert("Formato de curso inválido.");
+      if (!match) {
+        showOnomato(cursoSelect, '¡BANG!', 'error');
+        showBubble(cursoSelect, 'Formato de curso inválido.', 'error');
+        return;
+      }
 
       let grado = parseInt(match[1]);
       const nivelActual = match[2];
       const letra = match[3];
 
-      if (nivelActual === "Medio" && grado === 4) return alert("Este curso es 4° Medio. Usa el botón especial para eliminarlo.");
+      if (nivelActual === "Medio" && grado === 4) {
+        showOnomato(cursoSelect, '¡HEY!', 'error');
+        showBubble(cursoSelect, 'Es 4° Medio. Usa el botón especial.', 'warn');
+        return;
+      }
 
       grado++;
       let nuevoNivel = nivelActual;
-      if (nivelActual === "Básico" && grado > 8) {
-        grado = 1;
-        nuevoNivel = "Medio";
-      }
+      if (nivelActual === "Básico" && grado > 8) { grado = 1; nuevoNivel = "Medio"; }
 
-      const sufijos = {
-        "Básico": ["1ro", "2do", "3ro", "4to", "5to", "6to", "7mo", "8vo"],
-        "Medio": ["1ro", "2do", "3ro", "4to"]
-      };
-
+      const sufijos = { "Básico": ["1ro","2do","3ro","4to","5to","6to","7mo","8vo"], "Medio": ["1ro","2do","3ro","4to"] };
       const sufijo = sufijos[nuevoNivel][grado - 1];
       const nuevoCurso = `${sufijo} ${nuevoNivel} ${letra}`;
 
@@ -178,40 +238,42 @@
           await fetch(`${apiUrl}?accion=modificar_curso_estudiante&nombre=${encodeURIComponent(est.original)}&nuevoCurso=${encodeURIComponent(nuevoCurso)}&usuario=${encodeURIComponent(usuario)}`);
         }
 
-        alert(`✅ Curso cerrado correctamente. Se avanzaron ${estudiantesAvanzan.length} estudiantes a ${nuevoCurso}.`);
-        location.reload();
+        showOnomato(btnFinalizar, '¡POW!', 'ok');
+        showBubble(btnFinalizar, `✅ Avanzados ${estudiantesAvanzan.length} a ${nuevoCurso}`, 'ok');
       } catch (e) {
-        console.error(e);
-        alert("Error al procesar el cierre de año escolar.");
+        showOnomato(btnFinalizar, '¡BANG!', 'error');
+        showBubble(btnFinalizar, 'Error al procesar el cierre.', 'error');
       }
     }
 
     async function eliminarCuartos() {
-      if (!confirm("¿Estás seguro de eliminar TODOS los estudiantes de 4° Medio? Esta acción no se puede deshacer.")) return;
+      if (!confirm("¿Eliminar TODOS los estudiantes de 4° Medio? Esta acción no se puede deshacer.")) return;
 
       try {
         const res = await fetch(`${apiUrl}?accion=eliminar_cuartos_medios&usuario=${encodeURIComponent(usuario)}`);
         const data = await res.json();
         if (data.ok) {
-          alert(`✅ Se eliminaron ${data.eliminados} estudiantes de 4° Medio.`);
-          location.reload();
+          showOnomato(btnEliminar4M, '¡POW!', 'ok');
+          showBubble(btnEliminar4M, `✅ Eliminados ${data.eliminados} estudiantes de 4° Medio.`, 'ok');
         } else {
-          alert("Ocurrió un error al eliminar 4° Medio.");
+          showOnomato(btnEliminar4M, '¡BANG!', 'error');
+          showBubble(btnEliminar4M, 'Ocurrió un error al eliminar 4° Medio.', 'error');
         }
       } catch (error) {
-        console.error(error);
-        alert("Error al comunicarse con el servidor.");
+        showOnomato(btnEliminar4M, '¡BANG!', 'error');
+        showBubble(btnEliminar4M, 'Error de red con el servidor.', 'error');
       }
     }
+
+    document.getElementById("btnFinalizar").addEventListener('click', finalizarAno);
+    document.getElementById("btnEliminar4M").addEventListener('click', eliminarCuartos);
   </script>
   <script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    // ¡OJO! barra inicial -> ruta absoluta al SW en la RAÍZ
-    navigator.serviceWorker.register('/service-worker.js', { scope: '/' });
-  });
-}
-</script>
-
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js', { scope: '/' });
+      });
+    }
+  </script>
 </body>
 </html>

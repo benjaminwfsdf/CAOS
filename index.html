@@ -10,9 +10,12 @@
   <meta name="apple-mobile-web-app-title" content="CAOS">
 
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
   <title>CAOS - Estética Panel</title>
   <link rel="stylesheet" href="style-caos.css">
   <style>
+    /* ====== Base existente ====== */
     body {
       background-color: #fff;
       color: #000;
@@ -20,6 +23,7 @@
       margin: 20px;
       background-image: repeating-linear-gradient(45deg, #000 0px, #000 1px, transparent 1px, transparent 6px);
       background-size: 100% 100%;
+      padding-bottom: env(safe-area-inset-bottom);
     }
     .panel { background-color: white; border: 3px solid black; padding: 20px; box-shadow: 8px 8px 0 black; max-width: 800px; margin: 0 auto; }
     .titulo { font-size: 40px; font-weight: bold; text-align: center; border: 3px dashed black; padding: 15px; background-color: white; clip-path: polygon(0 0, 90% 0, 100% 10%, 100% 90%, 90% 100%, 0 100%); margin-bottom: 5px; }
@@ -30,10 +34,92 @@
     .fila { display: flex; justify-content: space-between; align-items: center; margin: 10px 0; flex-wrap: wrap; gap: 10px; }
     .autorizar { margin-top: 20px; display: block; width: 100%; font-size: 16px; padding: 12px; background: white; border: 3px solid black; box-shadow: 4px 4px 0 black; text-transform: uppercase; text-align: center; text-decoration: none; color: black; font-family: 'Rock Salt', cursive; }
     small.muted { color:#333; opacity:.8; font-family: Arial, sans-serif; }
+
+    footer { }
+
+    /* ====== Accesibilidad/tacto ====== */
+    button, .autorizar, select, input[type="text"]{
+      min-height: 44px;
+    }
+    button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible{
+      outline: 3px dashed #000; outline-offset: 2px;
+    }
+
+    /* ====== Ajustes responsive ====== */
+    @media (max-width: 900px){
+      .panel{ max-width: 720px; }
+    }
+    @media (max-width: 768px){
+      body{ margin: 12px; }
+      .panel{ padding: 14px; box-shadow: 6px 6px 0 black; }
+      .titulo{ font-size: clamp(24px, 6vw, 36px); padding: 12px; }
+      .subtitulo{ font-size: clamp(14px, 3.8vw, 18px); }
+      .bloque{ padding: 12px; box-shadow: 4px 4px 0 black; }
+      .fila{ gap: 12px; }
+
+      .fila > label, 
+      .fila > a,
+      .fila > button,
+      .fila > input,
+      .fila > span {
+        flex: 1 1 100%;
+      }
+      #cursoSelect, #alumnoSelect, #buscarAlumno{
+        width: 100%;
+        margin-right: 0;
+      }
+      #btnEditarEstudiantes, #btnEditarCursosCargo{
+        width: 100%;
+      }
+      .autorizar{ font-size: 15px; padding: 14px; }
+    }
+
+    @media (max-width: 420px){
+      .panel{ padding: 12px; }
+      .titulo{ font-size: clamp(22px, 7.5vw, 30px); }
+      .subtitulo{ font-size: 14px; }
+    }
+
+    html, body{ max-width:100%; overflow-x:hidden; }
+
+    /* ====== Globos de diálogo (cómic) ====== */
+    .caos-relative { position: relative; }
+    .bubble{
+      position:absolute; z-index:999; max-width:320px; background:#fff; color:#000;
+      border:3px solid #000; box-shadow:6px 6px 0 #000; padding:12px 14px; font-weight:700; line-height:1.2;
+      border-radius:14px; transform:translate(-50%,-110%) scale(0.98); opacity:0; pointer-events:none;
+      animation:bubble-in 250ms ease-out forwards, bubble-out 3s 2.4s ease-in forwards;
+    }
+    .bubble::after{
+      content:""; position:absolute; bottom:-18px; left:50%; transform:translateX(-50%) rotate(8deg);
+      width:24px; height:24px; background:#fff; border-left:3px solid #000; border-bottom:3px solid #000;
+      box-shadow:6px 6px 0 #000; clip-path:polygon(0 0,100% 0,100% 100%);
+    }
+    .bubble--ok{ border-color:#09b37a; box-shadow:6px 6px 0 #09b37a; }
+    .bubble--warn{ border-color:#f59e0b; box-shadow:6px 6px 0 #f59e0b; }
+    .bubble--error{ border-color:#e02424; box-shadow:6px 6px 0 #e02424; }
+    @keyframes bubble-in{ to{ opacity:1; transform:translate(-50%,-110%) scale(1);} }
+    @keyframes bubble-out{ to{ opacity:0; transform:translate(-50%,-130%) scale(0.96);} }
+
+    /* ====== Onomatopeyas ====== */
+    .onomato{
+      position:absolute; z-index:998; font-weight:900; letter-spacing:2px; font-size:28px; color:#33e6a4;
+      -webkit-text-stroke:2px #000; text-shadow:6px 6px 0 #09b37a;
+      transform:translate(-50%,-50%) scale(0.6) rotate(-6deg); opacity:0; pointer-events:none;
+      animation:ono-pop 520ms ease-out forwards;
+    }
+    .onomato--ok{ color:#33e6a4; text-shadow:6px 6px 0 #09b37a; }
+    .onomato--error{ color:#ff6b6b; text-shadow:6px 6px 0 #e02424; }
+    .onomato--wow{ color:#ffd45a; text-shadow:6px 6px 0 #f59e0b; }
+    @keyframes ono-pop{
+      20%{ opacity:1; transform:translate(-50%,-50%) scale(1.1) rotate(2deg); }
+      60%{ transform:translate(-50%,-54%) scale(1) rotate(-2deg); }
+      100%{ opacity:0; transform:translate(-50%,-60%) scale(0.9) rotate(0deg); }
+    }
   </style>
 </head>
 <body>
-  <div class="panel">
+  <div class="panel caos-relative">
     <div class="titulo">CAOS</div>
     <p class="subtitulo">(CARTAS ANTI ORDEN EN LA SALA)</p>
 
@@ -60,11 +146,11 @@
 
       <div class="fila">
         <span>////////////////</span>
-        <a id="btnAleatoria" href="#"><button disabled>Asignar carta aleatoria</button></a>
+        <a id="btnAleatoria" href="#"><button id="btnAleatoriaInner" disabled>Asignar carta aleatoria</button></a>
       </div>
       <div class="fila">
         <span>////////////////</span>
-        <a id="btnEspecifica" href="#"><button disabled>Asignar carta específica</button></a>
+        <a id="btnEspecifica" href="#"><button id="btnEspecificaInner" disabled>Asignar carta específica</button></a>
       </div>
       <small class="muted" id="statusAlumnos"></small>
     </div>
@@ -78,12 +164,39 @@
     </div>
   </div>
 
-  <footer style="border: 3px solid black; box-shadow: 4px 4px 0 black; padding: 15px; margin-top: 40px; text-align: center; font-size: 0.9em; background: white; max-width: 600px; margin-left: auto; margin-right: auto;">
+  <footer style="border: 3px solid black; box-shadow: 4px 4px 0 black; padding: 15px; margin-top: 40px; text-align: center; font-size: 0.9em; background: white; max-width: 600px; margin-left: auto; margin-right: auto; width: min(100% - 24px, 600px);">
     © 2025 CAOS. Todos los derechos reservados. <br>
     Sitio desarrollado por Benjamín González.
   </footer>
 
   <script>
+    // === Utilidades: globos y onomatopeyas ===
+    function showBubble(anchorEl, texto, tipo='ok'){
+      const panel = anchorEl.closest('.caos-relative') || document.body;
+      const rect = anchorEl.getBoundingClientRect();
+      const parentRect = panel.getBoundingClientRect();
+      const b = document.createElement('div');
+      b.className = `bubble bubble--${tipo}`;
+      b.setAttribute('role','status'); b.setAttribute('aria-live','polite');
+      b.textContent = texto;
+      b.style.left = (rect.left - parentRect.left + rect.width/2) + 'px';
+      b.style.top  = (rect.top  - parentRect.top) + 'px';
+      panel.appendChild(b);
+      setTimeout(()=> b.remove(), 3200);
+    }
+    function showOnomato(anchorEl, texto='¡POW!', estilo='ok'){
+      const panel = anchorEl.closest('.caos-relative') || document.body;
+      const rect = anchorEl.getBoundingClientRect();
+      const parentRect = panel.getBoundingClientRect();
+      const o = document.createElement('div');
+      o.className = `onomato onomato--${estilo}`;
+      o.textContent = texto;
+      o.style.left = (rect.left - parentRect.left + rect.width/2) + 'px';
+      o.style.top  = (rect.top  - parentRect.top - 30) + 'px';
+      panel.appendChild(o);
+      setTimeout(()=> o.remove(), 600);
+    }
+
     // === Parámetros y rutas ===
     const usuario = new URLSearchParams(window.location.search).get("usuario");
     if (!usuario) { window.location.href = "login.html"; }
@@ -95,6 +208,8 @@
     const buscarAlumno = document.getElementById('buscarAlumno');
     const btnAleatoria = document.getElementById('btnAleatoria');
     const btnEspecifica = document.getElementById('btnEspecifica');
+    const btnAleatoriaInner = document.getElementById('btnAleatoriaInner');
+    const btnEspecificaInner = document.getElementById('btnEspecificaInner');
     const btnAutorizar = document.getElementById('btnAutorizar');
     const btnEditarEstudiantes = document.getElementById('btnEditarEstudiantes');
     const btnEditarCursosCargo = document.getElementById('btnEditarCursosCargo');
@@ -137,7 +252,6 @@
       if (cached && Array.isArray(cached)) {
         pintarCursos(cached);
         statusCursos.textContent = "Cursos (caché, actualizando…)";
-        // actualiza en segundo plano
         fetchCursos(true);
       } else {
         statusCursos.textContent = "Cargando cursos…";
@@ -153,18 +267,29 @@
           if (data.ok) {
             setCache(cacheKey, data.cursos || []);
             pintarCursos(data.cursos || []);
-            statusCursos.textContent = background ? "Cursos actualizados." : "";
+            statusCursos.textContent = background ? "Cursos actualizados." : "Cursos listos.";
+            if (!background) {
+              showOnomato(cursoSelect, '¡POW!', 'ok');
+              showBubble(cursoSelect, '✅ Cursos cargados', 'ok');
+            }
           } else {
-            if (!background) statusCursos.textContent = "Error al cargar cursos.";
+            if (!background) {
+              statusCursos.textContent = "Error al cargar cursos.";
+              showOnomato(cursoSelect, '¡BANG!', 'error');
+              showBubble(cursoSelect, '❌ Error al cargar cursos', 'error');
+            }
           }
         } catch (err) {
-          if (!background) statusCursos.textContent = "Error de red al cargar cursos.";
+          if (!background) {
+            statusCursos.textContent = "Error de red al cargar cursos.";
+            showOnomato(cursoSelect, '¡BANG!', 'error');
+            showBubble(cursoSelect, '❌ Error de red', 'error');
+          }
         }
       }
     }
 
     function pintarCursos(cursos) {
-      // Limpia
       cursoSelect.innerHTML = '<option>Selecciona un curso</option>';
 
       const sufijos = ["ro", "do", "ro", "to", "to", "to", "mo", "vo"];
@@ -211,16 +336,27 @@
           const data = await r.json();
           if (data.ok && Array.isArray(data.estudiantes)) {
             setCache(cacheKey, data.estudiantes);
-            // Si el usuario no ha tecleado búsqueda, repintamos
             if (!buscarAlumno.value.trim()) {
               pintarAlumnos(data.estudiantes);
             }
-            statusAlumnos.textContent = background ? "Alumnos actualizados." : "";
+            statusAlumnos.textContent = background ? "Alumnos actualizados." : "Alumnos listos.";
+            if (!background) {
+              showOnomato(alumnoSelect, '¡POW!', 'ok');
+              showBubble(alumnoSelect, '✅ Alumnos cargados', 'ok');
+            }
           } else {
-            if (!background) statusAlumnos.textContent = "Error al cargar estudiantes.";
+            if (!background) {
+              statusAlumnos.textContent = "Error al cargar estudiantes.";
+              showOnomato(alumnoSelect, '¡BANG!', 'error');
+              showBubble(alumnoSelect, '❌ Error al cargar estudiantes', 'error');
+            }
           }
         } catch (_) {
-          if (!background) statusAlumnos.textContent = "Error de red al cargar estudiantes.";
+          if (!background) {
+            statusAlumnos.textContent = "Error de red al cargar estudiantes.";
+            showOnomato(alumnoSelect, '¡BANG!', 'error');
+            showBubble(alumnoSelect, '❌ Error de red', 'error');
+          }
         }
       }
     }
@@ -233,16 +369,13 @@
         option.textContent = nombre;
         alumnoSelect.appendChild(option);
       });
-      // re-selecciona si coincide
       if (alumnoSelPrev) alumnoSelect.value = alumnoSelPrev;
-
-      // Deshabilita reparto hasta elegir alumno válido
       setRepartoHabilitado(false);
     }
 
     function setRepartoHabilitado(on) {
-      btnAleatoria.querySelector('button').disabled = !on;
-      btnEspecifica.querySelector('button').disabled = !on;
+      btnAleatoriaInner.disabled = !on;
+      btnEspecificaInner.disabled = !on;
       if (!on) {
         btnAleatoria.href = '#';
         btnEspecifica.href = '#';
@@ -282,10 +415,25 @@
           setRepartoHabilitado(true);
           btnAleatoria.href = `panel_profesor/reparto_carta_aleatoria.html?alumno=${encoded}&usuario=${encodeURIComponent(usuario)}`;
           btnEspecifica.href = `panel_profesor/reparto_carta_especifica.html?alumno=${encoded}&usuario=${encodeURIComponent(usuario)}`;
+
+          // feedback visual
+          showOnomato(alumnoSelect, '¡POW!', 'ok');
+          showBubble(alumnoSelect, `🎓 ${alumno} seleccionado. Acciones habilitadas.`, 'ok');
         } else {
           setRepartoHabilitado(false);
         }
       });
+
+      // Aviso si intentan usar botones deshabilitados
+      function warnIfDisabled(e, innerBtn){
+        if (innerBtn.disabled) {
+          e.preventDefault();
+          showOnomato(innerBtn, '¡HEY!', 'error');
+          showBubble(innerBtn, 'Selecciona un estudiante primero.', 'warn');
+        }
+      }
+      btnAleatoria.addEventListener('click', (e)=> warnIfDisabled(e, btnAleatoriaInner));
+      btnEspecifica.addEventListener('click', (e)=> warnIfDisabled(e, btnEspecificaInner));
 
       // Restaura último curso usado (si existe en lista)
       const ultimo = localStorage.getItem("cursoSeleccionado");
@@ -298,7 +446,7 @@
     });
   </script>
 
-  <!-- SW global (si ya lo tenías, mantenlo) -->
+  <!-- SW global -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {

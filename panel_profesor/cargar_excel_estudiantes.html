@@ -2,16 +2,17 @@
 <html lang="es">
 <head>
   <!-- PWA (desde subcarpeta) -->
-<link rel="manifest" href="../manifest.json">
-<meta name="theme-color" content="#0b0b0c">
+  <link rel="manifest" href="../manifest.json">
+  <meta name="theme-color" content="#0b0b0c">
 
-<!-- iOS -->
-<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="CAOS">
+  <!-- iOS -->
+  <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CAOS">
 
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Agregar Estudiantes</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
@@ -22,89 +23,73 @@
       background-size: 100% 100%;
       color: #000;
       padding: 20px;
+      margin: 0;
+      padding-bottom: env(safe-area-inset-bottom);
     }
-
-    .panel {
+    .panel.caos-relative {
       border: 3px solid black;
       padding: 20px;
       background-color: white;
       box-shadow: 8px 8px 0 black;
       max-width: 800px;
       margin: auto;
+      width: min(100% - 24px, 800px);
+      position: relative; /* globos */
     }
-
     h1 {
-      font-size: 28px;
+      font-size: clamp(22px, 6vw, 28px);
       border: 3px dashed black;
       padding: 10px;
       background-color: white;
       clip-path: polygon(0 0, 90% 0, 100% 10%, 100% 90%, 90% 100%, 0 100%);
       text-align: center;
+      margin: 0 0 16px 0;
     }
-
-    label {
-      display: block;
-      margin-top: 20px;
-    }
-
+    label { display: block; margin-top: 12px; }
     select, input[type="text"], input[type="file"], button {
-      font-family: inherit;
-      font-size: 16px;
-      padding: 8px;
-      margin-top: 5px;
-      border: 2px solid black;
-      background-color: white;
-      box-shadow: 3px 3px 0 black;
-      width: 100%;
+      font-family: inherit; font-size: 16px; padding: 10px; margin-top: 6px; border: 2px solid black;
+      background-color: white; box-shadow: 3px 3px 0 black; width: 100%; min-height:44px;
     }
-
     .mensaje {
-      margin-top: 15px;
-      padding: 10px;
-      border: 2px dashed black;
-      background-color: #eee;
+      margin-top: 15px; padding: 10px; border: 2px dashed black; background-color: #eee;
+      white-space: pre-wrap; word-break: break-word;
     }
-
-    table {
-      width: 100%;
-      margin-top: 20px;
-      border-collapse: collapse;
-    }
-
-    table th, table td {
-      border: 1px solid black;
-      padding: 8px;
-      text-align: left;
-    }
-
+    table { width: 100%; margin-top: 16px; border-collapse: collapse; }
+    th, td { border: 1px solid black; padding: 8px; text-align: left; }
     .acciones button {
-      padding: 4px 10px;
-      font-size: 14px;
-      cursor: pointer;
-      border: 2px solid black;
-      background-color: white;
-      box-shadow: 2px 2px 0 black;
+      padding: 6px 12px; font-size: 14px; cursor: pointer; border: 2px solid black; background-color: white; box-shadow: 2px 2px 0 black; min-height:40px;
     }
-
-    .volver {
-      text-align: center;
-      margin-top: 30px;
-    }
-
+    .volver { text-align: center; margin-top: 24px; }
     .volver a {
-      text-decoration: none;
-      font-family: inherit;
-      font-size: 16px;
-      padding: 10px 20px;
-      border: 3px solid black;
-      background-color: white;
-      box-shadow: 4px 4px 0 black;
-      display: inline-block;
+      text-decoration: none; font-family: inherit; font-size: 16px; padding: 10px 20px; border: 3px solid black;
+      background-color: white; box-shadow: 4px 4px 0 black; display: inline-block; min-height:44px;
     }
+
+    /* Globos / Onomato */
+    .bubble{ position:absolute; z-index:999; max-width:320px; background:#fff; color:#000;
+      border:3px solid #000; box-shadow:6px 6px 0 #000; padding:12px 14px; font-weight:700; line-height:1.2;
+      border-radius:14px; transform:translate(-50%,-110%) scale(0.98); opacity:0; pointer-events:none;
+      animation:bubble-in 250ms ease-out forwards, bubble-out 3s 2.4s ease-in forwards; }
+    .bubble::after{ content:""; position:absolute; bottom:-18px; left:50%; transform:translateX(-50%) rotate(8deg);
+      width:24px; height:24px; background:#fff; border-left:3px solid #000; border-bottom:3px solid #000;
+      box-shadow:6px 6px 0 #000; clip-path:polygon(0 0,100% 0,100% 100%); }
+    .bubble--ok{ border-color:#09b37a; box-shadow:6px 6px 0 #09b37a; }
+    .bubble--warn{ border-color:#f59e0b; box-shadow:6px 6px 0 #f59e0b; }
+    .bubble--error{ border-color:#e02424; box-shadow:6px 6px 0 #e02424; }
+    @keyframes bubble-in{ to{ opacity:1; transform:translate(-50%,-110%) scale(1);} }
+    @keyframes bubble-out{ to{ opacity:0; transform:translate(-50%,-130%) scale(0.96);} }
+    .onomato{ position:absolute; z-index:998; font-weight:900; letter-spacing:2px; font-size:28px; -webkit-text-stroke:2px #000;
+      transform:translate(-50%,-50%) scale(0.6) rotate(-6deg); opacity:0; pointer-events:none; animation:ono-pop 520ms ease-out forwards; }
+    .onomato--ok{ color:#33e6a4; text-shadow:6px 6px 0 #09b37a; }
+    .onomato--error{ color:#ff6b6b; text-shadow:6px 6px 0 #e02424; }
+    .onomato--wow{ color:#ffd45a; text-shadow:6px 6px 0 #f59e0b; }
+    @keyframes ono-pop{ 20%{ opacity:1; transform:translate(-50%,-50%) scale(1.1) rotate(2deg); }
+      60%{ transform:translate(-50%,-54%) scale(1) rotate(-2deg); }
+      100%{ opacity:0; transform:translate(-50%,-60%) scale(0.9) rotate(0deg); } }
   </style>
 </head>
 <body>
-<div class="panel">
+<div class="panel caos-relative">
   <h1>Agregar Estudiantes</h1>
 
   <label>Sube un archivo .xlsx o .csv (con columnas: Curso, Nombre del estudiante):</label>
@@ -128,8 +113,8 @@
     </tbody>
   </table>
 
-  <button onclick="agregarFila()">➕ Agregar fila</button>
-  <button onclick="guardarTodos()">💾 Guardar todos</button>
+  <button id="btnAgregarFila">➕ Agregar fila</button>
+  <button id="btnGuardarTodos">💾 Guardar todos</button>
 
   <div id="mensaje" class="mensaje" style="display: none;"></div>
 
@@ -139,9 +124,40 @@
 </div>
 
 <script>
+  // util globos
+  function showBubble(anchorEl, texto, tipo='ok'){
+    const panel = document.querySelector('.panel');
+    const rect = anchorEl.getBoundingClientRect();
+    const parentRect = panel.getBoundingClientRect();
+    const b = document.createElement('div');
+    b.className = `bubble bubble--${tipo}`;
+    b.textContent = texto;
+    b.style.left = (rect.left - parentRect.left + rect.width/2) + 'px';
+    b.style.top  = (rect.top  - parentRect.top) + 'px';
+    panel.appendChild(b);
+    setTimeout(()=> b.remove(), 3200);
+  }
+  function showOnomato(anchorEl, texto='¡POW!', estilo='ok'){
+    const panel = document.querySelector('.panel');
+    const rect = anchorEl.getBoundingClientRect();
+    const parentRect = panel.getBoundingClientRect();
+    const o = document.createElement('div');
+    o.className = `onomato onomato--${estilo}`;
+    o.textContent = texto;
+    o.style.left = (rect.left - parentRect.left + rect.width/2) + 'px';
+    o.style.top  = (rect.top  - parentRect.top - 30) + 'px';
+    panel.appendChild(o);
+    setTimeout(()=> o.remove(), 600);
+  }
+
   const apiUrl = "https://script.google.com/macros/s/AKfycbxomBS4kpyZcwIl38bjHbNhH0i7hASugNfiRL19SkkPNAMmW5cJHuwXnCO3RI6WFi7Rlg/exec";
   const usuario = new URLSearchParams(window.location.search).get("usuario") || "";
-  if (!usuario) window.location.href = "../login.html";
+  if (!usuario) {
+    const panel = document.querySelector('.panel');
+    showOnomato(panel, '¡BANG!', 'error');
+    showBubble(panel, 'Debes iniciar sesión. Redirigiendo…', 'error');
+    setTimeout(()=> window.location.href = "../login.html", 900);
+  }
   document.getElementById("volverBtn").href = `../index.html?usuario=${encodeURIComponent(usuario)}`;
 
   function agregarFila(nombre = "", curso = "") {
@@ -172,17 +188,21 @@
       try {
         const res = await fetch(`${apiUrl}?accion=agregar_estudiante&curso=${encodeURIComponent(curso)}&nombre=${encodeURIComponent(nombre)}`);
         const json = await res.json();
-        if (json.exito) exitos.push(nombre);
-        else errores.push(nombre);
+        if (json.exito) exitos.push(`${nombre} (${curso})`);
+        else errores.push(`${nombre} (${curso})`);
       } catch {
-        errores.push(nombre);
+        errores.push(`${nombre} (${curso})`);
       }
     }
 
     mensaje.style.display = "block";
     mensaje.innerHTML = "";
-    if (exitos.length) mensaje.innerHTML += `✅ Estudiantes guardados:<br>${exitos.join("<br>")}`;
-    if (errores.length) mensaje.innerHTML += `<br><br>❌ Fallaron:<br>${errores.join("<br>")}`;
+    if (exitos.length) mensaje.innerHTML += `✅ Estudiantes guardados:\n${exitos.join("\n")}`;
+    if (errores.length) mensaje.innerHTML += `\n\n❌ Fallaron:\n${errores.join("\n")}`;
+
+    // feedback bonito
+    if (exitos.length) { showOnomato(document.getElementById('btnGuardarTodos'), '¡POW!', 'ok'); showBubble(document.getElementById('btnGuardarTodos'), `Guardados: ${exitos.length}`, 'ok'); }
+    if (errores.length) { showOnomato(document.getElementById('btnGuardarTodos'), '¡BANG!', 'error'); showBubble(document.getElementById('btnGuardarTodos'), `Fallaron: ${errores.length}`, 'warn'); }
   }
 
   document.getElementById("archivoEstudiantes").addEventListener("change", function () {
@@ -193,39 +213,56 @@
     if (archivo.name.endsWith(".csv")) {
       reader.onload = function (e) {
         const lines = e.target.result.split("\n");
+        let count = 0;
         lines.forEach(line => {
-          const [curso, nombre] = line.split(",").map(x => x.trim());
-          if (curso && nombre) agregarFila(nombre, curso);
+          const [curso, nombre] = line.split(",").map(x => (x || '').trim());
+          if (curso && nombre) { agregarFila(nombre, curso); count++; }
         });
+        showOnomato(document.getElementById('archivoEstudiantes'), '¡POW!', 'ok');
+        showBubble(document.getElementById('archivoEstudiantes'), `📥 Filas agregadas: ${count}`, 'ok');
       };
       reader.readAsText(archivo);
     } else {
       reader.onload = function (e) {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: "array" });
-        const hoja = workbook.Sheets[workbook.SheetNames[0]];
-        const json = XLSX.utils.sheet_to_json(hoja, { header: 1 });
-        json.slice(1).forEach(fila => {
-          const [curso, nombre] = fila;
-          if (curso && nombre) agregarFila(nombre, curso);
-        });
+        try{
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: "array" });
+          const hoja = workbook.Sheets[workbook.SheetNames[0]];
+          const json = XLSX.utils.sheet_to_json(hoja, { header: 1 });
+          let count = 0;
+          json.slice(1).forEach(fila => {
+            const [curso, nombre] = fila;
+            if (curso && nombre) { agregarFila(nombre, curso); count++; }
+          });
+          showOnomato(document.getElementById('archivoEstudiantes'), '¡POW!', 'ok');
+          showBubble(document.getElementById('archivoEstudiantes'), `📥 Filas agregadas: ${count}`, 'ok');
+        }catch(e){
+          showOnomato(document.getElementById('archivoEstudiantes'), '¡BANG!', 'error');
+          showBubble(document.getElementById('archivoEstudiantes'), '❌ Error leyendo el archivo.', 'error');
+        }
       };
       reader.readAsArrayBuffer(archivo);
     }
   });
+
+  document.getElementById("btnAgregarFila").addEventListener('click', () => {
+    agregarFila();
+    showOnomato(document.getElementById('btnAgregarFila'), '¡POW!', 'ok');
+    showBubble(document.getElementById('btnAgregarFila'), 'Fila agregada.', 'ok');
+  });
+  document.getElementById("btnGuardarTodos").addEventListener('click', guardarTodos);
 </script>
 
-<footer style="border: 3px solid black; box-shadow: 4px 4px 0 black; padding: 15px; margin-top: 40px; text-align: center; font-size: 0.9em; background: white; max-width: 600px; margin-left: auto; margin-right: auto;">
+<footer>
   © 2025 CAOS. Todos los derechos reservados. <br>
   Sitio desarrollado por Benjamín González.
 </footer>
 <script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    // ¡OJO! barra inicial -> ruta absoluta al SW en la RAÍZ
-    navigator.serviceWorker.register('/service-worker.js', { scope: '/' });
-  });
-}
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js', { scope: '/' });
+    });
+  }
 </script>
 
 </body>

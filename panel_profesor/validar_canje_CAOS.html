@@ -1,165 +1,291 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <!-- PWA -->
-<!-- PWA (desde subcarpeta) -->
-<link rel="manifest" href="../manifest.json">
-<meta name="theme-color" content="#0b0b0c">
+  <!-- PWA (desde subcarpeta) -->
+  <link rel="manifest" href="../manifest.json">
+  <meta name="theme-color" content="#0b0b0c">
 
-<!-- iOS -->
-<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="CAOS">
+  <!-- iOS -->
+  <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CAOS">
 
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
   <title>Validar Canje de Cartas - CAOS</title>
   <link rel="stylesheet" href="../style-caos.css">
   <style>
     body {
       font-family: 'Rock Salt', cursive;
       padding: 20px;
+      margin: 0;
       background: repeating-linear-gradient(45deg, #000 0px, #000 1px, transparent 1px, transparent 6px);
+      padding-bottom: env(safe-area-inset-bottom);
     }
-    .panel {
+    .panel.caos-relative {
       border: 3px solid black;
       padding: 20px;
       box-shadow: 6px 6px 0 black;
       background-color: white;
       max-width: 800px;
       margin: auto;
+      width: min(100% - 24px, 800px);
+      position: relative; /* necesario para globos */
     }
     h1 {
       text-align: center;
-      font-size: 30px;
+      font-size: clamp(22px, 6vw, 30px);
       border: 3px dashed black;
       padding: 10px;
       margin-bottom: 20px;
       background-color: white;
     }
+
+    /* Tabla y wrapper responsive */
+    .table-responsive{
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border: 2px dashed #000;
+      padding: 6px;
+      margin-top: 12px;
+      background: #fff;
+    }
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
+      min-width: 520px;
     }
     th, td {
       border: 1px solid black;
       padding: 8px;
       text-align: center;
+      white-space: nowrap;
     }
+
     button {
       font-family: inherit;
       font-size: 14px;
-      padding: 6px 10px;
+      padding: 10px 12px;
       border: 2px solid black;
       box-shadow: 2px 2px 0 black;
       background-color: white;
       cursor: pointer;
+      min-height: 44px;
     }
-    .mensaje {
-      margin-top: 20px;
-      padding: 10px;
-      border-top: 2px dashed black;
+
+    #volverBtn{
+      text-decoration: none;
+      font-family: inherit;
+      font-size: 16px;
+      padding: 12px 20px;
+      border: 3px solid black;
+      background-color: white;
+      box-shadow: 4px 4px 0 black;
+      display: inline-block;
+      min-height:44px;
+      line-height: 1.2;
+    }
+
+    @media (max-width: 768px){
+      body{ padding: 14px; }
+      .panel{ padding: 14px; box-shadow: 5px 5px 0 #000; }
+    }
+
+    /* ====== Globos de diálogo (cómic) ====== */
+    .bubble{
+      position:absolute; z-index:999; max-width:320px; background:#fff; color:#000;
+      border:3px solid #000; box-shadow:6px 6px 0 #000; padding:12px 14px; font-weight:700; line-height:1.2;
+      border-radius:14px; transform:translate(-50%,-110%) scale(0.98); opacity:0; pointer-events:none;
+      animation:bubble-in 250ms ease-out forwards, bubble-out 3s 2.4s ease-in forwards;
+    }
+    .bubble::after{
+      content:""; position:absolute; bottom:-18px; left:50%; transform:translateX(-50%) rotate(8deg);
+      width:24px; height:24px; background:#fff; border-left:3px solid #000; border-bottom:3px solid #000;
+      box-shadow:6px 6px 0 #000; clip-path:polygon(0 0,100% 0,100% 100%);
+    }
+    .bubble--ok{ border-color:#09b37a; box-shadow:6px 6px 0 #09b37a; }
+    .bubble--warn{ border-color:#f59e0b; box-shadow:6px 6px 0 #f59e0b; }
+    .bubble--error{ border-color:#e02424; box-shadow:6px 6px 0 #e02424; }
+    @keyframes bubble-in{ to{ opacity:1; transform:translate(-50%,-110%) scale(1);} }
+    @keyframes bubble-out{ to{ opacity:0; transform:translate(-50%,-130%) scale(0.96);} }
+
+    /* ====== Onomatopeyas ====== */
+    .onomato{
+      position:absolute; z-index:998; font-weight:900; letter-spacing:2px; font-size:28px; color:#33e6a4;
+      -webkit-text-stroke:2px #000; text-shadow:6px 6px 0 #09b37a;
+      transform:translate(-50%,-50%) scale(0.6) rotate(-6deg); opacity:0; pointer-events:none;
+      animation:ono-pop 520ms ease-out forwards;
+    }
+    .onomato--ok{ color:#33e6a4; text-shadow:6px 6px 0 #09b37a; }
+    .onomato--error{ color:#ff6b6b; text-shadow:6px 6px 0 #e02424; }
+    .onomato--wow{ color:#ffd45a; text-shadow:6px 6px 0 #f59e0b; }
+    @keyframes ono-pop{
+      20%{ opacity:1; transform:translate(-50%,-50%) scale(1.1) rotate(2deg); }
+      60%{ transform:translate(-50%,-54%) scale(1) rotate(-2deg); }
+      100%{ opacity:0; transform:translate(-50%,-60%) scale(0.9) rotate(0deg); }
     }
   </style>
 </head>
 <body>
-  <div class="panel">
+  <div class="panel caos-relative">
     <h1>🔍 Validar Canje de Cartas</h1>
 
     <div id="solicitudesContainer">Cargando solicitudes...</div>
 
     <div style="margin-top: 30px; text-align: center;">
-      <a id="volverBtn" href="#" style="
-        text-decoration: none;
-        font-family: inherit;
-        font-size: 16px;
-        padding: 10px 20px;
-        border: 3px solid black;
-        background-color: white;
-        box-shadow: 4px 4px 0 black;
-        display: inline-block;">⬅ Volver al menú principal</a>
+      <a id="volverBtn" href="#">⬅ Volver al menú principal</a>
     </div>
   </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbxZ5pH12xvU9-jnibxM5Uosjk0ntBNt_gONtGuhVM_s4jFE9j8lWJpDLicgG71fcd2B/exec";
+    // ===== Utilidades: globos y onomatopeyas =====
+    function showBubble(anchorEl, texto, tipo='ok'){
+      const panel = anchorEl.closest('.caos-relative') || document.body;
+      const rect = anchorEl.getBoundingClientRect();
+      const parentRect = panel.getBoundingClientRect();
+      const b = document.createElement('div');
+      b.className = `bubble bubble--${tipo}`;
+      b.setAttribute('role','status'); b.setAttribute('aria-live','polite');
+      b.textContent = texto;
+      b.style.left = (rect.left - parentRect.left + rect.width/2) + 'px';
+      b.style.top  = (rect.top  - parentRect.top) + 'px';
+      panel.appendChild(b);
+      setTimeout(()=> b.remove(), 3200);
+    }
+    function showOnomato(anchorEl, texto='¡POW!', estilo='ok'){
+      const panel = anchorEl.closest('.caos-relative') || document.body;
+      const rect = anchorEl.getBoundingClientRect();
+      const parentRect = panel.getBoundingClientRect();
+      const o = document.createElement('div');
+      o.className = `onomato onomato--${estilo}`;
+      o.textContent = texto;
+      o.style.left = (rect.left - parentRect.left + rect.width/2) + 'px';
+      o.style.top  = (rect.top  - parentRect.top - 30) + 'px';
+      panel.appendChild(o);
+      setTimeout(()=> o.remove(), 600);
+    }
 
+    const API_URL = "https://script.google.com/macros/s/AKfycbxZ5pH12xvU9-jnibxM5Uosjk0ntBNt_gONtGuhVM_s4jFE9j8lWJpDLicgG71fcd2B/exec";
     const params = new URLSearchParams(window.location.search);
     const usuario = params.get("usuario");
 
-    // Si no hay sesión iniciada, redirigir
     if (!usuario) {
-      alert("Sesión no iniciada. Redirigiendo al login.");
-      window.location.href = "../login.html";
+      // feedback + redirección
+      const panel = document.querySelector('.panel');
+      showOnomato(panel, '¡BANG!', 'error');
+      showBubble(panel, 'Sesión no iniciada. Redirigiendo…', 'error');
+      setTimeout(()=> window.location.href = "../login.html", 900);
     }
 
     // Asignar botón volver
-    document.getElementById("volverBtn").href = `../index.html?usuario=${encodeURIComponent(usuario)}`;
+    document.getElementById("volverBtn").href = `../index.html?usuario=${encodeURIComponent(usuario||'')}`;
 
     async function cargarSolicitudes() {
+      const contenedor = document.getElementById("solicitudesContainer");
       try {
         const res = await fetch(`${API_URL}?accion=ver_solicitudes`);
         const solicitudes = await res.json();
 
-        const contenedor = document.getElementById("solicitudesContainer");
-
         if (!Array.isArray(solicitudes) || solicitudes.length === 0) {
           contenedor.innerHTML = "<p>📭 No hay solicitudes pendientes.</p>";
+          const panel = document.querySelector('.panel');
+          showOnomato(panel, '¡HEY!', 'error');
+          showBubble(panel, 'No hay solicitudes por ahora.', 'warn');
           return;
         }
 
-        let html = `
-          <table>
-            <thead>
-              <tr>
-                <th>Alumno</th>
-                <th>Carta</th>
-                <th>Acción</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${solicitudes.map(s => `
+        const html = `
+          <div class="table-responsive">
+            <table>
+              <thead>
                 <tr>
-                  <td>${s.alumno}</td>
-                  <td>${s.carta}</td>
-                  <td>
-                    <button onclick="aprobar('${s.alumno}', '${s.carta}')">✅ Aprobar</button>
-                    <button onclick="rechazar('${s.alumno}', '${s.carta}')">❌ Rechazar</button>
-                  </td>
+                  <th>Alumno</th>
+                  <th>Carta</th>
+                  <th>Acción</th>
                 </tr>
-              `).join('')}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                ${solicitudes.map(s => `
+                  <tr>
+                    <td>${s.alumno}</td>
+                    <td>${s.carta}</td>
+                    <td style="white-space:nowrap;">
+                      <button onclick="aprobar('${s.alumno}', '${s.carta}', this)">✅ Aprobar</button>
+                      <button onclick="rechazar('${s.alumno}', '${s.carta}', this)">❌ Rechazar</button>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
         `;
 
         contenedor.innerHTML = html;
+
+        // feedback
+        const panel = document.querySelector('.panel');
+        showOnomato(panel, '¡POW!', 'ok');
+        showBubble(panel, `✅ ${solicitudes.length} solicitud(es) cargadas`, 'ok');
+
       } catch (error) {
         console.error("❌ Error cargando solicitudes:", error);
-        document.getElementById("solicitudesContainer").innerHTML = `<p style="color:red;">❌ Error al cargar las solicitudes.</p>`;
+        contenedor.innerHTML = `<p style="color:red;">❌ Error al cargar las solicitudes.</p>`;
+        const panel = document.querySelector('.panel');
+        showOnomato(panel, '¡BANG!', 'error');
+        showBubble(panel, 'Error de red al cargar.', 'error');
       }
     }
 
-    async function aprobar(alumno, carta) {
-      const confirmacion = confirm(`¿Aprobar canje de '${carta}' para ${alumno}?`);
-      if (!confirmacion) return;
+    async function aprobar(alumno, carta, btnEl) {
+      if (!confirm(`¿Aprobar canje de '${carta}' para ${alumno}?`)) return;
+      try{
+        const url = `${API_URL}?accion=aprobar_canje&alumno=${encodeURIComponent(alumno)}&carta=${encodeURIComponent(carta)}`;
+        const res = await fetch(url);
+        const mensaje = await res.text();
 
-      const url = `${API_URL}?accion=aprobar_canje&alumno=${encodeURIComponent(alumno)}&carta=${encodeURIComponent(carta)}`;
-      const res = await fetch(url);
-      const mensaje = await res.text();
-      alert(mensaje);
-      cargarSolicitudes();
+        showOnomato(btnEl, '¡POW!', 'ok');
+        showBubble(btnEl, `✅ ${mensaje || 'Canje aprobado.'}`, 'ok');
+
+        // Quita la fila aprobada
+        const tr = btnEl.closest('tr');
+        if (tr) tr.remove();
+
+        // Si la tabla queda vacía, mensaje
+        const tbody = document.querySelector('tbody');
+        if (tbody && tbody.children.length === 0) {
+          document.getElementById("solicitudesContainer").innerHTML = "<p>📭 No hay solicitudes pendientes.</p>";
+        }
+      } catch (e){
+        showOnomato(btnEl, '¡BANG!', 'error');
+        showBubble(btnEl, '❌ Error al aprobar.', 'error');
+      }
     }
 
-    async function rechazar(alumno, carta) {
-      const confirmacion = confirm(`¿Rechazar canje de '${carta}' para ${alumno}?`);
-      if (!confirmacion) return;
+    async function rechazar(alumno, carta, btnEl) {
+      if (!confirm(`¿Rechazar canje de '${carta}' para ${alumno}?`)) return;
+      try{
+        const url = `${API_URL}?accion=rechazar_canje&alumno=${encodeURIComponent(alumno)}&carta=${encodeURIComponent(carta)}`;
+        const res = await fetch(url);
+        const mensaje = await res.text();
 
-      const url = `${API_URL}?accion=rechazar_canje&alumno=${encodeURIComponent(alumno)}&carta=${encodeURIComponent(carta)}`;
-      const res = await fetch(url);
-      const mensaje = await res.text();
-      alert(mensaje);
-      cargarSolicitudes();
+        showOnomato(btnEl, '¡BANG!', 'error');
+        showBubble(btnEl, `🛑 ${mensaje || 'Canje rechazado.'}`, 'warn');
+
+        // Quita la fila rechazada
+        const tr = btnEl.closest('tr');
+        if (tr) tr.remove();
+
+        // Si la tabla queda vacía, mensaje
+        const tbody = document.querySelector('tbody');
+        if (tbody && tbody.children.length === 0) {
+          document.getElementById("solicitudesContainer").innerHTML = "<p>📭 No hay solicitudes pendientes.</p>";
+        }
+      } catch (e){
+        showOnomato(btnEl, '¡BANG!', 'error');
+        showBubble(btnEl, '❌ Error al rechazar.', 'error');
+      }
     }
 
     cargarSolicitudes();
@@ -169,25 +295,22 @@
     border: 3px solid black;
     box-shadow: 4px 4px 0 black;
     padding: 15px;
-    margin-top: 40px;
+    margin: 40px auto 0;
     text-align: center;
     font-size: 0.9em;
     background: white;
     max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;">
+    width: min(100% - 24px, 600px);">
     © 2025 CAOS. Todos los derechos reservados. <br>
     Sitio desarrollado por Benjamín González.
   </footer>
- <script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    // ¡OJO! barra inicial -> ruta absoluta al SW en la RAÍZ
-    navigator.serviceWorker.register('/service-worker.js', { scope: '/' });
-  });
-}
-</script>
 
-
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js', { scope: '/' });
+      });
+    }
+  </script>
 </body>
 </html>

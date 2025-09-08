@@ -2,110 +2,145 @@
 <html lang="es">
 <head>
   <!-- PWA -->
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#0b0b0c">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="CAOS">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0b0b0c">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CAOS">
 
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>CAOS - Crear Cuenta</title>
   <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+
   <style>
-    body {
-      font-family: 'Comic Neue', cursive;
-      background-image: repeating-linear-gradient(45deg, #000 0px, #000 1px, transparent 1px, transparent 6px);
-      background-size: 100% 100%;
-      margin: 0;
-      padding: 0;
+    body{
+      font-family:'Comic Neue',cursive;
+      background-image:repeating-linear-gradient(45deg,#000 0px,#000 1px,transparent 1px,transparent 6px);
+      background-size:100% 100%;
+      margin:0; padding:0 0 env(safe-area-inset-bottom);
+      color:#000;
     }
-    .container {
-      max-width: 700px;
-      margin: 40px auto;
-      background: white;
-      border: 3px solid black;
-      box-shadow: 8px 8px 0 black;
-      padding: 20px;
+    .container.caos-relative{
+      max-width:700px; margin:40px auto; background:#fff; border:3px solid #000;
+      box-shadow:8px 8px 0 #000; padding:20px; width:min(100% - 24px,700px);
+      position:relative; /* para globos */
     }
-    .titulo {
-      font-size: 40px;
-      font-weight: bold;
-      text-align: center;
-      border: 3px dashed black;
-      padding: 15px;
-      margin-bottom: 20px;
+    .titulo{
+      font-size:40px; font-weight:bold; text-align:center; border:3px dashed #000;
+      padding:15px; margin-bottom:20px; background:#fff;
     }
-    label, input, button {
-      font-size: 16px;
-      display: block;
-      width: 100%;
-      margin-bottom: 10px;
+    label, input, button{ font-size:16px; display:block; width:100%; margin-bottom:10px; }
+    input{
+      padding:10px; border:2px solid #000; box-shadow:3px 3px 0 #000; background:#fff; color:#000;
     }
-    input {
-      padding: 8px;
-      border: 2px solid black;
-      box-shadow: 3px 3px 0 black;
+    button{
+      background:#fff; padding:12px; border:2px solid #000; box-shadow:3px 3px 0 #000; cursor:pointer; min-height:44px;
+      font-family:inherit;
     }
-    button {
-      background: white;
-      padding: 10px;
-      border: 2px solid black;
-      box-shadow: 3px 3px 0 black;
-      cursor: pointer;
+    .cursos-grid{
+      display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr));
+      gap:6px; max-height:250px; overflow-y:auto; border:2px dashed #000; padding:10px; background:#fff;
     }
-    .cursos-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      gap: 5px;
-      max-height: 250px;
-      overflow-y: auto;
-      border: 2px dashed black;
-      padding: 10px;
+    .curso-item{ display:flex; align-items:center; gap:8px; }
+    .curso-item input{ width:auto; transform:scale(1.1); }
+
+    footer{
+      border:3px solid #000; box-shadow:4px 4px 0 #000; padding:15px; margin-top:40px; text-align:center;
+      background:#fff; max-width:600px; margin-left:auto; margin-right:auto;
     }
-    .curso-item {
-      display: flex;
-      align-items: center;
+
+    /* Focus accesible */
+    button:focus-visible, a:focus-visible, input:focus-visible{ outline:3px dashed #000; outline-offset:2px; }
+
+    /* ===== Globos de diálogo (cómic) ===== */
+    .bubble{
+      position:absolute; z-index:999; max-width:320px; background:#fff; color:#000;
+      border:3px solid #000; box-shadow:6px 6px 0 #000; padding:12px 14px; font-weight:700; line-height:1.2;
+      border-radius:14px; transform:translate(-50%,-110%) scale(0.98); opacity:0; pointer-events:none;
+      animation:bubble-in 250ms ease-out forwards, bubble-out 3s 2.4s ease-in forwards;
     }
-    .curso-item input {
-      width: auto;
-      margin-right: 8px;
+    .bubble::after{
+      content:""; position:absolute; bottom:-18px; left:50%; transform:translateX(-50%) rotate(8deg);
+      width:24px; height:24px; background:#fff; border-left:3px solid #000; border-bottom:3px solid #000;
+      box-shadow:6px 6px 0 #000; clip-path:polygon(0 0,100% 0,100% 100%);
     }
-    footer {
-      border: 3px solid black;
-      box-shadow: 4px 4px 0 black;
-      padding: 15px;
-      margin-top: 40px;
-      text-align: center;
-      background: white;
-      max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
+    .bubble--ok{ border-color:#09b37a; box-shadow:6px 6px 0 #09b37a; }
+    .bubble--warn{ border-color:#f59e0b; box-shadow:6px 6px 0 #f59e0b; }
+    .bubble--error{ border-color:#e02424; box-shadow:6px 6px 0 #e02424; }
+    @keyframes bubble-in{ to{ opacity:1; transform:translate(-50%,-110%) scale(1);} }
+    @keyframes bubble-out{ to{ opacity:0; transform:translate(-50%,-130%) scale(0.96);} }
+
+    /* ===== Onomatopeyas ===== */
+    .onomato{
+      position:absolute; z-index:998; font-weight:900; letter-spacing:2px; font-size:28px;
+      -webkit-text-stroke:2px #000;
+      transform:translate(-50%,-50%) scale(0.6) rotate(-6deg); opacity:0; pointer-events:none;
+      animation:ono-pop 520ms ease-out forwards;
+    }
+    .onomato--ok{ color:#33e6a4; text-shadow:6px 6px 0 #09b37a; }
+    .onomato--error{ color:#ff6b6b; text-shadow:6px 6px 0 #e02424; }
+    .onomato--wow{ color:#ffd45a; text-shadow:6px 6px 0 #f59e0b; }
+    @keyframes ono-pop{
+      20%{ opacity:1; transform:translate(-50%,-50%) scale(1.1) rotate(2deg); }
+      60%{ transform:translate(-50%,-54%) scale(1) rotate(-2deg); }
+      100%{ opacity:0; transform:translate(-50%,-60%) scale(0.9) rotate(0deg); }
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="container caos-relative">
     <div class="titulo">Crear Cuenta</div>
+
     <label>Correo electrónico:
-      <input type="email" id="usuarioRegistro">
+      <input type="email" id="usuarioRegistro" inputmode="email" autocomplete="username">
     </label>
     <label>Contraseña de seguridad (profesor):
-      <input type="password" id="claveSeguridad">
+      <input type="password" id="claveSeguridad" autocomplete="current-password">
     </label>
     <label>Contraseña nueva:
-      <input type="password" id="nuevaClave">
+      <input type="password" id="nuevaClave" autocomplete="new-password">
     </label>
 
-    <label>Cursos a cargo:</label>
+    <label style="font-weight:bold; margin-top:14px;">Cursos a cargo:</label>
     <div id="contenedorCursos" class="cursos-grid"></div>
 
     <button id="btnRegistro">Crear cuenta</button>
   </div>
 
   <script>
+    // Utilidades: globos y onomatopeyas
+    function showBubble(anchorEl, texto, tipo='ok'){
+      const panel = anchorEl.closest('.caos-relative') || document.body;
+      const rect = anchorEl.getBoundingClientRect();
+      const parentRect = panel.getBoundingClientRect();
+      const b = document.createElement('div');
+      b.className = `bubble bubble--${tipo}`;
+      b.setAttribute('role','status'); b.setAttribute('aria-live','polite');
+      b.textContent = texto;
+      b.style.left = (rect.left - parentRect.left + rect.width/2) + 'px';
+      b.style.top  = (rect.top  - parentRect.top) + 'px';
+      panel.appendChild(b);
+      setTimeout(()=> b.remove(), 3200);
+    }
+    function showOnomato(anchorEl, texto='¡POW!', estilo='ok'){
+      const panel = anchorEl.closest('.caos-relative') || document.body;
+      const rect = anchorEl.getBoundingClientRect();
+      const parentRect = panel.getBoundingClientRect();
+      const o = document.createElement('div');
+      o.className = `onomato onomato--${estilo}`;
+      o.textContent = texto;
+      o.style.left = (rect.left - parentRect.left + rect.width/2) + 'px';
+      o.style.top  = (rect.top  - parentRect.top - 30) + 'px';
+      panel.appendChild(o);
+      setTimeout(()=> o.remove(), 600);
+    }
+
+    // === Lógica original + feedback visual ===
     const apiUrl = 'https://script.google.com/macros/s/AKfycbwuNchPFTW2nCQThMFq2LMngQ8gQHay_hww8kmWZf0D8znqw3K1S_V3KpZBVOVv1_nE/exec';
     const contenedorCursos = document.getElementById("contenedorCursos");
+    const btnRegistro = document.getElementById("btnRegistro");
 
     const cursos = [];
     const basico = ["1ro", "2do", "3ro", "4to", "5to", "6to", "7mo", "8vo"];
@@ -119,51 +154,65 @@
       const div = document.createElement("div");
       div.className = "curso-item";
       const checkbox = document.createElement("input");
-      checkbox.type = "checkbox";
-      checkbox.value = curso;
+      checkbox.type = "checkbox"; checkbox.value = curso; checkbox.id = `c_${curso.replace(/\s+/g,'_')}`;
       const label = document.createElement("label");
+      label.setAttribute('for', checkbox.id);
       label.textContent = curso;
       div.appendChild(checkbox);
       div.appendChild(label);
       contenedorCursos.appendChild(div);
     });
 
-    document.getElementById("btnRegistro").addEventListener("click", async () => {
+    btnRegistro.addEventListener("click", async () => {
       const usuario = document.getElementById("usuarioRegistro").value.trim().toLowerCase();
       const claveSeguridad = document.getElementById("claveSeguridad").value.trim();
       const nuevaClave = document.getElementById("nuevaClave").value.trim();
       const cursosSeleccionados = Array.from(contenedorCursos.querySelectorAll("input:checked")).map(c => c.value).join(",");
 
-      if (claveSeguridad !== "profecaos123") {
-        return alert("❌ La contraseña de seguridad es incorrecta.");
-      }
-
       if (!usuario || !nuevaClave || cursosSeleccionados.length === 0) {
-        return alert("Completa todos los campos.");
+        showOnomato(btnRegistro, '¡HEY!', 'error');
+        showBubble(btnRegistro, 'Completa todos los campos y selecciona cursos.', 'warn');
+        return;
       }
 
-      const crearRes = await fetch(`${apiUrl}?accion=crear_profesor&usuario=${encodeURIComponent(usuario)}&nueva=${encodeURIComponent(nuevaClave)}&cursos=${encodeURIComponent(cursosSeleccionados)}`);
-      const crearData = await crearRes.json();
-
-      if (!crearData.ok) {
-        return alert("❌ Error: ya existe ese usuario.");
+      if (claveSeguridad !== "profecaos123") {
+        showOnomato(btnRegistro, '¡BANG!', 'error');
+        showBubble(btnRegistro, '❌ La contraseña de seguridad es incorrecta.', 'error');
+        return;
       }
 
-      alert("✅ Cuenta creada. Redirigiendo al panel...");
-      window.location.href = `index.html?usuario=${encodeURIComponent(usuario)}`;
+      try {
+        const crearRes = await fetch(`${apiUrl}?accion=crear_profesor&usuario=${encodeURIComponent(usuario)}&nueva=${encodeURIComponent(nuevaClave)}&cursos=${encodeURIComponent(cursosSeleccionados)}`);
+        const crearData = await crearRes.json();
+
+        if (!crearData.ok) {
+          showOnomato(btnRegistro, '¡BANG!', 'error');
+          showBubble(btnRegistro, '❌ Error: ya existe ese usuario.', 'error');
+          return;
+        }
+
+        showOnomato(btnRegistro, '¡POW!', 'ok');
+        showBubble(btnRegistro, '✅ Cuenta creada. Redirigiendo al panel…', 'ok');
+        setTimeout(()=> {
+          window.location.href = `index.html?usuario=${encodeURIComponent(usuario)}`;
+        }, 900);
+      } catch (e) {
+        showOnomato(btnRegistro, '¡BANG!', 'error');
+        showBubble(btnRegistro, '❌ Error de red. Intenta de nuevo.', 'error');
+      }
     });
   </script>
 
   <footer>
     © 2025 CAOS. Sitio desarrollado por Benjamín González.
   </footer>
-  <script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js');
-  });
-}
-</script>
 
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js');
+      });
+    }
+  </script>
 </body>
 </html>
