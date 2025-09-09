@@ -23,7 +23,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Rock+Salt&family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
 
-  <!-- OneSignal Web SDK (para push server-side) -->
+  <!-- OneSignal SDK (Web Push) -->
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 
   <style>
@@ -49,6 +49,65 @@
       font-family:'Rock Salt',cursive;
       font-weight:700;
       text-shadow:0 0 1px var(--ink);
+    }
+
+    /* Splash (pantalla de inicio) */
+    #splash{
+      position:fixed; inset:0; z-index:99999;
+      display:grid; place-items:center;
+      background:var(--paper);
+      transition:opacity .45s ease, transform .45s ease;
+    }
+    #splash.hide{
+      opacity:0; transform:translateY(-10px);
+      pointer-events:none;
+    }
+    .splash-inner{
+      display:grid; place-items:center; gap:14px;
+      border:3px dashed var(--ink);
+      border-radius:20px;
+      padding:22px 26px;
+      box-shadow:var(--shadow);
+      background:var(--paper);
+    }
+    #splashLogo{
+      width:min(180px, 42vw);
+      height:auto; 
+      opacity:0; transform:scale(.7);
+      filter: drop-shadow(0 0 0 var(--ink));
+      animation: splash-pop 1100ms cubic-bezier(.2,.9,.2,1.2) 120ms forwards;
+    }
+    .splash-title{
+      font-size:clamp(22px,6vw,34px);
+      letter-spacing:1px;
+      opacity:0; transform:translateY(6px);
+      animation: splash-fadeup 600ms ease 780ms forwards;
+    }
+    .splash-loading{
+      font-family:Arial, sans-serif; font-weight:700;
+      font-size:14px; opacity:.8;
+      display:flex; align-items:center; gap:6px; justify-content:center;
+      opacity:0; transform:translateY(6px);
+      animation: splash-fadeup 600ms ease 980ms forwards;
+    }
+    .dot{width:6px;height:6px;border-radius:50%;background:var(--ink);opacity:.3;animation:blink 1.4s infinite}
+    .dot:nth-child(2){animation-delay:.2s}
+    .dot:nth-child(3){animation-delay:.4s}
+
+    @keyframes blink { 0%, 80%, 100% { opacity:.15 } 40% { opacity:1 } }
+    @keyframes splash-pop {
+      0%   { opacity:0; transform:scale(.7) }
+      50%  { opacity:1; transform:scale(1.12) }
+      70%  { transform:scale(.96) }
+      100% { opacity:1; transform:scale(1) }
+    }
+    @keyframes splash-fadeup {
+      to { opacity:1; transform:translateY(0) }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      #splashLogo, .splash-title, .splash-loading { animation:none; opacity:1; transform:none; }
+      #splash { transition:none; }
     }
 
     /* Shell tipo app */
@@ -168,7 +227,7 @@
     #modalCambio input{padding:12px;font-size:18px;width:100%;border:2px solid var(--ink);border-radius:10px}
     #modalCambio button{padding:12px 18px;font-size:18px;border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);background:var(--paper);border-radius:12px;margin-top:12px;cursor:pointer}
 
-    /* Globos + onomatopeyas (igual lógica) */
+    /* Globos + onomatopeyas */
     .bubble{
       position:absolute; z-index:999; max-width:320px; background:var(--paper); color:var(--ink);
       border:3px solid var(--ink); box-shadow:6px 6px 0 var(--ink); padding:12px 14px; font-weight:700; line-height:1.2;
@@ -209,7 +268,19 @@
   </style>
 </head>
 <body>
-  <main class="app">
+
+  <!-- Splash -->
+  <div id="splash" aria-hidden="true">
+    <div class="splash-inner">
+      <img id="splashLogo" src="/estudiante/icons/icon-alumno-192.png" alt="Logo CAOS">
+      <div class="splash-title">CAOS</div>
+      <div class="splash-loading" aria-label="Cargando">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      </div>
+    </div>
+  </div>
+
+  <main class="app" id="appRoot">
     <!-- Panel de login -->
     <section class="panel" id="loginPanel" style="margin-top:6px;">
       <h1 class="titulo">🔐 Ingreso restringido</h1>
@@ -263,6 +334,27 @@
       });
     }
 
+    /* ===== Splash: revelar con seguridad tras DOM listo + fallback ===== */
+    (function setupSplash(){
+      const splash = document.getElementById('splash');
+
+      function reveal(){
+        if (!splash) return;
+        splash.classList.add('hide');
+        setTimeout(()=> splash && splash.remove(), 650);
+      }
+
+      // 1) Cuando el DOM está listo, programamos el fade out tras 1.2s (bounce del logo)
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => setTimeout(reveal, 1200));
+      } else {
+        setTimeout(reveal, 1200);
+      }
+
+      // 2) Fallback duro a los 3s por si algo bloqueara JS
+      setTimeout(reveal, 3000);
+    })();
+
     /* ===== Utils: Globos y Onomatopeyas ===== */
     function showBubble(anchorEl, texto, tipo='ok'){
       const panel = anchorEl.closest('.panel') || document.querySelector('.panel');
@@ -291,42 +383,33 @@
 
     /* ===== Config original ===== */
     const apiURL    = "https://script.google.com/macros/s/AKfycbxmU3eiiTe69ouewbLl4znzk2-ML4U-AfIoiGH2Kkj_4Uz55gv2B9QRH-kdqvDw-Dq5ZQ/exec";
-    const apiCartas = "https://script.google.com/macros/s/AKfycbweEbCZj3veEZM3tQcv5dBNKhEuL5QDoPmxvscZdB0887-XQiWmGGmtgPD3HmqwVkxV/exec";
+    const apiCartas = "https://script.google.com/macros/s/AKfycbx0Xx3eEiP0uisLfcLjrBxDw2mjJOQ1NTjenqZvlnBqKGqmhU8LZ-K5XiKDSwh5OY4p/exec";
     let alumnoGlobal = "";
 
-    /* ===== NUEVO: OneSignal init + etiquetado ===== */
-    const ONESIGNAL_APP_ID = "b4a200f4-30d9-46ce-9320-2c73c0721e1e"; // reemplaza si cambia
-
-    // Cola diferida recomendada por OneSignal v16
+    /* ===== OneSignal (front) ===== */
+    const ONESIGNAL_APP_ID = "b4a200f4-30d9-46ce-9320-2c73c0721e1e";
     window.OneSignalDeferred = window.OneSignalDeferred || [];
     OneSignalDeferred.push(async function(OneSignal) {
-      try {
-        await OneSignal.init({
-          appId: ONESIGNAL_APP_ID,
-          // Permite localhost como origen seguro en desarrollo (opcional)
-          // allowLocalhostAsSecureOrigin: true,
-        });
-      } catch (e) {
-        console.warn("[CAOS] OneSignal init error:", e);
-      }
+      await OneSignal.init({
+        appId: ONESIGNAL_APP_ID,
+        notifyButton: { enable: false }
+      });
     });
 
-    async function setupOneSignalForAlumno(alumno){
-      if (!window.OneSignal) return;
-      try{
-        // Solicita permiso (si no se ha pedido)
-        await window.OneSignal.Notifications.requestPermission();
-        // external_id para envíos desde servidor
-        await window.OneSignal.login(alumno); // v16: asigna external_id
-        // Tag de respaldo (por si usas filtros por tag)
-        await window.OneSignal.User.addTag("alumno", alumno);
-      }catch(e){
-        console.warn("[CAOS] OneSignal setup error:", e);
-      }
+    async function onesignalVincularAlumno(alumno) {
+      try {
+        const OneSignal = window.OneSignal;
+        if (!OneSignal) return;
+        await OneSignal.login(alumno);             // external user id (v16)
+        await OneSignal.sendTag('alumno', alumno); // tag redundante útil
+        const perm = await OneSignal.Notifications.getPermissionStatus();
+        if (perm !== 'granted') {
+          try { await OneSignal.Slidedown.promptPush(); } catch {}
+        }
+      } catch {}
     }
 
-    /* ===== NUEVO: Config polling simple para notificaciones locales ===== */
-    // Endpoint: `${apiCartas}?accion=estado_canje&alumno=...`
+    /* ===== Notificación local por polling (se mantiene) ===== */
     const NOTI_ICON = "/estudiante/icons/icon-alumno-192.png";
     const ESTADO_API = (alumno)=> `${apiCartas}?accion=estado_canje&alumno=${encodeURIComponent(alumno)}`;
     const STORAGE_KEY = (alumno)=> `caos:lastCanjeHash:${alumno}`;
@@ -356,32 +439,27 @@
           const hash = (data && data.hash) ? String(data.hash) : "";
 
           if (data && data.nuevo && hash && hash !== last) {
-            // Notificación local (si hay permiso)
             if ("Notification" in window && Notification.permission === "granted") {
               new Notification("CAOS - Canje actualizado", {
                 body: data.mensaje || "Tienes novedades de un canje.",
                 icon: NOTI_ICON,
               });
             } else {
-              // Fallback visual
               const panel = document.getElementById("cartasPanel");
               showOnomato(panel, '¡PING!', 'wow');
               showBubble(panel, data.mensaje || "Novedades de canje", 'warn');
             }
             localStorage.setItem(STORAGE_KEY(alumno), hash);
           }
-
-          // éxito: baja el backoff gradualmente
           backoff = Math.max(BACKOFF_MIN, Math.floor(backoff * 0.75));
         } catch (e) {
-          // error: aumenta el backoff
           backoff = Math.min(BACKOFF_MAX, Math.floor(backoff * 1.5));
           console.warn("[CAOS] Error consultando estado de canje:", e?.message || e);
         } finally {
           pollTimer = setTimeout(tick, backoff);
         }
       };
-      pollTimer = setTimeout(tick, 1000); // primer disparo rápido
+      pollTimer = setTimeout(tick, 1000);
     }
     function stopPollingEstado(){
       if (pollTimer) clearTimeout(pollTimer);
@@ -494,9 +572,12 @@
             document.getElementById("loginPanel").style.display = "none";
             document.getElementById("cartasPanel").style.display = "block";
 
-            // NUEVO: Push server-side + permiso local + polling
-            setupOneSignalForAlumno(alumnoGlobal);
+            // Vincular a OneSignal (para push en segundo plano)
+            onesignalVincularAlumno(alumnoGlobal);
+
+            // Notificaciones locales por polling (mientras tanto)
             pedirPermisoNotificaciones().then(()=> startPollingEstado(alumnoGlobal));
+
             cargarCartas(alumno);
           }
         } else {
@@ -528,8 +609,8 @@
           document.getElementById("loginPanel").style.display = "none";
           document.getElementById("cartasPanel").style.display = "block";
 
-          // NUEVO: push + permiso + polling tras el cambio
-          setupOneSignalForAlumno(alumnoGlobal);
+          // Vincular a OneSignal + polling luego del cambio
+          onesignalVincularAlumno(alumnoGlobal);
           pedirPermisoNotificaciones().then(()=> startPollingEstado(alumnoGlobal));
           cargarCartas(alumnoGlobal);
         } else {
