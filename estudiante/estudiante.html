@@ -23,6 +23,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Rock+Salt&family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
 
+  <!-- OneSignal Web SDK (para push server-side) -->
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+
   <style>
     :root{
       --ink:#000;
@@ -288,12 +291,42 @@
 
     /* ===== Config original ===== */
     const apiURL    = "https://script.google.com/macros/s/AKfycbxmU3eiiTe69ouewbLl4znzk2-ML4U-AfIoiGH2Kkj_4Uz55gv2B9QRH-kdqvDw-Dq5ZQ/exec";
-    const apiCartas = "https://script.google.com/macros/s/AKfycbx0Xx3eEiP0uisLfcLjrBxDw2mjJOQ1NTjenqZvlnBqKGqmhU8LZ-K5XiKDSwh5OY4p/exec";
+    const apiCartas = "https://script.google.com/macros/s/AKfycbweEbCZj3veEZM3tQcv5dBNKhEuL5QDoPmxvscZdB0887-XQiWmGGmtgPD3HmqwVkxV/exec";
     let alumnoGlobal = "";
 
+    /* ===== NUEVO: OneSignal init + etiquetado ===== */
+    const ONESIGNAL_APP_ID = "b4a200f4-30d9-46ce-9320-2c73c0721e1e"; // reemplaza si cambia
+
+    // Cola diferida recomendada por OneSignal v16
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+      try {
+        await OneSignal.init({
+          appId: ONESIGNAL_APP_ID,
+          // Permite localhost como origen seguro en desarrollo (opcional)
+          // allowLocalhostAsSecureOrigin: true,
+        });
+      } catch (e) {
+        console.warn("[CAOS] OneSignal init error:", e);
+      }
+    });
+
+    async function setupOneSignalForAlumno(alumno){
+      if (!window.OneSignal) return;
+      try{
+        // Solicita permiso (si no se ha pedido)
+        await window.OneSignal.Notifications.requestPermission();
+        // external_id para envíos desde servidor
+        await window.OneSignal.login(alumno); // v16: asigna external_id
+        // Tag de respaldo (por si usas filtros por tag)
+        await window.OneSignal.User.addTag("alumno", alumno);
+      }catch(e){
+        console.warn("[CAOS] OneSignal setup error:", e);
+      }
+    }
+
     /* ===== NUEVO: Config polling simple para notificaciones locales ===== */
-    // Endpoint sugerido: `${apiCartas}?accion=estado_canje&alumno=...`
-    // Debe devolver algo como: { nuevo: true, mensaje: "✅ Tu canje 'Pinta Mono' fue aprobado", hash: "abc123" }
+    // Endpoint: `${apiCartas}?accion=estado_canje&alumno=...`
     const NOTI_ICON = "/estudiante/icons/icon-alumno-192.png";
     const ESTADO_API = (alumno)=> `${apiCartas}?accion=estado_canje&alumno=${encodeURIComponent(alumno)}`;
     const STORAGE_KEY = (alumno)=> `caos:lastCanjeHash:${alumno}`;
@@ -461,7 +494,8 @@
             document.getElementById("loginPanel").style.display = "none";
             document.getElementById("cartasPanel").style.display = "block";
 
-            // NUEVO: pedir permiso notificaciones y empezar a consultar estado
+            // NUEVO: Push server-side + permiso local + polling
+            setupOneSignalForAlumno(alumnoGlobal);
             pedirPermisoNotificaciones().then(()=> startPollingEstado(alumnoGlobal));
             cargarCartas(alumno);
           }
@@ -494,7 +528,8 @@
           document.getElementById("loginPanel").style.display = "none";
           document.getElementById("cartasPanel").style.display = "block";
 
-          // NUEVO: pedir permiso y arrancar polling tras el cambio de clave
+          // NUEVO: push + permiso + polling tras el cambio
+          setupOneSignalForAlumno(alumnoGlobal);
           pedirPermisoNotificaciones().then(()=> startPollingEstado(alumnoGlobal));
           cargarCartas(alumnoGlobal);
         } else {
