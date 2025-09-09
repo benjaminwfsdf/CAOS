@@ -2,10 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"
-  />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <title>CAOS - Mis Cartas</title>
 
   <!-- PWA (ALUMNO) -->
@@ -52,33 +49,48 @@
       min-height:100dvh;
     }
 
-    /* Splash CAOS (igual patrón que login) */
+    /* ===== Splash estilo login (sin aro dorado) ===== */
     #splash{
       position:fixed; inset:0; z-index:99999;
-      display:flex; align-items:center; justify-content:center; flex-direction:column;
+      display:flex; align-items:center; justify-content:center;
       background:#fff;
       transition:opacity .35s ease, visibility .35s ease;
     }
     #splash.is-hidden{ opacity:0; visibility:hidden; }
-    #splash-logo{
-      width:min(42vh,200px); height:auto;
-      animation:splashIn 1400ms ease-out 120ms forwards;
-      image-rendering:auto;
+
+    .splash-wrap{
+      display:flex; flex-direction:column; align-items:center; gap:20px;
+      animation:splashIn 1200ms ease forwards;
     }
-    .splash-brand{
-      margin-top:14px; font:700 20px/1 'Rock Salt', cursive; opacity:0;
-      animation:fade-in 600ms ease-out 320ms forwards;
+    .logo-card{
+      width:210px; height:210px;
+      background:#fff;
+      border:4px solid #000;
+      border-radius:26px;
+      box-shadow:16px 16px 0 #000;
+      display:grid; place-items:center;
+    }
+    .logo-card .c-letter{
+      font-family:'Rock Salt', cursive;
+      font-size:120px; line-height:1;
+      letter-spacing:1px;
+      color:#000;
+      text-shadow:0 0 1px #000;
+      -webkit-text-stroke: 0px #000; /* look “dibujado” simple */
+      user-select:none;
+    }
+    .brand{
+      font-family:'Rock Salt', cursive;
+      font-size:32px; letter-spacing:1px;
     }
     @keyframes splashIn{
-      0%   { transform:scale(.86); opacity:0; }
-      45%  { transform:scale(1.08); opacity:1; }
-      65%  { transform:scale(.98); }
-      100% { transform:scale(1); opacity:0; }
+      0%   { transform:translateY(6px) scale(.86); opacity:0; }
+      45%  { transform:translateY(0)   scale(1.06); opacity:1; }
+      70%  { transform:translateY(0)   scale(.98); }
+      100% { transform:translateY(0)   scale(1); }
     }
-    @keyframes fade-in{ to{opacity:1} }
     @media (prefers-reduced-motion: reduce){
-      #splash-logo{ animation:none; opacity:1 }
-      .splash-brand{ animation:none; opacity:1 }
+      .splash-wrap{ animation:none }
     }
 
     /* Shell tipo app */
@@ -240,10 +252,12 @@
 </head>
 <body>
 
-  <!-- Splash -->
+  <!-- Splash (como login) -->
   <div id="splash" aria-hidden="true">
-    <img id="splash-logo" src="/estudiante/icons/icon-alumno-192.png" alt="CAOS Logo">
-    <div class="splash-brand">CAOS</div>
+    <div class="splash-wrap">
+      <div class="logo-card"><span class="c-letter">C</span></div>
+      <div class="brand">CAOS</div>
+    </div>
   </div>
 
   <main class="app">
@@ -255,8 +269,7 @@
       <div id="alumnoWrap" style="display:none; margin:6px 0; display:grid; gap:10px;">
         <input id="alumnoNombre" class="textin" type="text"
                placeholder="Ingresa tus dos nombres y dos apellidos (cualquier orden)"
-               autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"
-               readonly data-defer>
+               autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
         <div id="sugerencias"></div>
         <button type="button" class="btn" style="width:auto; justify-self:start"
           onclick="localStorage.removeItem('alumno');document.getElementById('alumnoNombre').value='';document.getElementById('sugerencias').style.display='none';">
@@ -267,8 +280,7 @@
       <form id="loginForm" style="display:grid; gap:10px;">
         <input type="password" id="password" class="textin"
                placeholder="Ingresa tu contraseña" required
-               autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"
-               readonly data-defer>
+               autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
         <button type="submit" class="btn" id="btnEntrar">Entrar</button>
       </form>
 
@@ -289,8 +301,7 @@
       <h2 style="margin:0 0 8px 0;">🔁 Cambiar Contraseña</h2>
       <p style="margin:0 0 10px 0;">Ingresa tu nueva contraseña.<br>Solo puedes hacerlo una vez.</p>
       <input type="password" id="nuevaPass" placeholder="Nueva contraseña"
-             autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"
-             readonly data-defer><br>
+             autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"><br>
       <button onclick="guardarNuevaClave()">Guardar</button>
     </div>
   </div>
@@ -422,38 +433,48 @@
       if (alumnoGlobal) startPollingEstado(alumnoGlobal);
     });
 
-    /* ===== Splash + bloqueo de teclado como en login ===== */
-    const splash = document.getElementById('splash');
-    const splashLogo = document.getElementById('splash-logo');
-
-    function enableDeferredInputs(){
-      // quita readonly de todos los inputs con data-defer
-      document.querySelectorAll('input[data-defer]').forEach(el=>{
-        el.removeAttribute('readonly');
-        el.removeAttribute('data-defer');
+    /* ===== Evitar auto-teclado al entrar (como en login) ===== */
+    function preventAutoKeyboard(container){
+      const scope = typeof container === 'string' ? document.getElementById(container) : (container || document);
+      const inputs = scope.querySelectorAll('input, textarea');
+      inputs.forEach(el => {
+        el.setAttribute('readonly','readonly');
+        el.blur();
       });
+      const release = () => {
+        inputs.forEach(el => el.removeAttribute('readonly'));
+        window.removeEventListener('touchstart', release, {passive:true});
+        window.removeEventListener('mousedown', release);
+      };
+      window.addEventListener('touchstart', release, {passive:true});
+      window.addEventListener('mousedown', release);
+      setTimeout(release, 900);
     }
-    function hideSplash(){
-      // Asegura que nada esté enfocado (evita teclado en móviles)
-      if (document.activeElement && document.activeElement.blur) {
-        document.activeElement.blur();
+
+    // Ocultar splash y evitar teclado
+    (function(){
+      const hideSplash = () => {
+        if (document.activeElement && typeof document.activeElement.blur === 'function') {
+          document.activeElement.blur();
+        }
+        preventAutoKeyboard('loginPanel');
+
+        const el = document.getElementById('splash');
+        if (!el) return;
+        el.classList.add('is-hidden');
+        setTimeout(() => el.remove(), 400);
+      };
+
+      const whenReady = () => {
+        setTimeout(hideSplash, 850);
+      };
+
+      if (document.readyState === 'complete') {
+        whenReady();
+      } else {
+        window.addEventListener('load', whenReady);
       }
-      enableDeferredInputs();
-
-      splash.classList.add('is-hidden');
-      setTimeout(()=> splash.remove(), 400);
-    }
-
-    // Cierra el splash al terminar la animación principal del logo
-    splashLogo?.addEventListener('animationend', hideSplash, { once:true });
-    // Fallback por si no corre la animación
-    setTimeout(()=> {
-      if (document.getElementById('splash')) hideSplash();
-    }, 2200);
-    // También al primer gesto del usuario
-    window.addEventListener('pointerdown', ()=>{
-      if (document.getElementById('splash')) hideSplash();
-    }, { once:true });
+    })();
 
     /* ===== Lógica de alumno ===== */
     function obtenerAlumnoInicial() {
