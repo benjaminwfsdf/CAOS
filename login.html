@@ -50,18 +50,56 @@
     .onomato{position:absolute; z-index:998; font-weight:900; letter-spacing:2px; font-size:28px; color:#33e6a4; -webkit-text-stroke:2px #000; text-shadow:6px 6px 0 #09b37a; transform:translate(-50%,-50%) scale(0.6) rotate(-6deg); opacity:0; pointer-events:none; animation:ono-pop 520ms ease-out forwards;}
     .onomato--error{ color:#ff6b6b; text-shadow:6px 6px 0 #e02424; } .onomato--wow{ color:#ffd45a; text-shadow:6px 6px 0 #f59e0b; }
     @keyframes ono-pop{ 20%{ opacity:1; transform:translate(-50%,-50%) scale(1.1) rotate(2deg); } 60%{ transform:translate(-50%,-54%) scale(1) rotate(-2deg); } 100%{ opacity:0; transform:translate(-50%,-60%) scale(0.9) rotate(0deg); } }
+
+    /* ---------- SPLASH ---------- */
+    .splash{
+      position:fixed; inset:0; z-index:99999; background:var(--paper);
+      display:grid; place-items:center;
+    }
+    .splash__logo{
+      width:min(42vh,220px); height:min(42vh,220px);
+      border:3px solid var(--ink); border-radius:24px; box-shadow:8px 8px 0 var(--ink);
+      background:#fff center/cover no-repeat;
+      /* usa tu ícono PWA como logo */
+      background-image:url('/icons/apple-touch-icon.png');
+      animation:logo-seq 1400ms ease-out 120ms forwards;
+    }
+    .splash__marca{
+      margin-top:14px; font:700 22px/1 'Rock Salt', cursive; opacity:0;
+      animation:fade-in 600ms ease-out 320ms forwards;
+    }
+    @keyframes logo-seq{
+      0%   { transform:scale(.86); opacity:0; }
+      45%  { transform:scale(1.08); opacity:1; }
+      65%  { transform:scale(.98); }
+      100% { transform:scale(1); opacity:0; }
+    }
+    @keyframes fade-in{ to{opacity:1} }
+    .splash--hidden{ display:none; }
+
+    /* Respeta accesibilidad: reduce motion */
+    @media (prefers-reduced-motion: reduce){
+      .splash__logo{ animation:none; opacity:1 }
+    }
   </style>
 </head>
 <body>
-  <div class="container caos-relative">
+  <!-- SPLASH -->
+  <div id="splash" class="splash" aria-hidden="true">
+    <div class="splash__logo" role="img" aria-label="Logo CAOS"></div>
+    <div class="splash__marca">CAOS</div>
+  </div>
+
+  <div class="container caos-relative" id="mainCard" aria-live="polite">
     <div class="titulo">CAOS</div>
     <p style="text-align:center; font-weight:700; margin:0 0 8px">(Panel del Profesor – Cartas Anti Orden)</p>
 
     <label for="usuarioLogin">Correo electrónico</label>
-    <input type="email" id="usuarioLogin" inputmode="email" autocomplete="username">
+    <!-- readonly al inicio para que NO abra el teclado durante el splash -->
+    <input type="email" id="usuarioLogin" inputmode="email" autocomplete="username" readonly data-defer>
 
     <label for="claveLogin">Contraseña</label>
-    <input type="password" id="claveLogin" autocomplete="current-password">
+    <input type="password" id="claveLogin" autocomplete="current-password" readonly data-defer>
 
     <button id="btnLogin">Ingresar</button>
 
@@ -71,6 +109,7 @@
   </div>
 
   <script>
+    /* ---------- Globos / onomato (sin cambios) ---------- */
     function showBubble(anchorEl, texto, tipo='ok'){
       const panel = anchorEl.closest('.caos-relative') || document.body;
       const rect = anchorEl.getBoundingClientRect();
@@ -97,6 +136,7 @@
       setTimeout(()=> o.remove(), 600);
     }
 
+    /* ---------- Login (tu lógica intacta) ---------- */
     const apiUrl = 'https://script.google.com/macros/s/AKfycbwuNchPFTW2nCQThMFq2LMngQ8gQHay_hww8kmWZf0D8znqw3K1S_V3KpZBVOVv1_nE/exec';
     const btnLogin = document.getElementById("btnLogin");
 
@@ -125,6 +165,50 @@
       } catch (e){
         showOnomato(btnLogin, '¡BANG!', 'error');
         showBubble(btnLogin, '❌ Error de red. Intenta de nuevo.', 'error');
+      }
+    });
+
+    /* ---------- Splash + bloqueo de teclado ---------- */
+    const splash = document.getElementById('splash');
+    const deferredInputs = Array.from(document.querySelectorAll('input[data-defer]'));
+
+    function enableInputs(){
+      // Evita que algo quede enfocado por el navegador
+      if (document.activeElement && document.activeElement.blur) {
+        document.activeElement.blur();
+      }
+      // Habilita los inputs (ya no abrirá teclado automáticamente)
+      deferredInputs.forEach(el => {
+        el.removeAttribute('readonly');
+        el.removeAttribute('data-defer');
+      });
+    }
+
+    function hideSplash(){
+      if (!splash) return;
+      splash.classList.add('splash--hidden');
+      enableInputs();
+    }
+
+    // Cierra el splash al terminar la animación del logo
+    splash?.addEventListener('animationend', (ev)=>{
+      // sólo al finalizar la animación principal del logo
+      if (ev.target.classList.contains('splash__logo')) hideSplash();
+    });
+
+    // Fallback: si algo pasa con la animación, cierra el splash a los 2s
+    setTimeout(hideSplash, 2000);
+
+    // Si el usuario toca la pantalla, cierra el splash y habilita
+    window.addEventListener('pointerdown', ()=>{
+      if (!splash.classList.contains('splash--hidden')) hideSplash();
+    }, { once:true });
+
+    // En algunos navegadores, al cargar podrían enfocar el primer input.
+    // Forzamos a que nada esté enfocado al principio.
+    window.addEventListener('load', ()=>{
+      if (document.activeElement && document.activeElement.blur) {
+        document.activeElement.blur();
       }
     });
   </script>

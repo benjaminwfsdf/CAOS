@@ -49,65 +49,36 @@
       font-family:'Rock Salt',cursive;
       font-weight:700;
       text-shadow:0 0 1px var(--ink);
+      min-height:100dvh;
     }
 
-    /* Splash (pantalla de inicio) */
+    /* Splash CAOS (igual patrón que login) */
     #splash{
       position:fixed; inset:0; z-index:99999;
-      display:grid; place-items:center;
-      background:var(--paper);
-      transition:opacity .45s ease, transform .45s ease;
+      display:flex; align-items:center; justify-content:center; flex-direction:column;
+      background:#fff;
+      transition:opacity .35s ease, visibility .35s ease;
     }
-    #splash.hide{
-      opacity:0; transform:translateY(-10px);
-      pointer-events:none;
+    #splash.is-hidden{ opacity:0; visibility:hidden; }
+    #splash-logo{
+      width:min(42vh,200px); height:auto;
+      animation:splashIn 1400ms ease-out 120ms forwards;
+      image-rendering:auto;
     }
-    .splash-inner{
-      display:grid; place-items:center; gap:14px;
-      border:3px dashed var(--ink);
-      border-radius:20px;
-      padding:22px 26px;
-      box-shadow:var(--shadow);
-      background:var(--paper);
+    .splash-brand{
+      margin-top:14px; font:700 20px/1 'Rock Salt', cursive; opacity:0;
+      animation:fade-in 600ms ease-out 320ms forwards;
     }
-    #splashLogo{
-      width:min(180px, 42vw);
-      height:auto; 
-      opacity:0; transform:scale(.7);
-      filter: drop-shadow(0 0 0 var(--ink));
-      animation: splash-pop 1100ms cubic-bezier(.2,.9,.2,1.2) 120ms forwards;
+    @keyframes splashIn{
+      0%   { transform:scale(.86); opacity:0; }
+      45%  { transform:scale(1.08); opacity:1; }
+      65%  { transform:scale(.98); }
+      100% { transform:scale(1); opacity:0; }
     }
-    .splash-title{
-      font-size:clamp(22px,6vw,34px);
-      letter-spacing:1px;
-      opacity:0; transform:translateY(6px);
-      animation: splash-fadeup 600ms ease 780ms forwards;
-    }
-    .splash-loading{
-      font-family:Arial, sans-serif; font-weight:700;
-      font-size:14px; opacity:.8;
-      display:flex; align-items:center; gap:6px; justify-content:center;
-      opacity:0; transform:translateY(6px);
-      animation: splash-fadeup 600ms ease 980ms forwards;
-    }
-    .dot{width:6px;height:6px;border-radius:50%;background:var(--ink);opacity:.3;animation:blink 1.4s infinite}
-    .dot:nth-child(2){animation-delay:.2s}
-    .dot:nth-child(3){animation-delay:.4s}
-
-    @keyframes blink { 0%, 80%, 100% { opacity:.15 } 40% { opacity:1 } }
-    @keyframes splash-pop {
-      0%   { opacity:0; transform:scale(.7) }
-      50%  { opacity:1; transform:scale(1.12) }
-      70%  { transform:scale(.96) }
-      100% { opacity:1; transform:scale(1) }
-    }
-    @keyframes splash-fadeup {
-      to { opacity:1; transform:translateY(0) }
-    }
-
+    @keyframes fade-in{ to{opacity:1} }
     @media (prefers-reduced-motion: reduce){
-      #splashLogo, .splash-title, .splash-loading { animation:none; opacity:1; transform:none; }
-      #splash { transition:none; }
+      #splash-logo{ animation:none; opacity:1 }
+      .splash-brand{ animation:none; opacity:1 }
     }
 
     /* Shell tipo app */
@@ -271,23 +242,21 @@
 
   <!-- Splash -->
   <div id="splash" aria-hidden="true">
-    <div class="splash-inner">
-      <img id="splashLogo" src="/estudiante/icons/icon-alumno-192.png" alt="Logo CAOS">
-      <div class="splash-title">CAOS</div>
-      <div class="splash-loading" aria-label="Cargando">
-        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-      </div>
-    </div>
+    <img id="splash-logo" src="/estudiante/icons/icon-alumno-192.png" alt="CAOS Logo">
+    <div class="splash-brand">CAOS</div>
   </div>
 
-  <main class="app" id="appRoot">
+  <main class="app">
     <!-- Panel de login -->
     <section class="panel" id="loginPanel" style="margin-top:6px;">
       <h1 class="titulo">🔐 Ingreso restringido</h1>
 
       <!-- Campo de nombre (si no llega en URL ni está guardado) -->
       <div id="alumnoWrap" style="display:none; margin:6px 0; display:grid; gap:10px;">
-        <input id="alumnoNombre" class="textin" type="text" placeholder="Ingresa tus dos nombres y dos apellidos (cualquier orden)">
+        <input id="alumnoNombre" class="textin" type="text"
+               placeholder="Ingresa tus dos nombres y dos apellidos (cualquier orden)"
+               autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"
+               readonly data-defer>
         <div id="sugerencias"></div>
         <button type="button" class="btn" style="width:auto; justify-self:start"
           onclick="localStorage.removeItem('alumno');document.getElementById('alumnoNombre').value='';document.getElementById('sugerencias').style.display='none';">
@@ -296,7 +265,10 @@
       </div>
 
       <form id="loginForm" style="display:grid; gap:10px;">
-        <input type="password" id="password" class="textin" placeholder="Ingresa tu contraseña" required>
+        <input type="password" id="password" class="textin"
+               placeholder="Ingresa tu contraseña" required
+               autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"
+               readonly data-defer>
         <button type="submit" class="btn" id="btnEntrar">Entrar</button>
       </form>
 
@@ -316,7 +288,9 @@
     <div class="contenido">
       <h2 style="margin:0 0 8px 0;">🔁 Cambiar Contraseña</h2>
       <p style="margin:0 0 10px 0;">Ingresa tu nueva contraseña.<br>Solo puedes hacerlo una vez.</p>
-      <input type="password" id="nuevaPass" placeholder="Nueva contraseña"><br>
+      <input type="password" id="nuevaPass" placeholder="Nueva contraseña"
+             autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"
+             readonly data-defer><br>
       <button onclick="guardarNuevaClave()">Guardar</button>
     </div>
   </div>
@@ -333,27 +307,6 @@
         navigator.serviceWorker.register('../service-worker.js?alumno-ui2');
       });
     }
-
-    /* ===== Splash: revelar con seguridad tras DOM listo + fallback ===== */
-    (function setupSplash(){
-      const splash = document.getElementById('splash');
-
-      function reveal(){
-        if (!splash) return;
-        splash.classList.add('hide');
-        setTimeout(()=> splash && splash.remove(), 650);
-      }
-
-      // 1) Cuando el DOM está listo, programamos el fade out tras 1.2s (bounce del logo)
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => setTimeout(reveal, 1200));
-      } else {
-        setTimeout(reveal, 1200);
-      }
-
-      // 2) Fallback duro a los 3s por si algo bloqueara JS
-      setTimeout(reveal, 3000);
-    })();
 
     /* ===== Utils: Globos y Onomatopeyas ===== */
     function showBubble(anchorEl, texto, tipo='ok'){
@@ -395,13 +348,12 @@
         notifyButton: { enable: false }
       });
     });
-
     async function onesignalVincularAlumno(alumno) {
       try {
         const OneSignal = window.OneSignal;
         if (!OneSignal) return;
-        await OneSignal.login(alumno);             // external user id (v16)
-        await OneSignal.sendTag('alumno', alumno); // tag redundante útil
+        await OneSignal.login(alumno);
+        await OneSignal.sendTag('alumno', alumno);
         const perm = await OneSignal.Notifications.getPermissionStatus();
         if (perm !== 'granted') {
           try { await OneSignal.Slidedown.promptPush(); } catch {}
@@ -409,7 +361,7 @@
       } catch {}
     }
 
-    /* ===== Notificación local por polling (se mantiene) ===== */
+    /* ===== Notificación local por polling ===== */
     const NOTI_ICON = "/estudiante/icons/icon-alumno-192.png";
     const ESTADO_API = (alumno)=> `${apiCartas}?accion=estado_canje&alumno=${encodeURIComponent(alumno)}`;
     const STORAGE_KEY = (alumno)=> `caos:lastCanjeHash:${alumno}`;
@@ -469,6 +421,39 @@
       if (document.hidden) return;
       if (alumnoGlobal) startPollingEstado(alumnoGlobal);
     });
+
+    /* ===== Splash + bloqueo de teclado como en login ===== */
+    const splash = document.getElementById('splash');
+    const splashLogo = document.getElementById('splash-logo');
+
+    function enableDeferredInputs(){
+      // quita readonly de todos los inputs con data-defer
+      document.querySelectorAll('input[data-defer]').forEach(el=>{
+        el.removeAttribute('readonly');
+        el.removeAttribute('data-defer');
+      });
+    }
+    function hideSplash(){
+      // Asegura que nada esté enfocado (evita teclado en móviles)
+      if (document.activeElement && document.activeElement.blur) {
+        document.activeElement.blur();
+      }
+      enableDeferredInputs();
+
+      splash.classList.add('is-hidden');
+      setTimeout(()=> splash.remove(), 400);
+    }
+
+    // Cierra el splash al terminar la animación principal del logo
+    splashLogo?.addEventListener('animationend', hideSplash, { once:true });
+    // Fallback por si no corre la animación
+    setTimeout(()=> {
+      if (document.getElementById('splash')) hideSplash();
+    }, 2200);
+    // También al primer gesto del usuario
+    window.addEventListener('pointerdown', ()=>{
+      if (document.getElementById('splash')) hideSplash();
+    }, { once:true });
 
     /* ===== Lógica de alumno ===== */
     function obtenerAlumnoInicial() {
@@ -572,12 +557,8 @@
             document.getElementById("loginPanel").style.display = "none";
             document.getElementById("cartasPanel").style.display = "block";
 
-            // Vincular a OneSignal (para push en segundo plano)
             onesignalVincularAlumno(alumnoGlobal);
-
-            // Notificaciones locales por polling (mientras tanto)
             pedirPermisoNotificaciones().then(()=> startPollingEstado(alumnoGlobal));
-
             cargarCartas(alumno);
           }
         } else {
@@ -609,7 +590,6 @@
           document.getElementById("loginPanel").style.display = "none";
           document.getElementById("cartasPanel").style.display = "block";
 
-          // Vincular a OneSignal + polling luego del cambio
           onesignalVincularAlumno(alumnoGlobal);
           pedirPermisoNotificaciones().then(()=> startPollingEstado(alumnoGlobal));
           cargarCartas(alumnoGlobal);
