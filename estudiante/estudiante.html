@@ -25,12 +25,8 @@
 
   <style>
     :root{
-      --ink:#000;
-      --paper:#fff;
-      --shadow:8px 8px 0 var(--ink);
-      --radius:18px;
-      --gap:12px;
-      --pad:14px;
+      --ink:#000; --paper:#fff; --shadow:8px 8px 0 var(--ink);
+      --radius:18px; --gap:12px; --pad:14px;
       --fz-title:clamp(22px,5.6vw,32px);
       --fz-sub:clamp(16px,4.2vw,22px);
       --fz-body:clamp(14px,3.8vw,18px);
@@ -40,16 +36,13 @@
     body{
       margin:0;
       padding:env(safe-area-inset-top) env(safe-area-inset-right) calc(16px + env(safe-area-inset-bottom)) env(safe-area-inset-left);
-      background:var(--paper);
-      color:var(--ink);
+      background:var(--paper); color:var(--ink);
       -webkit-tap-highlight-color:transparent;
-      font-family:'Rock Salt',cursive;
-      font-weight:700;
-      text-shadow:0 0 1px var(--ink);
+      font-family:'Rock Salt',cursive; font-weight:700; text-shadow:0 0 1px var(--ink);
       min-height:100dvh;
     }
 
-    /* ===== Splash estilo login (sin aro dorado) ===== */
+    /* ===== Splash con tu logo ===== */
     #splash{
       position:fixed; inset:0; z-index:99999;
       display:flex; align-items:center; justify-content:center;
@@ -62,155 +55,96 @@
       display:flex; flex-direction:column; align-items:center; gap:20px;
       animation:splashIn 1200ms ease forwards;
     }
-    .logo-card{
-      width:210px; height:210px;
-      background:#fff;
-      border:4px solid #000;
-      border-radius:26px;
-      box-shadow:16px 16px 0 #000;
-      display:grid; place-items:center;
+   .logo-card{
+  width:210px; height:210px; background:#fff;
+  border:4px solid #000; border-radius:26px;
+  box-shadow:16px 16px 0 #000;
+  display:grid; place-items:center; overflow:hidden; /* <- importante */
+}
+
+/* Nuevo: el logo como background que “rellena” */
+.logo-bg{
+  width:100%; height:100%;
+  background-image:url("/estudiante/icons/icon-alumno-192.png"); /* tu logo */
+  background-position:center;
+  background-repeat:no-repeat;
+  /* cover + ligero zoom para compensar el padding del PNG */
+  background-size:120% 120%;
+}
+
+    .logo-img{
+      width:78%; height:78%; object-fit:contain; image-rendering:auto;
+      /* el PNG es negro con fondo; si quieres invertir, comenta lo siguiente */
+      /* filter: invert(0); */
     }
-    .logo-card .c-letter{
-      font-family:'Rock Salt', cursive;
-      font-size:120px; line-height:1;
-      letter-spacing:1px;
-      color:#000;
-      text-shadow:0 0 1px #000;
-      -webkit-text-stroke: 0px #000; /* look “dibujado” simple */
-      user-select:none;
-    }
-    .brand{
-      font-family:'Rock Salt', cursive;
-      font-size:32px; letter-spacing:1px;
-    }
+    .brand{ font-family:'Rock Salt', cursive; font-size:32px; letter-spacing:1px; }
+
     @keyframes splashIn{
       0%   { transform:translateY(6px) scale(.86); opacity:0; }
       45%  { transform:translateY(0)   scale(1.06); opacity:1; }
       70%  { transform:translateY(0)   scale(.98); }
       100% { transform:translateY(0)   scale(1); }
     }
-    @media (prefers-reduced-motion: reduce){
-      .splash-wrap{ animation:none }
-    }
+    @media (prefers-reduced-motion: reduce){ .splash-wrap{ animation:none } }
 
-    /* Shell tipo app */
-    .app{
-      max-width:900px;margin:0 auto;
-      display:grid; gap:var(--gap);
-      padding:12px;
-    }
+    /* ===== App shell ===== */
+    .app{ max-width:900px; margin:0 auto; display:grid; gap:var(--gap); padding:12px; }
     .panel{
-      background:var(--paper);
-      border:3px solid var(--ink);
-      border-radius:var(--radius);
-      padding:var(--pad);
-      box-shadow:var(--shadow);
-      position:relative; /* para globos */
+      background:var(--paper); border:3px solid var(--ink); border-radius:var(--radius);
+      padding:var(--pad); box-shadow:var(--shadow); position:relative;
     }
 
-    /* Encabezados */
     .titulo{
-      font-size:var(--fz-title);
-      text-align:center;
-      border:3px dashed var(--ink);
-      border-radius:14px;
-      padding:10px 12px;
-      margin:0 0 6px 0;
-      background:var(--paper);
+      font-size:var(--fz-title); text-align:center;
+      border:3px dashed var(--ink); border-radius:14px; padding:10px 12px;
+      margin:0 0 6px 0; background:var(--paper);
     }
-    .subtitulo{
-      font-size:var(--fz-sub);
-      text-align:center;
-      margin:4px 0 14px 0;
-    }
+    .subtitulo{ font-size:var(--fz-sub); text-align:center; margin:4px 0 14px 0; }
 
-    /* Inputs / botones táctiles */
     .textin,.btn{
-      width:100%; min-height:48px;
-      border:2px solid var(--ink);
-      border-radius:12px;
-      font-family:Arial, Helvetica, sans-serif;
-      font-weight:700;
-      font-size:var(--fz-body);
-      padding:12px 14px;
-      background:var(--paper);
-      color:var(--ink);
-      box-shadow:3px 3px 0 var(--ink);
+      width:100%; min-height:48px; border:2px solid var(--ink); border-radius:12px;
+      font-family:Arial, Helvetica, sans-serif; font-weight:700; font-size:var(--fz-body);
+      padding:12px 14px; background:var(--paper); color:var(--ink); box-shadow:3px 3px 0 var(--ink);
     }
-    .btn{cursor:pointer}
-    .btn:disabled{background:#efefef;color:#9c9c9c;cursor:not-allowed}
+    .btn{ cursor:pointer }
+    .btn:disabled{ background:#efefef; color:#9c9c9c; cursor:not-allowed }
 
-    /* Cartas (mobile-first) */
     .carta{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:10px;
-      border:2px solid var(--ink);
-      border-radius:14px;
-      padding:12px;
-      background:var(--paper);
-      box-shadow:4px 4px 0 var(--ink);
+      display:grid; grid-template-columns:1fr; gap:10px; border:2px solid var(--ink);
+      border-radius:14px; padding:12px; background:var(--paper); box-shadow:4px 4px 0 var(--ink);
     }
-    .carta img{
-      width:100%;
-      max-width:320px;
-      height:auto;
-      place-self:center;
-      border-radius:12px;
-    }
-    .carta-row{
-      display:flex; align-items:center; gap:10px;
-      justify-content:space-between; flex-wrap:wrap;
-    }
-    .carta-info{
-      font-family:Arial, sans-serif; font-size:var(--fz-body);
-      flex:1; min-width:180px;
-    }
-    .cantidad{font-weight:700; font-size:clamp(18px,5vw,28px); margin-top:4px}
-    .boton-canje{min-width:160px}
+    .carta img{ width:100%; max-width:320px; height:auto; place-self:center; border-radius:12px; }
+    .carta-row{ display:flex; align-items:center; gap:10px; justify-content:space-between; flex-wrap:wrap; }
+    .carta-info{ font-family:Arial, sans-serif; font-size:var(--fz-body); flex:1; min-width:180px; }
+    .cantidad{ font-weight:700; font-size:clamp(18px,5vw,28px); margin-top:4px }
+    .boton-canje{ min-width:160px }
 
     .descripcion{
-      display:none;
-      font-family:Arial, sans-serif;
-      font-size:clamp(16px,4.6vw,20px);
-      line-height:1.35;
-      margin-top:6px;
-      color:var(--ink);
+      display:none; font-family:Arial, sans-serif; font-size:clamp(16px,4.6vw,20px);
+      line-height:1.35; margin-top:6px; color:var(--ink);
     }
 
     footer{
-      border:3px solid var(--ink);
-      border-radius:14px;
-      box-shadow:4px 4px 0 var(--ink);
-      padding:12px;
-      text-align:center;
-      font-family:Arial, sans-serif;
-      font-weight:700;
-      font-size:12px;
-      background:var(--paper);
-      max-width:600px;
-      margin:4px auto 0;
+      border:3px solid var(--ink); border-radius:14px; box-shadow:4px 4px 0 var(--ink);
+      padding:12px; text-align:center; font-family:Arial, sans-serif; font-weight:700; font-size:12px;
+      background:var(--paper); max-width:600px; margin:4px auto 0;
     }
 
-    /* Sugerencias nombre */
-    #sugerencias{display:none;margin-top:8px}
+    #sugerencias{ display:none; margin-top:8px }
     .sug{
-      display:inline-block;margin:4px 6px 0 0;padding:6px 10px;border:2px solid var(--ink);
-      background:var(--paper);box-shadow:3px 3px 0 var(--ink);cursor:pointer;
-      border-radius:999px;font-family:Arial,sans-serif;font-weight:700;font-size:14px;
+      display:inline-block; margin:4px 6px 0 0; padding:6px 10px; border:2px solid var(--ink);
+      background:var(--paper); box-shadow:3px 3px 0 var(--ink); cursor:pointer; border-radius:999px;
+      font-family:Arial,sans-serif; font-weight:700; font-size:14px;
     }
 
-    /* Modal primera clave */
-    #modalCambio{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;align-items:center;justify-content:center}
+    #modalCambio{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:9999; align-items:center; justify-content:center }
     #modalCambio .contenido{
-      width:92%;max-width:380px;
-      background:var(--paper);border:3px solid var(--ink);box-shadow:6px 6px 0 var(--ink);
-      border-radius:16px;padding:18px;text-align:center;font-family:'Comic Neue', cursive;
+      width:92%; max-width:380px; background:var(--paper); border:3px solid var(--ink);
+      box-shadow:6px 6px 0 var(--ink); border-radius:16px; padding:18px; text-align:center; font-family:'Comic Neue', cursive;
     }
-    #modalCambio input{padding:12px;font-size:18px;width:100%;border:2px solid var(--ink);border-radius:10px}
-    #modalCambio button{padding:12px 18px;font-size:18px;border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);background:var(--paper);border-radius:12px;margin-top:12px;cursor:pointer}
+    #modalCambio input{ padding:12px; font-size:18px; width:100%; border:2px solid var(--ink); border-radius:10px }
+    #modalCambio button{ padding:12px 18px; font-size:18px; border:2px solid var(--ink); box-shadow:3px 3px 0 var(--ink); background:var(--paper); border-radius:12px; margin-top:12px; cursor:pointer }
 
-    /* Globos + onomatopeyas */
     .bubble{
       position:absolute; z-index:999; max-width:320px; background:var(--paper); color:var(--ink);
       border:3px solid var(--ink); box-shadow:6px 6px 0 var(--ink); padding:12px 14px; font-weight:700; line-height:1.2;
@@ -242,30 +176,32 @@
       100%{ opacity:0; transform:translate(-50%,-60%) scale(0.9) rotate(0deg); }
     }
 
-    /* Desktop refinado */
     @media (min-width:800px){
-      .carta{grid-template-columns:240px 1fr; align-items:center}
-      .carta img{width:240px}
-      .boton-canje{min-width:200px}
+      .carta{ grid-template-columns:240px 1fr; align-items:center }
+      .carta img{ width:240px }
+      .boton-canje{ min-width:200px }
     }
   </style>
 </head>
 <body>
 
-  <!-- Splash (como login) -->
+  <!-- Splash con logo -->
   <div id="splash" aria-hidden="true">
-    <div class="splash-wrap">
-      <div class="logo-card"><span class="c-letter">C</span></div>
-      <div class="brand">CAOS</div>
+  <div class="splash-wrap">
+    <div class="logo-card">
+      <div class="logo-bg"></div> <!-- antes había <img class="logo-img" ...> -->
     </div>
+    <div class="brand">CAOS</div>
   </div>
+</div>
+
+      
 
   <main class="app">
     <!-- Panel de login -->
     <section class="panel" id="loginPanel" style="margin-top:6px;">
       <h1 class="titulo">🔐 Ingreso restringido</h1>
 
-      <!-- Campo de nombre (si no llega en URL ni está guardado) -->
       <div id="alumnoWrap" style="display:none; margin:6px 0; display:grid; gap:10px;">
         <input id="alumnoNombre" class="textin" type="text"
                placeholder="Ingresa tus dos nombres y dos apellidos (cualquier orden)"
@@ -307,7 +243,7 @@
   </div>
 
   <footer>
-    © 2025 CAOS. Todos los derechos reservados. — 
+    © 2025 CAOS. Todos los derechos reservados. —
     Desarrollado por Benjamín González — Ilustraciones: Constanza Cayul.
   </footer>
 
@@ -319,7 +255,7 @@
       });
     }
 
-    /* ===== Utils: Globos y Onomatopeyas ===== */
+    /* ===== Globos / onomatopeyas ===== */
     function showBubble(anchorEl, texto, tipo='ok'){
       const panel = anchorEl.closest('.panel') || document.querySelector('.panel');
       const rect = anchorEl.getBoundingClientRect();
@@ -345,19 +281,16 @@
       setTimeout(()=> o.remove(), 600);
     }
 
-    /* ===== Config original ===== */
+    /* ===== Config ===== */
     const apiURL    = "https://script.google.com/macros/s/AKfycbxmU3eiiTe69ouewbLl4znzk2-ML4U-AfIoiGH2Kkj_4Uz55gv2B9QRH-kdqvDw-Dq5ZQ/exec";
     const apiCartas = "https://script.google.com/macros/s/AKfycbx0Xx3eEiP0uisLfcLjrBxDw2mjJOQ1NTjenqZvlnBqKGqmhU8LZ-K5XiKDSwh5OY4p/exec";
     let alumnoGlobal = "";
 
-    /* ===== OneSignal (front) ===== */
+    /* ===== OneSignal ===== */
     const ONESIGNAL_APP_ID = "b4a200f4-30d9-46ce-9320-2c73c0721e1e";
     window.OneSignalDeferred = window.OneSignalDeferred || [];
     OneSignalDeferred.push(async function(OneSignal) {
-      await OneSignal.init({
-        appId: ONESIGNAL_APP_ID,
-        notifyButton: { enable: false }
-      });
+      await OneSignal.init({ appId: ONESIGNAL_APP_ID, notifyButton: { enable:false } });
     });
     async function onesignalVincularAlumno(alumno) {
       try {
@@ -366,9 +299,7 @@
         await OneSignal.login(alumno);
         await OneSignal.sendTag('alumno', alumno);
         const perm = await OneSignal.Notifications.getPermissionStatus();
-        if (perm !== 'granted') {
-          try { await OneSignal.Slidedown.promptPush(); } catch {}
-        }
+        if (perm !== 'granted') { try { await OneSignal.Slidedown.promptPush(); } catch {} }
       } catch {}
     }
 
@@ -385,14 +316,14 @@
     }
 
     let pollTimer = null;
-    let backoff = 60000; // 60s
+    let backoff = 60000;
     const BACKOFF_MIN = 30000;
     const BACKOFF_MAX = 5 * 60 * 1000;
 
     function startPollingEstado(alumno){
       stopPollingEstado();
       const tick = async ()=>{
-        if (document.hidden) return; // solo cuando visible
+        if (document.hidden) return;
         try {
           const res = await fetch(ESTADO_API(alumno), { cache: "no-store" });
           if (!res.ok) throw new Error("HTTP " + res.status);
@@ -403,10 +334,7 @@
 
           if (data && data.nuevo && hash && hash !== last) {
             if ("Notification" in window && Notification.permission === "granted") {
-              new Notification("CAOS - Canje actualizado", {
-                body: data.mensaje || "Tienes novedades de un canje.",
-                icon: NOTI_ICON,
-              });
+              new Notification("CAOS - Canje actualizado", { body: data.mensaje || "Tienes novedades de un canje.", icon: NOTI_ICON });
             } else {
               const panel = document.getElementById("cartasPanel");
               showOnomato(panel, '¡PING!', 'wow');
@@ -424,23 +352,14 @@
       };
       pollTimer = setTimeout(tick, 1000);
     }
-    function stopPollingEstado(){
-      if (pollTimer) clearTimeout(pollTimer);
-      pollTimer = null;
-    }
-    document.addEventListener("visibilitychange", ()=>{
-      if (document.hidden) return;
-      if (alumnoGlobal) startPollingEstado(alumnoGlobal);
-    });
+    function stopPollingEstado(){ if (pollTimer) clearTimeout(pollTimer); pollTimer = null; }
+    document.addEventListener("visibilitychange", ()=>{ if (!document.hidden && alumnoGlobal) startPollingEstado(alumnoGlobal); });
 
-    /* ===== Evitar auto-teclado al entrar (como en login) ===== */
+    /* ===== Evitar auto-teclado al entrar ===== */
     function preventAutoKeyboard(container){
       const scope = typeof container === 'string' ? document.getElementById(container) : (container || document);
       const inputs = scope.querySelectorAll('input, textarea');
-      inputs.forEach(el => {
-        el.setAttribute('readonly','readonly');
-        el.blur();
-      });
+      inputs.forEach(el => { el.setAttribute('readonly','readonly'); el.blur(); });
       const release = () => {
         inputs.forEach(el => el.removeAttribute('readonly'));
         window.removeEventListener('touchstart', release, {passive:true});
@@ -454,29 +373,18 @@
     // Ocultar splash y evitar teclado
     (function(){
       const hideSplash = () => {
-        if (document.activeElement && typeof document.activeElement.blur === 'function') {
-          document.activeElement.blur();
-        }
+        if (document.activeElement && typeof document.activeElement.blur === 'function') document.activeElement.blur();
         preventAutoKeyboard('loginPanel');
-
         const el = document.getElementById('splash');
         if (!el) return;
         el.classList.add('is-hidden');
         setTimeout(() => el.remove(), 400);
       };
-
-      const whenReady = () => {
-        setTimeout(hideSplash, 850);
-      };
-
-      if (document.readyState === 'complete') {
-        whenReady();
-      } else {
-        window.addEventListener('load', whenReady);
-      }
+      const whenReady = () => { setTimeout(hideSplash, 850); };
+      if (document.readyState === 'complete') whenReady(); else window.addEventListener('load', whenReady);
     })();
 
-    /* ===== Lógica de alumno ===== */
+    /* ===== Lógica de alumno / cartas (SIN CAMBIOS) ===== */
     function obtenerAlumnoInicial() {
       const params = new URLSearchParams(location.search);
       const desdeURL = params.get("alumno");
@@ -541,7 +449,7 @@
           } else {
             if (r.sugerencias && r.sugerencias.length) {
               pintarSugerencias(r.sugerencias);
-              document.getElementById("mensajeLogin").innerText = "Sugerencias encontradas. Toca tu nombre y vuelve a intentar.";
+              document.getElementById("mensajeLogin").innerText = "Elige tu nombre sugerido y vuelve a intentar.";
               showOnomato(document.getElementById('alumnoNombre'), '¡PING!', 'wow');
               showBubble(document.getElementById('alumnoNombre'), 'Elige tu nombre sugerido', 'warn');
             } else {
@@ -656,9 +564,7 @@
           div.className = "carta";
 
           const img = new Image();
-          img.alt = nombre;
-          img.loading = "lazy";
-          img.decoding = "async";
+          img.alt = nombre; img.loading = "lazy"; img.decoding = "async";
           img.src = carta?.["URL Pública"] || "https://i.imgur.com/U3F4gA1.png";
           img.onerror = () => img.src = "https://i.imgur.com/U3F4gA1.png";
 
