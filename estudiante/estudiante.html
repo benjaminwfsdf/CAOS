@@ -55,28 +55,21 @@
       display:flex; flex-direction:column; align-items:center; gap:20px;
       animation:splashIn 1200ms ease forwards;
     }
-   .logo-card{
-  width:210px; height:210px; background:#fff;
-  border:4px solid #000; border-radius:26px;
-  box-shadow:16px 16px 0 #000;
-  display:grid; place-items:center; overflow:hidden; /* <- importante */
-}
-
-/* Nuevo: el logo como background que “rellena” */
-.logo-bg{
-  width:100%; height:100%;
-  background-image:url("/estudiante/icons/icon-alumno-192.png"); /* tu logo */
-  background-position:center;
-  background-repeat:no-repeat;
-  /* cover + ligero zoom para compensar el padding del PNG */
-  background-size:120% 120%;
-}
-
-    .logo-img{
-      width:78%; height:78%; object-fit:contain; image-rendering:auto;
-      /* el PNG es negro con fondo; si quieres invertir, comenta lo siguiente */
-      /* filter: invert(0); */
+    .logo-card{
+      width:210px; height:210px; background:#fff;
+      border:4px solid #000; border-radius:26px;
+      box-shadow:16px 16px 0 #000;
+      display:grid; place-items:center; overflow:hidden;
     }
+    .logo-bg{
+      width:100%; height:100%;
+      background-image:url("/estudiante/icons/icon-alumno-192.png");
+      background-position:center;
+      background-repeat:no-repeat;
+      background-size:120% 120%;
+    }
+
+    .logo-img{ width:78%; height:78%; object-fit:contain; image-rendering:auto; }
     .brand{ font-family:'Rock Salt', cursive; font-size:32px; letter-spacing:1px; }
 
     @keyframes splashIn{
@@ -187,22 +180,21 @@
 
   <!-- Splash con logo -->
   <div id="splash" aria-hidden="true">
-  <div class="splash-wrap">
-    <div class="logo-card">
-      <div class="logo-bg"></div> <!-- antes había <img class="logo-img" ...> -->
+    <div class="splash-wrap">
+      <div class="logo-card">
+        <div class="logo-bg"></div>
+      </div>
+      <div class="brand">CAOS</div>
     </div>
-    <div class="brand">CAOS</div>
   </div>
-</div>
-
-      
 
   <main class="app">
     <!-- Panel de login -->
     <section class="panel" id="loginPanel" style="margin-top:6px;">
       <h1 class="titulo">🔐 Ingreso restringido</h1>
 
-      <div id="alumnoWrap" style="display:none; margin:6px 0; display:grid; gap:10px;">
+      <!-- FIX: solo un display (empieza oculto) -->
+      <div id="alumnoWrap" style="display:none; margin:6px 0; gap:10px;">
         <input id="alumnoNombre" class="textin" type="text"
                placeholder="Ingresa tus dos nombres y dos apellidos (cualquier orden)"
                autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
@@ -282,9 +274,29 @@
     }
 
     /* ===== Config ===== */
-    const apiURL    = "https://script.google.com/macros/s/AKfycbxmU3eiiTe69ouewbLl4znzk2-ML4U-AfIoiGH2Kkj_4Uz55gv2B9QRH-kdqvDw-Dq5ZQ/exec";
+    const apiURL    = "https://script.google.com/macros/s/AKfycby_ZsxSoU--gFjUPjCegTR-eNqPH28ozaOAuwParpwZ7YkzsulYhcvBfmJucVZfVm8SuQ/exec";
     const apiCartas = "https://script.google.com/macros/s/AKfycbx0Xx3eEiP0uisLfcLjrBxDw2mjJOQ1NTjenqZvlnBqKGqmhU8LZ-K5XiKDSwh5OY4p/exec";
-    let alumnoGlobal = "";
+
+    // Variables globales de alumno (display vs clave normalizada)
+    let alumnoDisplay = "";
+    let alumnoKey = "";
+
+    /* ===== Normalización / limpieza ===== */
+    // Quita tildes, pasa a minúsculas y colapsa espacios => para comparar/buscar
+    function normalizarNombre(n){
+      return (n||"")
+        .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // sin tildes
+        .toLowerCase()
+        .replace(/\s+/g,' ') // espacios múltiples -> 1
+        .trim();
+    }
+    // Conserva mayúsculas como vengan, pero colapsa espacios; (opcional) quita tildes visibles si prefieres
+    function limpiarNombre(n){
+      return (n||"")
+        .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // <- si quisieras mantener tildes, comenta esta línea
+        .replace(/\s+/g,' ')
+        .trim();
+    }
 
     /* ===== OneSignal ===== */
     const ONESIGNAL_APP_ID = "b4a200f4-30d9-46ce-9320-2c73c0721e1e";
@@ -353,7 +365,7 @@
       pollTimer = setTimeout(tick, 1000);
     }
     function stopPollingEstado(){ if (pollTimer) clearTimeout(pollTimer); pollTimer = null; }
-    document.addEventListener("visibilitychange", ()=>{ if (!document.hidden && alumnoGlobal) startPollingEstado(alumnoGlobal); });
+    document.addEventListener("visibilitychange", ()=>{ if (!document.hidden && alumnoKey) startPollingEstado(alumnoKey); });
 
     /* ===== Evitar auto-teclado al entrar ===== */
     function preventAutoKeyboard(container){
@@ -384,15 +396,18 @@
       if (document.readyState === 'complete') whenReady(); else window.addEventListener('load', whenReady);
     })();
 
-    /* ===== Lógica de alumno / cartas (SIN CAMBIOS) ===== */
+    /* ===== Alumno inicial (URL / localStorage) ===== */
     function obtenerAlumnoInicial() {
       const params = new URLSearchParams(location.search);
       const desdeURL = params.get("alumno");
       if (desdeURL) {
-        const limpio = decodeURIComponent(desdeURL).trim();
-        if (limpio) { localStorage.setItem("alumno", limpio); return limpio; }
+        const limpio = limpiarNombre(decodeURIComponent(desdeURL));
+        if (limpio) {
+          localStorage.setItem("alumno", limpio);
+          return limpio;
+        }
       }
-      const guardado = (localStorage.getItem("alumno") || "").trim();
+      const guardado = limpiarNombre(localStorage.getItem("alumno") || "");
       if (guardado) return guardado;
       document.getElementById("alumnoWrap").style.display = "grid";
       return "";
@@ -419,14 +434,17 @@
     }
 
     async function resolverAlumno(nombreEntrada) {
-      const url = `${apiURL}?accion=resolver_alumno&nombre=${encodeURIComponent(nombreEntrada)}`;
+      // Enviamos nombre "limpio" y también el normalizado por si tu GAS lo ocupa
+      const nombreLimpio = limpiarNombre(nombreEntrada);
+      const nombreNorm   = normalizarNombre(nombreEntrada);
+      const url = `${apiURL}?accion=resolver_alumno&nombre=${encodeURIComponent(nombreLimpio)}&nombre_norm=${encodeURIComponent(nombreNorm)}`;
       const res = await fetch(url);
       return await res.json();
     }
 
     document.getElementById("loginForm").addEventListener("submit", async function (e) {
       e.preventDefault();
-      const pass = document.getElementById("password").value;
+      const pass = (document.getElementById("password").value || "").trim(); // TRIM contraseña
       const btn = document.getElementById("btnEntrar");
 
       let alumno = obtenerAlumnoInicial();
@@ -441,7 +459,7 @@
         try {
           const r = await resolverAlumno(tmp);
           if (r.ok && r.alumno) {
-            alumno = r.alumno;
+            alumno = limpiarNombre(r.alumno);
             localStorage.setItem("alumno", alumno);
             pintarSugerencias([]);
             showOnomato(btn, '¡POW!', 'ok');
@@ -468,10 +486,13 @@
         }
       }
 
-      alumnoGlobal = alumno;
+      // Set globales para display y para clave
+      alumnoDisplay = limpiarNombre(alumno);
+      alumnoKey     = normalizarNombre(alumnoDisplay);
 
       try {
-        const urlLogin = `${apiURL}?accion=login&nombre=${encodeURIComponent(alumno)}&pass=${encodeURIComponent(pass)}`;
+        // Enviamos ambas variantes (por compatibilidad con tu API)
+        const urlLogin = `${apiURL}?accion=login&nombre=${encodeURIComponent(alumnoDisplay)}&nombre_norm=${encodeURIComponent(alumnoKey)}&pass=${encodeURIComponent(pass)}`;
         const res = await fetch(urlLogin);
         const data = await res.json();
 
@@ -486,12 +507,13 @@
             document.getElementById("loginPanel").style.display = "none";
             document.getElementById("cartasPanel").style.display = "block";
 
-            onesignalVincularAlumno(alumnoGlobal);
-            pedirPermisoNotificaciones().then(()=> startPollingEstado(alumnoGlobal));
-            cargarCartas(alumno);
+            onesignalVincularAlumno(alumnoKey);
+            pedirPermisoNotificaciones().then(()=> startPollingEstado(alumnoKey));
+            cargarCartas(alumnoDisplay);
           }
         } else {
-          document.getElementById("mensajeLogin").innerText = "❌ Contraseña incorrecta o nombre inválido.";
+          const msg = data.mensaje || "❌ Contraseña incorrecta o nombre inválido.";
+          document.getElementById("mensajeLogin").innerText = msg;
           showOnomato(document.getElementById('password'), '¡BANG!', 'error');
           showBubble(document.getElementById('password'), 'Credenciales inválidas', 'error');
         }
@@ -503,14 +525,14 @@
     });
 
     async function guardarNuevaClave() {
-      const nueva = document.getElementById("nuevaPass").value.trim();
+      const nueva = (document.getElementById("nuevaPass").value || "").trim();
       if (!nueva) {
         showOnomato(document.getElementById('nuevaPass'), '¡HEY!', 'error');
         showBubble(document.getElementById('nuevaPass'), 'Escribe una nueva contraseña', 'warn');
         return;
       }
       try {
-        const url = `${apiURL}?accion=cambiar_pass&nombre=${encodeURIComponent(alumnoGlobal)}&nueva=${encodeURIComponent(nueva)}`;
+        const url = `${apiURL}?accion=cambiar_pass&nombre=${encodeURIComponent(alumnoDisplay)}&nombre_norm=${encodeURIComponent(alumnoKey)}&nueva=${encodeURIComponent(nueva)}`;
         const res = await fetch(url);
         const data = await res.json();
         if (data && data.ok) {
@@ -519,9 +541,9 @@
           document.getElementById("loginPanel").style.display = "none";
           document.getElementById("cartasPanel").style.display = "block";
 
-          onesignalVincularAlumno(alumnoGlobal);
-          pedirPermisoNotificaciones().then(()=> startPollingEstado(alumnoGlobal));
-          cargarCartas(alumnoGlobal);
+          onesignalVincularAlumno(alumnoKey);
+          pedirPermisoNotificaciones().then(()=> startPollingEstado(alumnoKey));
+          cargarCartas(alumnoDisplay);
         } else {
           showOnomato(document.getElementById('nuevaPass'), '¡BANG!', 'error');
           showBubble(document.getElementById('nuevaPass'), 'No se pudo guardar', 'error');
