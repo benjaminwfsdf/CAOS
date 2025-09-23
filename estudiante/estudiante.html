@@ -129,17 +129,6 @@
     </section>
   </main>
 
-  <!-- Modal cambio de contraseña -->
-  <div id="modalCambio">
-    <div class="contenido">
-      <h2 style="margin:0 0 8px 0;">🔁 Cambiar Contraseña</h2>
-      <p style="margin:0 0 10px 0;">Ingresa tu nueva contraseña.<br>Solo puedes hacerlo una vez.</p>
-      <input type="password" id="nuevaPass" placeholder="Nueva contraseña"
-             autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"><br>
-      <button onclick="guardarNuevaClave()">Guardar</button>
-    </div>
-  </div>
-
   <footer>
     © 2025 CAOS. Todos los derechos reservados. — Desarrollado por Benjamín González — Ilustraciones: Constanza Cayul.
   </footer>
@@ -148,7 +137,7 @@
     /* ===== PWA ===== */
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('../service-worker.js?alumno-ui3');
+        navigator.serviceWorker.register('../service-worker.js?alumno-ui3-prompt');
       });
     }
 
@@ -192,7 +181,7 @@
     }
     function limpiarNombre(n){
       return (n||"")
-        .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // si quieres mantener tildes, comenta esta línea
+        .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
         .replace(/\s+/g,' ')
         .trim();
     }
@@ -250,7 +239,7 @@
       return await res.json();
     }
 
-    /* ===== Login — SIEMPRE con nombre + contraseña ===== */
+    /* ===== Login — nombre + contraseña, con cambio opcional si usa Caos2025 ===== */
     document.getElementById("loginForm").addEventListener("submit", async function (e) {
       e.preventDefault();
       const pass = (document.getElementById("password").value || "").trim();
@@ -296,7 +285,7 @@
         return;
       }
 
-      // 2) Validar contraseña
+      // 2) Validar contraseña y (si es default) ofrecer cambio con prompt
       try {
         const urlLogin = `${apiURL}?accion=login&nombre=${encodeURIComponent(alumnoDisplay)}&nombre_norm=${encodeURIComponent(alumnoKey)}&pass=${encodeURIComponent(pass)}`;
         const res = await fetch(urlLogin);
@@ -304,17 +293,37 @@
 
         if (data.ok) {
           if (!data.cambioHecho) {
-            showOnomato(btn, '¡WOW!', 'wow');
-            showBubble(btn, 'Primera vez: cambia tu contraseña', 'ok');
-            document.getElementById("modalCambio").style.display = "flex";
-          } else {
-            showOnomato(btn, '¡POW!', 'ok');
-            showBubble(btn, 'Acceso concedido', 'ok');
-            document.getElementById("loginPanel").style.display = "none";
-            document.getElementById("cartasPanel").style.display = "block";
-            onesignalVincularAlumno(alumnoKey);
-            cargarCartas(alumnoDisplay);
+            // Está usando la predeterminada (Caos2025)
+            const desea = confirm("Estás usando la clave predeterminada (Caos2025). ¿Deseas cambiarla ahora?");
+            if (desea) {
+              const nueva = prompt("Ingresa tu nueva contraseña (mínimo 4 caracteres):", "");
+              if (nueva && nueva.trim().length >= 4) {
+                try {
+                  const url = `${apiURL}?accion=cambiar_pass&nombre=${encodeURIComponent(alumnoDisplay)}&nombre_norm=${encodeURIComponent(alumnoKey)}&nueva=${encodeURIComponent(nueva.trim())}`;
+                  const r = await fetch(url);
+                  const d = await r.json();
+                  if (d && d.ok) {
+                    alert("✅ Contraseña cambiada correctamente.");
+                  } else {
+                    alert("❌ No se pudo guardar la nueva contraseña.");
+                  }
+                } catch {
+                  alert("❌ Error de red al cambiar la contraseña.");
+                }
+              } else if (nueva !== null) {
+                alert("La contraseña debe tener al menos 4 caracteres.");
+              }
+            }
           }
+
+          // Acceso concedido (si cambió o no quiso cambiar)
+          showOnomato(btn, '¡POW!', 'ok');
+          showBubble(btn, 'Acceso concedido', 'ok');
+          document.getElementById("loginPanel").style.display = "none";
+          document.getElementById("cartasPanel").style.display = "block";
+          onesignalVincularAlumno(alumnoKey);
+          cargarCartas(alumnoDisplay);
+
         } else {
           const msg = data.mensaje || "❌ Contraseña incorrecta o nombre inválido.";
           document.getElementById("mensajeLogin").innerText = msg;
@@ -327,40 +336,6 @@
         showBubble(btn, 'Error de red', 'error');
       }
     });
-
-    async function guardarNuevaClave() {
-      const caja = document.getElementById("alumnoNombre");
-      const alumnoDisplay = limpiarNombre(caja.value || localStorage.getItem("alumno") || "");
-      const alumnoKey     = normalizarNombre(alumnoDisplay);
-      const nueva = (document.getElementById("nuevaPass").value || "").trim();
-      if (!nueva) {
-        showOnomato(document.getElementById('nuevaPass'), '¡HEY!', 'error');
-        showBubble(document.getElementById('nuevaPass'), 'Escribe una nueva contraseña', 'warn');
-        return;
-      }
-      try {
-        const url = `${apiURL}?accion=cambiar_pass&nombre=${encodeURIComponent(alumnoDisplay)}&nombre_norm=${encodeURIComponent(alumnoKey)}&nueva=${encodeURIComponent(nueva)}`;
-        const res = await fetch(url);
-        const data = await res.json();
-        if (data && data.ok) {
-          alert("✅ Contraseña cambiada correctamente.");
-          document.getElementById("modalCambio").style.display = "none";
-          document.getElementById("loginPanel").style.display = "none";
-          document.getElementById("cartasPanel").style.display = "block";
-          onesignalVincularAlumno(alumnoKey);
-          cargarCartas(alumnoDisplay);
-        } else {
-          showOnomato(document.getElementById('nuevaPass'), '¡BANG!', 'error');
-          showBubble(document.getElementById('nuevaPass'), 'No se pudo guardar', 'error');
-          alert("❌ No se pudo guardar la nueva contraseña.");
-        }
-      } catch {
-        showOnomato(document.getElementById('nuevaPass'), '¡BANG!', 'error');
-        showBubble(document.getElementById('nuevaPass'), 'Error de red', 'error');
-        alert("❌ Error al guardar la nueva contraseña.");
-      }
-    }
-    window.guardarNuevaClave = guardarNuevaClave;
 
     /* ===== Cartas ===== */
     async function cargarCartas(alumno) {
@@ -474,7 +449,7 @@
       }
     }
 
-    // Ocultar splash (pequeño toque)
+    // Ocultar splash
     (function(){
       const hideSplash = () => {
         const el = document.getElementById('splash');
