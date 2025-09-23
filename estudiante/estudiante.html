@@ -42,159 +42,65 @@
       min-height:100dvh;
     }
 
-    /* ===== Splash con tu logo ===== */
-    #splash{
-      position:fixed; inset:0; z-index:99999;
-      display:flex; align-items:center; justify-content:center;
-      background:#fff;
-      transition:opacity .35s ease, visibility .35s ease;
-    }
-    #splash.is-hidden{ opacity:0; visibility:hidden; }
-
-    .splash-wrap{
-      display:flex; flex-direction:column; align-items:center; gap:20px;
-      animation:splashIn 1200ms ease forwards;
-    }
-    .logo-card{
-      width:210px; height:210px; background:#fff;
-      border:4px solid #000; border-radius:26px;
-      box-shadow:16px 16px 0 #000;
-      display:grid; place-items:center; overflow:hidden;
-    }
-    .logo-bg{
-      width:100%; height:100%;
-      background-image:url("/estudiante/icons/icon-alumno-192.png");
-      background-position:center;
-      background-repeat:no-repeat;
-      background-size:120% 120%;
-    }
-
-    .logo-img{ width:78%; height:78%; object-fit:contain; image-rendering:auto; }
+    #splash{position:fixed; inset:0; z-index:99999; display:flex; align-items:center; justify-content:center; background:#fff; transition:opacity .35s ease, visibility .35s ease;}
+    #splash.is-hidden{opacity:0; visibility:hidden;}
+    .splash-wrap{display:flex; flex-direction:column; align-items:center; gap:20px; animation:splashIn 1200ms ease forwards;}
+    .logo-card{width:210px; height:210px; background:#fff; border:4px solid #000; border-radius:26px; box-shadow:16px 16px 0 #000; display:grid; place-items:center; overflow:hidden;}
+    .logo-bg{width:100%; height:100%; background-image:url("/estudiante/icons/icon-alumno-192.png"); background-position:center; background-repeat:no-repeat; background-size:120% 120%;}
     .brand{ font-family:'Rock Salt', cursive; font-size:32px; letter-spacing:1px; }
-
-    @keyframes splashIn{
-      0%   { transform:translateY(6px) scale(.86); opacity:0; }
-      45%  { transform:translateY(0)   scale(1.06); opacity:1; }
-      70%  { transform:translateY(0)   scale(.98); }
-      100% { transform:translateY(0)   scale(1); }
-    }
+    @keyframes splashIn{0%{transform:translateY(6px) scale(.86); opacity:0;}45%{transform:translateY(0) scale(1.06); opacity:1;}70%{transform:translateY(0) scale(.98);}100%{transform:translateY(0) scale(1);}}
     @media (prefers-reduced-motion: reduce){ .splash-wrap{ animation:none } }
 
-    /* ===== App shell ===== */
     .app{ max-width:900px; margin:0 auto; display:grid; gap:var(--gap); padding:12px; }
-    .panel{
-      background:var(--paper); border:3px solid var(--ink); border-radius:var(--radius);
-      padding:var(--pad); box-shadow:var(--shadow); position:relative;
-    }
-
-    .titulo{
-      font-size:var(--fz-title); text-align:center;
-      border:3px dashed var(--ink); border-radius:14px; padding:10px 12px;
-      margin:0 0 6px 0; background:var(--paper);
-    }
+    .panel{ background:var(--paper); border:3px solid var(--ink); border-radius:var(--radius); padding:var(--pad); box-shadow:var(--shadow); position:relative; }
+    .titulo{ font-size:var(--fz-title); text-align:center; border:3px dashed var(--ink); border-radius:14px; padding:10px 12px; margin:0 0 6px 0; background:var(--paper); }
     .subtitulo{ font-size:var(--fz-sub); text-align:center; margin:4px 0 14px 0; }
-
-    .textin,.btn{
-      width:100%; min-height:48px; border:2px solid var(--ink); border-radius:12px;
-      font-family:Arial, Helvetica, sans-serif; font-weight:700; font-size:var(--fz-body);
-      padding:12px 14px; background:var(--paper); color:var(--ink); box-shadow:3px 3px 0 var(--ink);
-    }
+    .textin,.btn{ width:100%; min-height:48px; border:2px solid var(--ink); border-radius:12px; font-family:Arial, Helvetica, sans-serif; font-weight:700; font-size:var(--fz-body); padding:12px 14px; background:var(--paper); color:var(--ink); box-shadow:3px 3px 0 var(--ink); }
     .btn{ cursor:pointer }
     .btn:disabled{ background:#efefef; color:#9c9c9c; cursor:not-allowed }
-
-    .carta{
-      display:grid; grid-template-columns:1fr; gap:10px; border:2px solid var(--ink);
-      border-radius:14px; padding:12px; background:var(--paper); box-shadow:4px 4px 0 var(--ink);
-    }
+    .carta{ display:grid; grid-template-columns:1fr; gap:10px; border:2px solid var(--ink); border-radius:14px; padding:12px; background:var(--paper); box-shadow:4px 4px 0 var(--ink); }
     .carta img{ width:100%; max-width:320px; height:auto; place-self:center; border-radius:12px; }
     .carta-row{ display:flex; align-items:center; gap:10px; justify-content:space-between; flex-wrap:wrap; }
     .carta-info{ font-family:Arial, sans-serif; font-size:var(--fz-body); flex:1; min-width:180px; }
     .cantidad{ font-weight:700; font-size:clamp(18px,5vw,28px); margin-top:4px }
     .boton-canje{ min-width:160px }
-
-    .descripcion{
-      display:none; font-family:Arial, sans-serif; font-size:clamp(16px,4.6vw,20px);
-      line-height:1.35; margin-top:6px; color:var(--ink);
-    }
-
-    footer{
-      border:3px solid var(--ink); border-radius:14px; box-shadow:4px 4px 0 var(--ink);
-      padding:12px; text-align:center; font-family:Arial, sans-serif; font-weight:700; font-size:12px;
-      background:var(--paper); max-width:600px; margin:4px auto 0;
-    }
-
+    .descripcion{ display:none; font-family:Arial, sans-serif; font-size:clamp(16px,4.6vw,20px); line-height:1.35; margin-top:6px; color:var(--ink); }
+    footer{ border:3px solid var(--ink); border-radius:14px; box-shadow:4px 4px 0 var(--ink); padding:12px; text-align:center; font-family:Arial, sans-serif; font-weight:700; font-size:12px; background:var(--paper); max-width:600px; margin:4px auto 0; }
     #sugerencias{ display:none; margin-top:8px }
-    .sug{
-      display:inline-block; margin:4px 6px 0 0; padding:6px 10px; border:2px solid var(--ink);
-      background:var(--paper); box-shadow:3px 3px 0 var(--ink); cursor:pointer; border-radius:999px;
-      font-family:Arial,sans-serif; font-weight:700; font-size:14px;
-    }
+    .sug{ display:inline-block; margin:4px 6px 0 0; padding:6px 10px; border:2px solid var(--ink); background:var(--paper); box-shadow:3px 3px 0 var(--ink); cursor:pointer; border-radius:999px; font-family:Arial,sans-serif; font-weight:700; font-size:14px; }
 
-    #modalCambio{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:9999; align-items:center; justify-content:center }
-    #modalCambio .contenido{
-      width:92%; max-width:380px; background:var(--paper); border:3px solid var(--ink);
-      box-shadow:6px 6px 0 var(--ink); border-radius:16px; padding:18px; text-align:center; font-family:'Comic Neue', cursive;
-    }
-    #modalCambio input{ padding:12px; font-size:18px; width:100%; border:2px solid var(--ink); border-radius:10px }
-    #modalCambio button{ padding:12px 18px; font-size:18px; border:2px solid var(--ink); box-shadow:3px 3px 0 var(--ink); background:var(--paper); border-radius:12px; margin-top:12px; cursor:pointer }
-
-    .bubble{
-      position:absolute; z-index:999; max-width:320px; background:var(--paper); color:var(--ink);
-      border:3px solid var(--ink); box-shadow:6px 6px 0 var(--ink); padding:12px 14px; font-weight:700; line-height:1.2;
-      border-radius:14px; transform:translate(-50%,-110%) scale(0.98); opacity:0; pointer-events:none;
-      animation:bubble-in 250ms ease-out forwards, bubble-out 3s 2.4s ease-in forwards;
-    }
-    .bubble::after{
-      content:""; position:absolute; bottom:-18px; left:50%; transform:translateX(-50%) rotate(8deg);
-      width:24px; height:24px; background:var(--paper); border-left:3px solid var(--ink); border-bottom:3px solid var(--ink);
-      box-shadow:6px 6px 0 var(--ink); clip-path:polygon(0 0,100% 0,100% 100%);
-    }
+    .bubble{ position:absolute; z-index:999; max-width:320px; background:var(--paper); color:var(--ink); border:3px solid var(--ink); box-shadow:6px 6px 0 var(--ink); padding:12px 14px; font-weight:700; line-height:1.2; border-radius:14px; transform:translate(-50%,-110%) scale(0.98); opacity:0; pointer-events:none; animation:bubble-in 250ms ease-out forwards, bubble-out 3s 2.4s ease-in forwards; }
+    .bubble::after{ content:""; position:absolute; bottom:-18px; left:50%; transform:translateX(-50%) rotate(8deg); width:24px; height:24px; background:var(--paper); border-left:3px solid var(--ink); border-bottom:3px solid var(--ink); box-shadow:6px 6px 0 var(--ink); clip-path:polygon(0 0,100% 0,100% 100%); }
     .bubble--ok{ border-color:#09b37a; box-shadow:6px 6px 0 #09b37a; }
     .bubble--warn{ border-color:#f59e0b; box-shadow:6px 6px 0 #f59e0b; }
     .bubble--error{ border-color:#e02424; box-shadow:6px 6px 0 #e02424; }
     @keyframes bubble-in{ to{ opacity:1; transform:translate(-50%,-110%) scale(1);} }
     @keyframes bubble-out{ to{ opacity:0; transform:translate(-50%,-130%) scale(0.96);} }
-
-    .onomato{
-      position:absolute; z-index:998; font-weight:900; letter-spacing:2px; font-size:28px;
-      -webkit-text-stroke:2px var(--ink); transform:translate(-50%,-50%) scale(0.6) rotate(-6deg);
-      opacity:0; pointer-events:none; animation:ono-pop 520ms ease-out forwards;
-    }
+    .onomato{ position:absolute; z-index:998; font-weight:900; letter-spacing:2px; font-size:28px; -webkit-text-stroke:2px var(--ink); transform:translate(-50%,-50%) scale(0.6) rotate(-6deg); opacity:0; pointer-events:none; animation:ono-pop 520ms ease-out forwards; }
     .onomato--ok{ color:#33e6a4; text-shadow:6px 6px 0 #09b37a; }
     .onomato--error{ color:#ff6b6b; text-shadow:6px 6px 0 #e02424; }
     .onomato--wow{ color:#ffd45a; text-shadow:6px 6px 0 #f59e0b; }
-    @keyframes ono-pop{
-      20%{ opacity:1; transform:translate(-50%,-50%) scale(1.1) rotate(2deg); }
-      60%{ transform:translate(-50%,-54%) scale(1) rotate(-2deg); }
-      100%{ opacity:0; transform:translate(-50%,-60%) scale(0.9) rotate(0deg); }
-    }
-
-    @media (min-width:800px){
-      .carta{ grid-template-columns:240px 1fr; align-items:center }
-      .carta img{ width:240px }
-      .boton-canje{ min-width:200px }
-    }
+    @keyframes ono-pop{ 20%{ opacity:1; transform:translate(-50%,-50%) scale(1.1) rotate(2deg); } 60%{ transform:translate(-50%,-54%) scale(1) rotate(-2deg); } 100%{ opacity:0; transform:translate(-50%,-60%) scale(0.9) rotate(0deg); } }
+    @media (min-width:800px){ .carta{ grid-template-columns:240px 1fr; align-items:center } .carta img{ width:240px } .boton-canje{ min-width:200px } }
   </style>
 </head>
 <body>
 
-  <!-- Splash con logo -->
+  <!-- Splash -->
   <div id="splash" aria-hidden="true">
     <div class="splash-wrap">
-      <div class="logo-card">
-        <div class="logo-bg"></div>
-      </div>
+      <div class="logo-card"><div class="logo-bg"></div></div>
       <div class="brand">CAOS</div>
     </div>
   </div>
 
   <main class="app">
-    <!-- Panel de login -->
+    <!-- Login -->
     <section class="panel" id="loginPanel" style="margin-top:6px;">
       <h1 class="titulo">🔐 Ingreso restringido</h1>
 
-      <!-- FIX: solo un display (empieza oculto) -->
-      <div id="alumnoWrap" style="display:none; margin:6px 0; gap:10px;">
+      <!-- SIEMPRE visible -->
+      <div id="alumnoWrap" style="display:grid; margin:6px 0; gap:10px;">
         <input id="alumnoNombre" class="textin" type="text"
                placeholder="Ingresa tus dos nombres y dos apellidos (cualquier orden)"
                autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
@@ -215,7 +121,7 @@
       <div id="mensajeLogin" style="color:#e02424;margin-top:8px;text-align:center;font-family:Arial,sans-serif;font-weight:700;"></div>
     </section>
 
-    <!-- Panel de cartas -->
+    <!-- Cartas -->
     <section class="panel" id="cartasPanel" style="display:none;">
       <h2 class="titulo">CAOS (Cartas Anti Orden en la Sala)</h2>
       <p class="subtitulo" id="nombreAlumno">Cargando estudiante...</p>
@@ -223,7 +129,7 @@
     </section>
   </main>
 
-  <!-- Modal de cambio de contraseña -->
+  <!-- Modal cambio de contraseña -->
   <div id="modalCambio">
     <div class="contenido">
       <h2 style="margin:0 0 8px 0;">🔁 Cambiar Contraseña</h2>
@@ -235,19 +141,18 @@
   </div>
 
   <footer>
-    © 2025 CAOS. Todos los derechos reservados. —
-    Desarrollado por Benjamín González — Ilustraciones: Constanza Cayul.
+    © 2025 CAOS. Todos los derechos reservados. — Desarrollado por Benjamín González — Ilustraciones: Constanza Cayul.
   </footer>
 
   <script>
-    /* ===== PWA (forzar actualización del SW) ===== */
+    /* ===== PWA ===== */
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('../service-worker.js?alumno-ui2');
+        navigator.serviceWorker.register('../service-worker.js?alumno-ui3');
       });
     }
 
-    /* ===== Globos / onomatopeyas ===== */
+    /* ===== UI helpers ===== */
     function showBubble(anchorEl, texto, tipo='ok'){
       const panel = anchorEl.closest('.panel') || document.querySelector('.panel');
       const rect = anchorEl.getBoundingClientRect();
@@ -274,145 +179,49 @@
     }
 
     /* ===== Config ===== */
-    const apiURL    = "https://script.google.com/macros/s/AKfycby_ZsxSoU--gFjUPjCegTR-eNqPH28ozaOAuwParpwZ7YkzsulYhcvBfmJucVZfVm8SuQ/exec";
+    const apiURL    = "https://script.google.com/macros/s/AKfycbxj0bxFQfNrzeyE1Pz--jz6xKnid7Yda4c06igimeqmdXvuMepgfSSsoX-RGfzxBM6YIg/exec";
     const apiCartas = "https://script.google.com/macros/s/AKfycbx0Xx3eEiP0uisLfcLjrBxDw2mjJOQ1NTjenqZvlnBqKGqmhU8LZ-K5XiKDSwh5OY4p/exec";
 
-    // Variables globales de alumno (display vs clave normalizada)
-    let alumnoDisplay = "";
-    let alumnoKey = "";
-
-    /* ===== Normalización / limpieza ===== */
-    // Quita tildes, pasa a minúsculas y colapsa espacios => para comparar/buscar
+    /* ===== Normalización ===== */
     function normalizarNombre(n){
       return (n||"")
         .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // sin tildes
         .toLowerCase()
-        .replace(/\s+/g,' ') // espacios múltiples -> 1
+        .replace(/\s+/g,' ') // dobles espacios -> 1
         .trim();
     }
-    // Conserva mayúsculas como vengan, pero colapsa espacios; (opcional) quita tildes visibles si prefieres
     function limpiarNombre(n){
       return (n||"")
-        .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // <- si quisieras mantener tildes, comenta esta línea
+        .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // si quieres mantener tildes, comenta esta línea
         .replace(/\s+/g,' ')
         .trim();
     }
 
-    /* ===== OneSignal ===== */
+    /* ===== OneSignal (opcional) ===== */
     const ONESIGNAL_APP_ID = "b4a200f4-30d9-46ce-9320-2c73c0721e1e";
     window.OneSignalDeferred = window.OneSignalDeferred || [];
     OneSignalDeferred.push(async function(OneSignal) {
       await OneSignal.init({ appId: ONESIGNAL_APP_ID, notifyButton: { enable:false } });
     });
-    async function onesignalVincularAlumno(alumno) {
+    async function onesignalVincularAlumno(alumnoKey) {
       try {
         const OneSignal = window.OneSignal;
         if (!OneSignal) return;
-        await OneSignal.login(alumno);
-        await OneSignal.sendTag('alumno', alumno);
-        const perm = await OneSignal.Notifications.getPermissionStatus();
-        if (perm !== 'granted') { try { await OneSignal.Slidedown.promptPush(); } catch {} }
+        await OneSignal.login(alumnoKey);
+        await OneSignal.sendTag('alumno', alumnoKey);
       } catch {}
     }
 
-    /* ===== Notificación local por polling ===== */
-    const NOTI_ICON = "/estudiante/icons/icon-alumno-192.png";
-    const ESTADO_API = (alumno)=> `${apiCartas}?accion=estado_canje&alumno=${encodeURIComponent(alumno)}`;
-    const STORAGE_KEY = (alumno)=> `caos:lastCanjeHash:${alumno}`;
-
-    async function pedirPermisoNotificaciones() {
-      if (!("Notification" in window)) return false;
-      if (Notification.permission === "granted") return true;
-      const p = await Notification.requestPermission();
-      return p === "granted";
-    }
-
-    let pollTimer = null;
-    let backoff = 60000;
-    const BACKOFF_MIN = 30000;
-    const BACKOFF_MAX = 5 * 60 * 1000;
-
-    function startPollingEstado(alumno){
-      stopPollingEstado();
-      const tick = async ()=>{
-        if (document.hidden) return;
-        try {
-          const res = await fetch(ESTADO_API(alumno), { cache: "no-store" });
-          if (!res.ok) throw new Error("HTTP " + res.status);
-          const data = await res.json();
-
-          const last = localStorage.getItem(STORAGE_KEY(alumno)) || "";
-          const hash = (data && data.hash) ? String(data.hash) : "";
-
-          if (data && data.nuevo && hash && hash !== last) {
-            if ("Notification" in window && Notification.permission === "granted") {
-              new Notification("CAOS - Canje actualizado", { body: data.mensaje || "Tienes novedades de un canje.", icon: NOTI_ICON });
-            } else {
-              const panel = document.getElementById("cartasPanel");
-              showOnomato(panel, '¡PING!', 'wow');
-              showBubble(panel, data.mensaje || "Novedades de canje", 'warn');
-            }
-            localStorage.setItem(STORAGE_KEY(alumno), hash);
-          }
-          backoff = Math.max(BACKOFF_MIN, Math.floor(backoff * 0.75));
-        } catch (e) {
-          backoff = Math.min(BACKOFF_MAX, Math.floor(backoff * 1.5));
-          console.warn("[CAOS] Error consultando estado de canje:", e?.message || e);
-        } finally {
-          pollTimer = setTimeout(tick, backoff);
-        }
-      };
-      pollTimer = setTimeout(tick, 1000);
-    }
-    function stopPollingEstado(){ if (pollTimer) clearTimeout(pollTimer); pollTimer = null; }
-    document.addEventListener("visibilitychange", ()=>{ if (!document.hidden && alumnoKey) startPollingEstado(alumnoKey); });
-
-    /* ===== Evitar auto-teclado al entrar ===== */
-    function preventAutoKeyboard(container){
-      const scope = typeof container === 'string' ? document.getElementById(container) : (container || document);
-      const inputs = scope.querySelectorAll('input, textarea');
-      inputs.forEach(el => { el.setAttribute('readonly','readonly'); el.blur(); });
-      const release = () => {
-        inputs.forEach(el => el.removeAttribute('readonly'));
-        window.removeEventListener('touchstart', release, {passive:true});
-        window.removeEventListener('mousedown', release);
-      };
-      window.addEventListener('touchstart', release, {passive:true});
-      window.addEventListener('mousedown', release);
-      setTimeout(release, 900);
-    }
-
-    // Ocultar splash y evitar teclado
-    (function(){
-      const hideSplash = () => {
-        if (document.activeElement && typeof document.activeElement.blur === 'function') document.activeElement.blur();
-        preventAutoKeyboard('loginPanel');
-        const el = document.getElementById('splash');
-        if (!el) return;
-        el.classList.add('is-hidden');
-        setTimeout(() => el.remove(), 400);
-      };
-      const whenReady = () => { setTimeout(hideSplash, 850); };
-      if (document.readyState === 'complete') whenReady(); else window.addEventListener('load', whenReady);
-    })();
-
-    /* ===== Alumno inicial (URL / localStorage) ===== */
-    function obtenerAlumnoInicial() {
+    /* ===== Prefill del nombre (no autoriza, solo ayuda) ===== */
+    document.addEventListener('DOMContentLoaded', () => {
       const params = new URLSearchParams(location.search);
-      const desdeURL = params.get("alumno");
-      if (desdeURL) {
-        const limpio = limpiarNombre(decodeURIComponent(desdeURL));
-        if (limpio) {
-          localStorage.setItem("alumno", limpio);
-          return limpio;
-        }
-      }
-      const guardado = limpiarNombre(localStorage.getItem("alumno") || "");
-      if (guardado) return guardado;
-      document.getElementById("alumnoWrap").style.display = "grid";
-      return "";
-    }
+      const desdeURL = params.get("alumno") || "";
+      const pre = limpiarNombre(desdeURL || localStorage.getItem("alumno") || "");
+      const inp = document.getElementById("alumnoNombre");
+      if (inp && pre) inp.value = pre;
+    });
 
+    /* ===== Sugerencias ===== */
     function pintarSugerencias(lista) {
       const box = document.getElementById("sugerencias");
       if (!lista || !lista.length) { box.style.display = "none"; box.innerHTML = ""; return; }
@@ -434,7 +243,6 @@
     }
 
     async function resolverAlumno(nombreEntrada) {
-      // Enviamos nombre "limpio" y también el normalizado por si tu GAS lo ocupa
       const nombreLimpio = limpiarNombre(nombreEntrada);
       const nombreNorm   = normalizarNombre(nombreEntrada);
       const url = `${apiURL}?accion=resolver_alumno&nombre=${encodeURIComponent(nombreLimpio)}&nombre_norm=${encodeURIComponent(nombreNorm)}`;
@@ -442,56 +250,54 @@
       return await res.json();
     }
 
+    /* ===== Login — SIEMPRE con nombre + contraseña ===== */
     document.getElementById("loginForm").addEventListener("submit", async function (e) {
       e.preventDefault();
-      const pass = (document.getElementById("password").value || "").trim(); // TRIM contraseña
-      const btn = document.getElementById("btnEntrar");
+      const pass = (document.getElementById("password").value || "").trim();
+      const btn  = document.getElementById("btnEntrar");
+      const caja = document.getElementById("alumnoNombre");
+      const nombreIngresado = (caja.value || "").trim();
 
-      let alumno = obtenerAlumnoInicial();
-      if (!alumno) {
-        const tmp = (document.getElementById("alumnoNombre").value || "").trim();
-        if (!tmp) {
-          document.getElementById("mensajeLogin").innerText = "⚠️ Ingresa tus nombres y apellidos.";
-          showOnomato(document.getElementById('alumnoNombre'), '¡HEY!', 'error');
-          showBubble(document.getElementById('alumnoNombre'), 'Ingresa tu nombre completo', 'warn');
-          return;
-        }
-        try {
-          const r = await resolverAlumno(tmp);
-          if (r.ok && r.alumno) {
-            alumno = limpiarNombre(r.alumno);
-            localStorage.setItem("alumno", alumno);
-            pintarSugerencias([]);
-            showOnomato(btn, '¡POW!', 'ok');
-            showBubble(btn, `Hola, ${alumno}`, 'ok');
-          } else {
-            if (r.sugerencias && r.sugerencias.length) {
-              pintarSugerencias(r.sugerencias);
-              document.getElementById("mensajeLogin").innerText = "Elige tu nombre sugerido y vuelve a intentar.";
-              showOnomato(document.getElementById('alumnoNombre'), '¡PING!', 'wow');
-              showBubble(document.getElementById('alumnoNombre'), 'Elige tu nombre sugerido', 'warn');
-            } else {
-              pintarSugerencias([]);
-              document.getElementById("mensajeLogin").innerText = "Nombre no encontrado. Revisa la ortografía.";
-              showOnomato(document.getElementById('alumnoNombre'), '¡BANG!', 'error');
-              showBubble(document.getElementById('alumnoNombre'), 'No se encontró tu nombre', 'error');
-            }
-            return;
-          }
-        } catch (err) {
-          document.getElementById("mensajeLogin").innerText = "Error de conexión al resolver el nombre.";
-          showOnomato(btn, '¡BANG!', 'error');
-          showBubble(btn, 'Error de conexión', 'error');
-          return;
-        }
+      if (!nombreIngresado) {
+        document.getElementById("mensajeLogin").innerText = "⚠️ Ingresa tus dos nombres y dos apellidos.";
+        showOnomato(caja, '¡HEY!', 'error');
+        showBubble(caja, 'Escribe tu nombre completo', 'warn');
+        return;
       }
 
-      // Set globales para display y para clave
-      alumnoDisplay = limpiarNombre(alumno);
-      alumnoKey     = normalizarNombre(alumnoDisplay);
-
+      // 1) Resolver alumno
+      let alumnoDisplay = "";
+      let alumnoKey     = "";
       try {
-        // Enviamos ambas variantes (por compatibilidad con tu API)
+        const r = await resolverAlumno(nombreIngresado);
+        if (r.ok && r.alumno) {
+          alumnoDisplay = limpiarNombre(r.alumno);
+          alumnoKey     = normalizarNombre(alumnoDisplay);
+          localStorage.setItem("alumno", alumnoDisplay);
+          pintarSugerencias([]);
+        } else {
+          if (r.sugerencias && r.sugerencias.length) {
+            pintarSugerencias(r.sugerencias);
+            document.getElementById("mensajeLogin").innerText = "Elige tu nombre sugerido y vuelve a intentar.";
+            showOnomato(caja, '¡PING!', 'wow');
+            showBubble(caja, 'Elige tu nombre sugerido', 'warn');
+          } else {
+            pintarSugerencias([]);
+            document.getElementById("mensajeLogin").innerText = "Nombre no encontrado. Revisa la ortografía.";
+            showOnomato(caja, '¡BANG!', 'error');
+            showBubble(caja, 'No se encontró tu nombre', 'error');
+          }
+          return;
+        }
+      } catch {
+        document.getElementById("mensajeLogin").innerText = "Error de conexión al resolver el nombre.";
+        showOnomato(btn, '¡BANG!', 'error');
+        showBubble(btn, 'Error de conexión', 'error');
+        return;
+      }
+
+      // 2) Validar contraseña
+      try {
         const urlLogin = `${apiURL}?accion=login&nombre=${encodeURIComponent(alumnoDisplay)}&nombre_norm=${encodeURIComponent(alumnoKey)}&pass=${encodeURIComponent(pass)}`;
         const res = await fetch(urlLogin);
         const data = await res.json();
@@ -506,9 +312,7 @@
             showBubble(btn, 'Acceso concedido', 'ok');
             document.getElementById("loginPanel").style.display = "none";
             document.getElementById("cartasPanel").style.display = "block";
-
             onesignalVincularAlumno(alumnoKey);
-            pedirPermisoNotificaciones().then(()=> startPollingEstado(alumnoKey));
             cargarCartas(alumnoDisplay);
           }
         } else {
@@ -517,7 +321,7 @@
           showOnomato(document.getElementById('password'), '¡BANG!', 'error');
           showBubble(document.getElementById('password'), 'Credenciales inválidas', 'error');
         }
-      } catch (error) {
+      } catch {
         document.getElementById("mensajeLogin").innerText = "⚠️ Error al conectar con el servidor.";
         showOnomato(btn, '¡BANG!', 'error');
         showBubble(btn, 'Error de red', 'error');
@@ -525,6 +329,9 @@
     });
 
     async function guardarNuevaClave() {
+      const caja = document.getElementById("alumnoNombre");
+      const alumnoDisplay = limpiarNombre(caja.value || localStorage.getItem("alumno") || "");
+      const alumnoKey     = normalizarNombre(alumnoDisplay);
       const nueva = (document.getElementById("nuevaPass").value || "").trim();
       if (!nueva) {
         showOnomato(document.getElementById('nuevaPass'), '¡HEY!', 'error');
@@ -540,16 +347,14 @@
           document.getElementById("modalCambio").style.display = "none";
           document.getElementById("loginPanel").style.display = "none";
           document.getElementById("cartasPanel").style.display = "block";
-
           onesignalVincularAlumno(alumnoKey);
-          pedirPermisoNotificaciones().then(()=> startPollingEstado(alumnoKey));
           cargarCartas(alumnoDisplay);
         } else {
           showOnomato(document.getElementById('nuevaPass'), '¡BANG!', 'error');
           showBubble(document.getElementById('nuevaPass'), 'No se pudo guardar', 'error');
           alert("❌ No se pudo guardar la nueva contraseña.");
         }
-      } catch (e) {
+      } catch {
         showOnomato(document.getElementById('nuevaPass'), '¡BANG!', 'error');
         showBubble(document.getElementById('nuevaPass'), 'Error de red', 'error');
         alert("❌ Error al guardar la nueva contraseña.");
@@ -557,13 +362,15 @@
     }
     window.guardarNuevaClave = guardarNuevaClave;
 
+    /* ===== Cartas ===== */
     async function cargarCartas(alumno) {
+      const api = apiCartas;
       document.getElementById("nombreAlumno").innerText = alumno;
       try {
-        const resCartas = await fetch(`${apiCartas}?alumno=${encodeURIComponent(alumno)}`, { cache: "no-store" });
+        const resCartas = await fetch(`${api}?alumno=${encodeURIComponent(alumno)}`, { cache: "no-store" });
         const dataCartas = await resCartas.json();
 
-        const resImagenes = await fetch(`${apiCartas}?accion=imagenes`, { cache: "force-cache" });
+        const resImagenes = await fetch(`${api}?accion=imagenes`, { cache: "force-cache" });
         const dataImagenes = await resImagenes.json();
 
         const conteo = dataCartas.conteo || {};
@@ -605,7 +412,7 @@
             ev.stopPropagation();
             const ok = confirm(`¿Confirmas solicitar el canje de '${nombre}'?`);
             if (!ok) return;
-            const url = `${apiCartas}?accion=solicitar_canje&alumno=${encodeURIComponent(alumno)}&carta=${encodeURIComponent(nombre)}`;
+            const url = `${api}?accion=solicitar_canje&alumno=${encodeURIComponent(alumno)}&carta=${encodeURIComponent(nombre)}`;
             try {
               const res = await fetch(url, { method: "GET", keepalive: true });
               const texto = await res.text();
@@ -634,7 +441,6 @@
 
           row.appendChild(info);
           row.appendChild(boton);
-
           div.appendChild(img);
           div.appendChild(row);
           div.appendChild(descripcion);
@@ -667,6 +473,18 @@
         default: return "Sin descripción disponible para esta carta.";
       }
     }
+
+    // Ocultar splash (pequeño toque)
+    (function(){
+      const hideSplash = () => {
+        const el = document.getElementById('splash');
+        if (!el) return;
+        el.classList.add('is-hidden');
+        setTimeout(() => el.remove(), 400);
+      };
+      const whenReady = () => { setTimeout(hideSplash, 850); };
+      if (document.readyState === 'complete') whenReady(); else window.addEventListener('load', whenReady);
+    })();
   </script>
 </body>
 </html>
