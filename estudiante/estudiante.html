@@ -168,22 +168,16 @@
     }
 
     /* ===== Config ===== */
-    const apiURL    = "https://script.google.com/macros/s/AKfycbxj0bxFQfNrzeyE1Pz--jz6xKnid7Yda4c06igimeqmdXvuMepgfSSsoX-RGfzxBM6YIg/exec";
-    const apiCartas = "https://script.google.com/macros/s/AKfycbxQ05Z0SG4txB0wkl70d6XXTCrUC8KyDl-BQ954VTrO2ZDhjdWBRVuV4Rn_zENt2t2w/exec";
+    const apiURL    = "https://script.google.com/macros/s/AKfycbwSQyV9rXDNbxPrFD5jhjjWF6_EGqUC8ucznWUZYqsRqiY3hNDsJOwmlqmYVbdSc7WcNg/exec";
+    const apiCartas = "https://script.google.com/macros/s/AKfycbwu80f58Fg8Gv5plx7kT1a9LFUQEkuYyKTh-l_m0tPPzmblM9L1WLSW6Rf9Jzc4WKPf/exec";
 
     /* ===== Normalización ===== */
+    const sinTildes = s => (s||"").normalize('NFD').replace(/[\u0300-\u036f]/g,'');
     function normalizarNombre(n){
-      return (n||"")
-        .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // sin tildes
-        .toLowerCase()
-        .replace(/\s+/g,' ') // dobles espacios -> 1
-        .trim();
+      return sinTildes(n).toLowerCase().replace(/\s+/g,' ').trim();
     }
     function limpiarNombre(n){
-      return (n||"")
-        .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-        .replace(/\s+/g,' ')
-        .trim();
+      return sinTildes(n).replace(/\s+/g,' ').trim();
     }
 
     /* ===== OneSignal (opcional) ===== */
@@ -201,7 +195,7 @@
       } catch {}
     }
 
-    /* ===== Prefill del nombre (no autoriza, solo ayuda) ===== */
+    /* ===== Prefill del nombre ===== */
     document.addEventListener('DOMContentLoaded', () => {
       const params = new URLSearchParams(location.search);
       const desdeURL = params.get("alumno") || "";
@@ -293,7 +287,6 @@
 
         if (data.ok) {
           if (!data.cambioHecho) {
-            // Está usando la predeterminada (Caos2025)
             const desea = confirm("Estás usando la clave predeterminada (Caos2025). ¿Deseas cambiarla ahora?");
             if (desea) {
               const nueva = prompt("Ingresa tu nueva contraseña (mínimo 4 caracteres):", "");
@@ -316,7 +309,7 @@
             }
           }
 
-          // Acceso concedido (si cambió o no quiso cambiar)
+          // Acceso concedido
           showOnomato(btn, '¡POW!', 'ok');
           showBubble(btn, 'Acceso concedido', 'ok');
           document.getElementById("loginPanel").style.display = "none";
