@@ -58,11 +58,25 @@
     .textin,.btn{ width:100%; min-height:48px; border:2px solid var(--ink); border-radius:12px; font-family:Arial, Helvetica, sans-serif; font-weight:700; font-size:var(--fz-body); padding:12px 14px; background:var(--paper); color:var(--ink); box-shadow:3px 3px 0 var(--ink); }
     .btn{ cursor:pointer }
     .btn:disabled{ background:#efefef; color:#9c9c9c; cursor:not-allowed }
-    .carta{ display:grid; grid-template-columns:1fr; gap:10px; border:2px solid var(--ink); border-radius:14px; padding:12px; background:var(--paper); box-shadow:4px 4px 0 var(--ink); }
-    .carta img{ width:100%; max-width:320px; height:auto; place-self:center; border-radius:12px; }
+
+    /* Carta optimizada para scroll: */
+    .carta{
+      display:grid; grid-template-columns:1fr; gap:10px;
+      border:2px solid var(--ink); border-radius:14px; padding:12px;
+      background:var(--paper); box-shadow:4px 4px 0 var(--ink);
+      /* Mejora de rendimiento en listas largas: */
+      content-visibility:auto;           /* evita layout/pintado hasta ser visible */
+      contain-intrinsic-size: 360px;     /* altura estimada para el placeholder */
+      will-change: transform;
+    }
+    .carta img{
+      width:100%; max-width:320px; height:auto; place-self:center; border-radius:12px;
+      background:#f3f3f3;                /* esqueleto */
+      transition:filter .2s ease;
+      filter:saturate(0.92) contrast(0.98);
+    }
     .carta-row{ display:flex; align-items:center; gap:10px; justify-content:space-between; flex-wrap:wrap; }
     .carta-info{ font-family:Arial, sans-serif; font-size:var(--fz-body); flex:1; min-width:180px; }
-    /* .carta-info .desc { ELIMINADA (era la descripción permanente) } */
     .cantidad{ font-weight:700; font-size:clamp(18px,5vw,28px); margin-top:4px }
     .boton-canje{ min-width:160px }
     .descripcion{ display:none; font-family:Arial, sans-serif; font-size:clamp(16px,4.6vw,20px); line-height:1.35; margin-top:6px; color:var(--ink); }
@@ -70,6 +84,7 @@
     #sugerencias{ display:none; margin-top:8px }
     .sug{ display:inline-block; margin:4px 6px 0 0; padding:6px 10px; border:2px solid var(--ink); background:var(--paper); box-shadow:3px 3px 0 var(--ink); cursor:pointer; border-radius:999px; font-family:Arial,sans-serif; font-weight:700; font-size:14px; }
 
+    /* Globos / onomatopeyas */
     .bubble{ position:absolute; z-index:999; max-width:320px; background:var(--paper); color:var(--ink); border:3px solid var(--ink); box-shadow:6px 6px 0 var(--ink); padding:12px 14px; font-weight:700; line-height:1.2; border-radius:14px; transform:translate(-50%,-110%) scale(0.98); opacity:0; pointer-events:none; animation:bubble-in .25s ease-out forwards, bubble-out 3s 2.4s ease-in forwards; }
     .bubble::after{ content:""; position:absolute; bottom:-18px; left:50%; transform:translateX(-50%) rotate(8deg); width:24px; height:24px; background:var(--paper); border-left:3px solid var(--ink); border-bottom:3px solid var(--ink); box-shadow:6px 6px 0 var(--ink); clip-path:polygon(0 0,100% 0,100% 100%); }
     .bubble--ok{ border-color:#09b37a; box-shadow:6px 6px 0 #09b37a; }
@@ -125,6 +140,8 @@
       <h2 class="titulo">CAOS (Cartas Anti Orden en la Sala)</h2>
       <p class="subtitulo" id="nombreAlumno">Cargando estudiante...</p>
       <div id="cartasContainer" style="display:grid; gap:12px;">Cargando cartas...</div>
+      <!-- Sentinela para carga progresiva -->
+      <div id="sentinel" style="height:1px;"></div>
     </section>
   </main>
 
@@ -174,9 +191,6 @@
     const sinTildes = s => (s||"").normalize('NFD').replace(/[\u0300-\u036f]/g,'');
     function normalizarNombre(n){ return sinTildes(n).toLowerCase().replace(/\s+/g,' ').trim(); }
     function limpiarNombre(n){ return sinTildes(n).replace(/\s+/g,' ').trim(); }
-
-    /* ===== (Notificaciones eliminadas) ===== */
-    // Se retiró OneSignal: variables, init y funciones relacionadas.
 
     /* ===== Prefill del nombre y aviso de victoria ===== */
     document.addEventListener('DOMContentLoaded', () => {
@@ -240,12 +254,19 @@
       }catch{ return String(url); }
     }
 
-    // Intenta varias URLs hasta que una cargue
+    // Intenta varias URLs hasta que una cargue (prefiere WebP -> JPG -> PNG)
     function tryImageCandidates(imgEl, sources, fallback){
       let i = 0;
+      const ordered = [];
+      sources.forEach(s=>{
+        if(!s) return;
+        const base = s.replace(/\.(png|jpg|jpeg|webp|gif)$/i,'');
+        ordered.push(`${base}.webp`, `${base}.jpg`, `${base}.jpeg`, `${base}.png`);
+      });
+      const unique = [...new Set(ordered.concat(sources))];
       const next = () => {
-        if (i >= sources.length){ imgEl.src = fallback; return; }
-        const url = sources[i++];
+        if (i >= unique.length){ imgEl.src = fallback; return; }
+        const url = unique[i++];
         imgEl.onerror = next;
         imgEl.src = url;
       };
@@ -328,7 +349,6 @@
           showBubble(btn, 'Acceso concedido', 'ok');
           document.getElementById("loginPanel").style.display = "none";
           document.getElementById("cartasPanel").style.display = "block";
-          // (Eliminado) onesignalVincularAlumno(alumnoKey);
           cargarCartas(alumnoDisplay);
           iniciarWatcherEstadoCanje(alumnoDisplay);   // watcher
 
@@ -345,161 +365,95 @@
       }
     });
 
-    /* ===== Doble toque / doble clic (helper) ===== */
+    /* ===== Doble toque / doble clic robusto =====
+       - Ignora gestos con desplazamiento (>18px)
+       - Ventana de tiempo: 280ms
+       - No bloquea el scroll salvo confirmar doble toque
+    */
     function habilitarDobleToque(elemento, callback){
-      let ultimoToque = 0;
-      // Soporte móvil (touch)
+      let lastTapTime = 0, lastX = 0, lastY = 0, tapTarget = null, tapTimer = null;
+
+      elemento.addEventListener('touchstart', (ev) => {
+        if (ev.touches.length !== 1) return; // solo un dedo
+        const t = ev.touches[0];
+        tapTarget = ev.currentTarget;
+        lastX = t.clientX; lastY = t.clientY;
+      }, {passive:true});
+
       elemento.addEventListener('touchend', (ev) => {
-        const ahora = Date.now();
-        if (ahora - ultimoToque < 300) { // ventana de 300ms
+        const now = Date.now();
+        const dt  = now - lastTapTime;
+        const t   = ev.changedTouches && ev.changedTouches[0];
+        if (!t) return;
+
+        const dx = Math.abs(t.clientX - lastX);
+        const dy = Math.abs(t.clientY - lastY);
+        const moved = (dx + dy) > 18;  // umbral desplazamiento
+
+        if (dt < 280 && !moved && tapTarget === ev.currentTarget) {
+          // Doble toque confirmado
+          if (tapTimer){ clearTimeout(tapTimer); tapTimer = null; }
+          lastTapTime = 0;
           callback(ev);
           ev.preventDefault();
+          ev.stopPropagation();
+          return;
         }
-        ultimoToque = ahora;
+
+        // Primer toque: espera por un segundo toque
+        lastTapTime = now;
+        if (tapTimer) clearTimeout(tapTimer);
+        tapTimer = setTimeout(()=>{ lastTapTime = 0; }, 320);
       }, {passive:false});
-      // Soporte desktop (doble clic)
+
+      // Desktop
       elemento.addEventListener('dblclick', (ev) => {
         callback(ev);
       });
     }
 
-    /* ===== Cartas ===== */
+    /* ===== Carga de cartas (optimizada) ===== */
+    let _imagenesIndex = null;       // cache de imágenes
+    let _cartasData = null;          // cache de conteo por nombre
+    let _nombresOrden = [];          // lista de nombres de cartas
+    let _renderIndex = 0;            // índice de render progresivo
+    const RENDER_CHUNK = 12;         // cuántas cartas por bloque
+
     async function cargarCartas(alumno) {
-      const api = apiCartas;
       document.getElementById("nombreAlumno").innerText = alumno;
+      const contenedor = document.getElementById("cartasContainer");
+      contenedor.innerHTML = "Cargando cartas...";
+
       try {
-        const resCartas = await fetch(`${api}?alumno=${encodeURIComponent(alumno)}`, { cache: "no-store" });
+        // Pedidos en paralelo, con cache inteligente
+        const [resCartas, resImagenes] = await Promise.all([
+          fetch(`${apiCartas}?alumno=${encodeURIComponent(alumno)}`, { cache: "no-store" }),
+          _imagenesIndex ? Promise.resolve({ ok:true, json: async()=>_imagenesIndex })
+                         : fetch(`${apiCartas}?accion=imagenes`, { cache: "force-cache" })
+        ]);
+
         const dataCartas = await resCartas.json();
+        _imagenesIndex = _imagenesIndex || await resImagenes.json();
 
-        const resImagenes = await fetch(`${api}?accion=imagenes`, { cache: "force-cache" });
-        const dataImagenes = await resImagenes.json();
+        _cartasData = dataCartas.conteo || {};
+        _nombresOrden = Object.keys(_cartasData);
 
-        const conteo = dataCartas.conteo || {};
-        const contenedor = document.getElementById("cartasContainer");
-        contenedor.innerHTML = "";
-
-        const nombres = Object.keys(conteo);
-        if (!nombres.length) {
+        if (!_nombresOrden.length) {
           contenedor.innerHTML = "<p style='text-align:center;font-family:Arial,sans-serif;'>📭 No tienes cartas todavía.</p>";
           showOnomato(contenedor, '¡PING!', 'wow');
           showBubble(contenedor, 'Cuando recibas cartas, aparecerán aquí', 'warn');
           return;
         }
 
-        nombres.forEach((nombre) => {
-          const cantidad = conteo[nombre];
-          const carta = dataImagenes.find(img => img.Nombre === nombre);
+        // Prepara container
+        contenedor.innerHTML = "";
+        _renderIndex = 0;
 
-          const div = document.createElement("div");
-          div.className = "carta";
-          div.setAttribute('role','group');
-          div.setAttribute('aria-label', nombre);
+        // Primer bloque inmediato
+        renderChunk(contenedor);
 
-          const img = new Image();
-          img.alt = nombre;
-          img.loading = "lazy";
-          img.decoding = "async";
-          img.crossOrigin = "anonymous";
-          img.referrerPolicy = "no-referrer";
-
-          const PLACEHOLDER = "https://i.imgur.com/U3F4gA1.png";
-
-          // ===== IMAGEN (override para Pac-Man Arcade) =====
-          const rawURL = carta?.["URL Pública"] || "";
-          const normalizedBase = normalizarImgur(rawURL);
-          if (nombre === "Pac-Man Arcade") {
-            const PACMAN_ID = "DGuyJYb";
-            const candidates = [
-              `https://i.imgur.com/${PACMAN_ID}.png`,
-              `https://i.imgur.com/${PACMAN_ID}.jpg`,
-              `https://i.imgur.com/${PACMAN_ID}.jpeg`,
-              `https://i.imgur.com/${PACMAN_ID}.webp`,
-              ...(normalizedBase ? [
-                `${normalizedBase}.png`,
-                `${normalizedBase}.jpg`,
-                `${normalizedBase}.jpeg`,
-                `${normalizedBase}.webp`,
-              ] : []),
-              rawURL
-            ];
-            tryImageCandidates(img, candidates, PLACEHOLDER);
-          } else {
-            const candidates = [];
-            if (normalizedBase && /^https?:\/\/i\.imgur\.com\/[A-Za-z0-9]+$/i.test(normalizedBase)) {
-              candidates.push(
-                `${normalizedBase}.png`,
-                `${normalizedBase}.jpg`,
-                `${normalizedBase}.jpeg`,
-                `${normalizedBase}.webp`
-              );
-            }
-            if (rawURL) candidates.unshift(rawURL);
-            tryImageCandidates(img, candidates, PLACEHOLDER);
-          }
-
-          const row = document.createElement("div");
-          row.className = "carta-row";
-
-          const descripcionTxt = obtenerDescripcion(nombre);
-
-          const info = document.createElement("div");
-          info.className = "carta-info";
-          // 🔧 Quitamos la descripción permanente (.desc)
-          info.innerHTML = `
-            <div><strong>${nombre}</strong></div>
-            <div class="cantidad">Cantidad: ${cantidad}</div>
-            <div style="font-family:Arial,sans-serif;font-size:12px;opacity:.8;margin-top:4px;">
-              (Doble toque o doble clic para ver la descripción)
-            </div>
-          `;
-
-          const boton = document.createElement("button");
-          boton.className = "btn boton-canje";
-          boton.innerText = "Solicitar Canje";
-          boton.disabled = cantidad < 1;
-          boton.onclick = async (ev) => {
-            ev.stopPropagation();
-            const ok = confirm(`¿Confirmas solicitar el canje de '${nombre}'?`);
-            if (!ok) return;
-            const url = `${api}?accion=solicitar_canje&alumno=${encodeURIComponent(alumno)}&carta=${encodeURIComponent(nombre)}`;
-            try {
-              const res = await fetch(url, { method: "GET", keepalive: true });
-              const texto = await res.text();
-              showOnomato(boton, '¡POW!', 'ok');
-              showBubble(boton, 'Solicitud enviada al profesor', 'ok');
-              alert("Solicitud enviada al profesor.\n" + texto);
-            } catch {
-              showOnomato(boton, '¡BANG!', 'error');
-              showBubble(boton, 'No se pudo enviar la solicitud', 'error');
-              alert("No se pudo enviar la solicitud por un error de red.");
-            }
-          };
-
-          // Descripción plegable (solo visible con doble toque/clic)
-          const descripcion = document.createElement("div");
-          descripcion.className = "descripcion";
-          descripcion.innerText = descripcionTxt;
-          descripcion.setAttribute('aria-hidden', 'true');
-
-          // 🔧 Doble toque / doble clic para alternar la descripción
-          const toggleDescripcion = () => {
-            const visible = descripcion.style.display === "block";
-            descripcion.style.display = visible ? "none" : "block";
-            descripcion.setAttribute('aria-hidden', visible ? 'true' : 'false');
-            if (!visible) {
-              showOnomato(div, '¡WOW!', 'wow');
-              showBubble(div, 'Descripción de la carta', 'ok');
-            }
-          };
-          habilitarDobleToque(div, toggleDescripcion);
-
-          row.appendChild(info);
-          row.appendChild(boton);
-          div.appendChild(img);
-          div.appendChild(row);
-          div.appendChild(descripcion);
-          contenedor.appendChild(div);
-        });
+        // Configura IO para carga progresiva
+        prepararCargaProgresiva(contenedor);
 
         showOnomato(contenedor, '¡POW!', 'ok');
         showBubble(contenedor, 'Cartas cargadas', 'ok');
@@ -509,6 +463,143 @@
         showOnomato(document.getElementById("cartasContainer"), '¡BANG!', 'error');
         showBubble(document.getElementById("cartasContainer"), 'Error al conectar con el servidor', 'error');
       }
+    }
+
+    function renderChunk(contenedor){
+      const fin = Math.min(_renderIndex + RENDER_CHUNK, _nombresOrden.length);
+      for (let i = _renderIndex; i < fin; i++){
+        const nombre = _nombresOrden[i];
+        const cantidad = _cartasData[nombre];
+        const carta = (_imagenesIndex || []).find(img => img.Nombre === nombre);
+
+        const div = document.createElement("div");
+        div.className = "carta";
+        div.setAttribute('role','group');
+        div.setAttribute('aria-label', nombre);
+
+        const img = new Image();
+        img.alt = nombre;
+        img.loading = (i < 6) ? "eager" : "lazy";  // primeras visibles con prioridad
+        if (i < 3) img.fetchPriority = "high";
+        img.decoding = "async";
+        img.crossOrigin = "anonymous";
+        img.referrerPolicy = "no-referrer";
+
+        const PLACEHOLDER = "https://i.imgur.com/U3F4gA1.png";
+
+        // ===== IMAGEN (override para Pac-Man Arcade) =====
+        const rawURL = carta?.["URL Pública"] || "";
+        const normalizedBase = normalizarImgur(rawURL);
+        if (nombre === "Pac-Man Arcade") {
+          const PACMAN_ID = "DGuyJYb";
+          const candidates = [
+            `https://i.imgur.com/${PACMAN_ID}.png`,
+            `https://i.imgur.com/${PACMAN_ID}.jpg`,
+            `https://i.imgur.com/${PACMAN_ID}.jpeg`,
+            `https://i.imgur.com/${PACMAN_ID}.webp`,
+            ...(normalizedBase ? [
+              `${normalizedBase}.png`,
+              `${normalizedBase}.jpg`,
+              `${normalizedBase}.jpeg`,
+              `${normalizedBase}.webp`,
+            ] : []),
+            rawURL
+          ];
+          tryImageCandidates(img, candidates, PLACEHOLDER);
+        } else {
+          const candidates = [];
+          if (normalizedBase && /^https?:\/\/i\.imgur\.com\/[A-Za-z0-9]+$/i.test(normalizedBase)) {
+            candidates.push(
+              `${normalizedBase}.webp`,
+              `${normalizedBase}.jpg`,
+              `${normalizedBase}.jpeg`,
+              `${normalizedBase}.png`
+            );
+          }
+          if (rawURL) candidates.unshift(rawURL);
+          tryImageCandidates(img, candidates, PLACEHOLDER);
+        }
+
+        const row = document.createElement("div");
+        row.className = "carta-row";
+
+        const descripcionTxt = obtenerDescripcion(nombre);
+
+        const info = document.createElement("div");
+        info.className = "carta-info";
+        info.innerHTML = `
+          <div><strong>${nombre}</strong></div>
+          <div class="cantidad">Cantidad: ${cantidad}</div>
+          <div style="font-family:Arial,sans-serif;font-size:12px;opacity:.8;margin-top:4px;">
+            (Doble toque o doble clic para ver la descripción)
+          </div>
+        `;
+
+        const boton = document.createElement("button");
+        boton.className = "btn boton-canje";
+        boton.innerText = "Solicitar Canje";
+        boton.disabled = cantidad < 1;
+        boton.onclick = async (ev) => {
+          ev.stopPropagation();
+          const ok = confirm(`¿Confirmas solicitar el canje de '${nombre}'?`);
+          if (!ok) return;
+          const url = `${apiCartas}?accion=solicitar_canje&alumno=${encodeURIComponent(document.getElementById('nombreAlumno').innerText)}&carta=${encodeURIComponent(nombre)}`;
+          try {
+            const res = await fetch(url, { method: "GET", keepalive: true });
+            const texto = await res.text();
+            showOnomato(boton, '¡POW!', 'ok');
+            showBubble(boton, 'Solicitud enviada al profesor', 'ok');
+            alert("Solicitud enviada al profesor.\n" + texto);
+          } catch {
+            showOnomato(boton, '¡BANG!', 'error');
+            showBubble(boton, 'No se pudo enviar la solicitud', 'error');
+            alert("No se pudo enviar la solicitud por un error de red.");
+          }
+        };
+
+        const descripcion = document.createElement("div");
+        descripcion.className = "descripcion";
+        descripcion.innerText = descripcionTxt;
+        descripcion.setAttribute('aria-hidden', 'true');
+
+        const toggleDescripcion = () => {
+          const visible = descripcion.style.display === "block";
+          descripcion.style.display = visible ? "none" : "block";
+          descripcion.setAttribute('aria-hidden', visible ? 'true' : 'false');
+          if (!visible) {
+            showOnomato(div, '¡WOW!', 'wow');
+            showBubble(div, 'Descripción de la carta', 'ok');
+          }
+        };
+        habilitarDobleToque(div, toggleDescripcion);
+
+        row.appendChild(info);
+        row.appendChild(boton);
+        div.appendChild(img);
+        div.appendChild(row);
+        div.appendChild(descripcion);
+        contenedor.appendChild(div);
+      }
+      _renderIndex = fin;
+    }
+
+    function prepararCargaProgresiva(contenedor){
+      const sentinel = document.getElementById('sentinel');
+      if (!('IntersectionObserver' in window) || !sentinel) return;
+
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            // Render siguiente bloque en microtarea para no trabar scroll
+            queueMicrotask(()=> {
+              renderChunk(contenedor);
+              if (_renderIndex >= _nombresOrden.length) io.disconnect();
+            });
+          }
+        });
+      }, { rootMargin: '1200px 0px 1200px 0px' }); // pre-carga generosa
+
+      io.observe(sentinel);
     }
 
     function obtenerDescripcion(nombre) {
