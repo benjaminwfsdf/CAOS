@@ -20,8 +20,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Rock+Salt&family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
 
-  <!-- OneSignal SDK (Web Push) -->
-  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  <!-- (Notificaciones eliminadas: OneSignal SDK) -->
+  <!-- <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script> -->
 
   <style>
     :root{
@@ -175,20 +175,8 @@
     function normalizarNombre(n){ return sinTildes(n).toLowerCase().replace(/\s+/g,' ').trim(); }
     function limpiarNombre(n){ return sinTildes(n).replace(/\s+/g,' ').trim(); }
 
-    /* ===== OneSignal (opcional) ===== */
-    const ONESIGNAL_APP_ID = "b4a200f4-30d9-46ce-9320-2c73c0721e1e";
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(async function(OneSignal) {
-      await OneSignal.init({ appId: ONESIGNAL_APP_ID, notifyButton: { enable:false } });
-    });
-    async function onesignalVincularAlumno(alumnoKey) {
-      try {
-        const OneSignal = window.OneSignal;
-        if (!OneSignal) return;
-        await OneSignal.login(alumnoKey);
-        await OneSignal.sendTag('alumno', alumnoKey);
-      } catch {}
-    }
+    /* ===== (Notificaciones eliminadas) ===== */
+    // Se retiró OneSignal: variables, init y funciones relacionadas.
 
     /* ===== Prefill del nombre y aviso de victoria ===== */
     document.addEventListener('DOMContentLoaded', () => {
@@ -340,7 +328,7 @@
           showBubble(btn, 'Acceso concedido', 'ok');
           document.getElementById("loginPanel").style.display = "none";
           document.getElementById("cartasPanel").style.display = "block";
-          onesignalVincularAlumno(alumnoKey);
+          // (Eliminado) onesignalVincularAlumno(alumnoKey);
           cargarCartas(alumnoDisplay);
           iniciarWatcherEstadoCanje(alumnoDisplay);   // watcher
 
