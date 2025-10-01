@@ -57,7 +57,7 @@
     .btn{ cursor:pointer }
     .btn:disabled{ background:#efefef; color:#9c9c9c; cursor:not-allowed }
 
-    /* Carta optimizada para scroll */
+    /* Carta optimizada para scroll: */
     .carta{
       display:grid; grid-template-columns:1fr; gap:10px;
       border:2px solid var(--ink); border-radius:14px; padding:12px;
@@ -449,7 +449,6 @@
       } catch (error) {
         document.getElementById("cartasContainer").innerText = "Error al cargar las cartas.";
         showOnomato(document.getElementById("cartasContainer"), '¡BANG!', 'error');
-        // (FIX de typo aquí:)
         showBubble(document.getElementById("cartasContainer"), 'Error al conectar con el servidor', 'error');
       }
     }
@@ -648,32 +647,43 @@
       tick();
     }
 
-    /* ===== Ocultar splash: robusto y con fallback ===== */
+    /* ===== Splash con duración mínima y tope ===== */
     (function(){
       const splash = document.getElementById('splash');
+      const SPLASH_MIN_MS = 1100; // mínimo visible ~1.1s
+      const SPLASH_MAX_MS = 2000; // máximo visible 2.0s
+      const start = performance.now();
+      let hidden = false;
+
       const hideSplash = () => {
-        if (!splash) return;
+        if (hidden || !splash) return;
+        hidden = true;
         splash.classList.add('is-hidden');
         setTimeout(() => splash.remove(), 500);
       };
 
-      // 1) DOM listo -> intentamos ocultar
+      // Lógica para respetar visibilidad mínima
+      const scheduleHideRespectingMin = () => {
+        const elapsed = performance.now() - start;
+        const wait = Math.max(SPLASH_MIN_MS - elapsed, 0);
+        setTimeout(hideSplash, wait);
+      };
+
+      // Señales de “listo”: DOM, fuentes, load
       if (document.readyState === 'complete' || document.readyState === 'interactive') {
-        setTimeout(hideSplash, 200); // breve delay para pintar
+        scheduleHideRespectingMin();
       } else {
-        document.addEventListener('DOMContentLoaded', () => setTimeout(hideSplash, 200), {once:true});
+        document.addEventListener('DOMContentLoaded', scheduleHideRespectingMin, {once:true});
       }
 
-      // 2) Cuando carguen fuentes (evita quedarse esperando al 'load')
       if (document.fonts && document.fonts.ready) {
-        document.fonts.ready.then(()=> setTimeout(hideSplash, 0)).catch(()=>{});
+        document.fonts.ready.then(scheduleHideRespectingMin).catch(()=>{});
       }
 
-      // 3) load clásico por si acaso
-      window.addEventListener('load', () => setTimeout(hideSplash, 200), {once:true});
+      window.addEventListener('load', scheduleHideRespectingMin, {once:true});
 
-      // 4) Fallback duro: a los 2.5s como máximo lo ocultamos
-      setTimeout(hideSplash, 2500);
+      // Fallback duro a los 2s
+      setTimeout(hideSplash, SPLASH_MAX_MS);
     })();
   </script>
 </body>
