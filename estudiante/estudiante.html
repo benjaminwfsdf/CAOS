@@ -21,7 +21,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Rock+Salt&family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
 
   <!-- (Notificaciones eliminadas: OneSignal SDK) -->
-  <!-- <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script> -->
 
   <style>
     :root{
@@ -64,14 +63,13 @@
       display:grid; grid-template-columns:1fr; gap:10px;
       border:2px solid var(--ink); border-radius:14px; padding:12px;
       background:var(--paper); box-shadow:4px 4px 0 var(--ink);
-      /* Mejora de rendimiento en listas largas: */
-      content-visibility:auto;           /* evita layout/pintado hasta ser visible */
-      contain-intrinsic-size: 360px;     /* altura estimada para el placeholder */
+      content-visibility:auto;
+      contain-intrinsic-size: 360px;
       will-change: transform;
     }
     .carta img{
       width:100%; max-width:320px; height:auto; place-self:center; border-radius:12px;
-      background:#f3f3f3;                /* esqueleto */
+      background:#f3f3f3;
       transition:filter .2s ease;
       filter:saturate(0.92) contrast(0.98);
     }
@@ -79,6 +77,10 @@
     .carta-info{ font-family:Arial, sans-serif; font-size:var(--fz-body); flex:1; min-width:180px; }
     .cantidad{ font-weight:700; font-size:clamp(18px,5vw,28px); margin-top:4px }
     .boton-canje{ min-width:160px }
+    .btn-desc{
+      width:auto; padding:10px 12px; border-radius:12px; font-size:clamp(12px,3.6vw,14px);
+      background:var(--paper); border:2px dashed var(--ink); box-shadow:3px 3px 0 var(--ink);
+    }
     .descripcion{ display:none; font-family:Arial, sans-serif; font-size:clamp(16px,4.6vw,20px); line-height:1.35; margin-top:6px; color:var(--ink); }
     footer{ border:3px solid var(--ink); border-radius:14px; box-shadow:4px 4px 0 var(--ink); padding:12px; text-align:center; font-family:Arial, sans-serif; font-weight:700; font-size:12px; background:var(--paper); max-width:600px; margin:4px auto 0; }
     #sugerencias{ display:none; margin-top:8px }
@@ -140,7 +142,6 @@
       <h2 class="titulo">CAOS (Cartas Anti Orden en la Sala)</h2>
       <p class="subtitulo" id="nombreAlumno">Cargando estudiante...</p>
       <div id="cartasContainer" style="display:grid; gap:12px;">Cargando cartas...</div>
-      <!-- Sentinela para carga progresiva -->
       <div id="sentinel" style="height:1px;"></div>
     </section>
   </main>
@@ -350,7 +351,7 @@
           document.getElementById("loginPanel").style.display = "none";
           document.getElementById("cartasPanel").style.display = "block";
           cargarCartas(alumnoDisplay);
-          iniciarWatcherEstadoCanje(alumnoDisplay);   // watcher
+          iniciarWatcherEstadoCanje(alumnoDisplay);
 
         } else {
           const msg = data.mensaje || "❌ Contraseña incorrecta o nombre inválido.";
@@ -365,59 +366,67 @@
       }
     });
 
-    /* ===== Doble toque / doble clic robusto =====
-       - Ignora gestos con desplazamiento (>18px)
-       - Ventana de tiempo: 280ms
-       - No bloquea el scroll salvo confirmar doble toque
-    */
-    function habilitarDobleToque(elemento, callback){
-      let lastTapTime = 0, lastX = 0, lastY = 0, tapTarget = null, tapTimer = null;
+    /* ===== NUEVO: Pulsación larga + botón para descripción ===== */
+    function habilitarLongPress(elemento, onLongPress){
+      let timer = null, startX=0, startY=0, moved=false;
 
-      elemento.addEventListener('touchstart', (ev) => {
-        if (ev.touches.length !== 1) return; // solo un dedo
+      const clear = ()=>{ if(timer){ clearTimeout(timer); timer=null; } };
+
+      elemento.addEventListener('touchstart', (ev)=>{
+        if(ev.touches.length!==1) return;
         const t = ev.touches[0];
-        tapTarget = ev.currentTarget;
-        lastX = t.clientX; lastY = t.clientY;
+        startX=t.clientX; startY=t.clientY; moved=false;
+        clear();
+        timer = setTimeout(()=>{
+          timer=null;
+          if(!moved){ onLongPress(ev); }
+        }, 450); // 450ms
       }, {passive:true});
 
-      elemento.addEventListener('touchend', (ev) => {
-        const now = Date.now();
-        const dt  = now - lastTapTime;
-        const t   = ev.changedTouches && ev.changedTouches[0];
-        if (!t) return;
+      elemento.addEventListener('touchmove', (ev)=>{
+        const t = ev.touches[0];
+        if(Math.abs(t.clientX-startX)+Math.abs(t.clientY-startY) > 18){ moved=true; clear(); }
+      }, {passive:true});
 
-        const dx = Math.abs(t.clientX - lastX);
-        const dy = Math.abs(t.clientY - lastY);
-        const moved = (dx + dy) > 18;  // umbral desplazamiento
+      elemento.addEventListener('touchend', clear, {passive:true});
+      elemento.addEventListener('touchcancel', clear, {passive:true});
 
-        if (dt < 280 && !moved && tapTarget === ev.currentTarget) {
-          // Doble toque confirmado
-          if (tapTimer){ clearTimeout(tapTimer); tapTimer = null; }
-          lastTapTime = 0;
-          callback(ev);
-          ev.preventDefault();
-          ev.stopPropagation();
-          return;
-        }
-
-        // Primer toque: espera por un segundo toque
-        lastTapTime = now;
-        if (tapTimer) clearTimeout(tapTimer);
-        tapTimer = setTimeout(()=>{ lastTapTime = 0; }, 320);
-      }, {passive:false});
-
-      // Desktop
-      elemento.addEventListener('dblclick', (ev) => {
-        callback(ev);
+      // Desktop: mantener click
+      elemento.addEventListener('mousedown', (ev)=>{
+        if(ev.button!==0) return;
+        startX=ev.clientX; startY=ev.clientY; moved=false;
+        clear();
+        timer = setTimeout(()=>{
+          timer=null;
+          if(!moved){ onLongPress(ev); }
+        }, 550);
       });
+      elemento.addEventListener('mousemove', (ev)=>{
+        if(timer && (Math.abs(ev.clientX-startX)+Math.abs(ev.clientY-startY) > 12)){ moved=true; clear(); }
+      });
+      ['mouseleave','mouseup','blur'].forEach(evt=> elemento.addEventListener(evt, clear));
+    }
+
+    function toggleDescripcion(divCarta, descripcionEl, botonEl){
+      const visible = descripcionEl.style.display === 'block';
+      descripcionEl.style.display = visible ? 'none' : 'block';
+      descripcionEl.setAttribute('aria-hidden', visible ? 'true' : 'false');
+      if(botonEl){
+        botonEl.setAttribute('aria-expanded', (!visible).toString());
+        botonEl.textContent = (!visible) ? 'Ocultar descripción' : 'ℹ️ Ver descripción';
+      }
+      if (!visible) {
+        showOnomato(divCarta, '¡WOW!', 'wow');
+        showBubble(divCarta, 'Descripción de la carta', 'ok');
+      }
     }
 
     /* ===== Carga de cartas (optimizada) ===== */
-    let _imagenesIndex = null;       // cache de imágenes
-    let _cartasData = null;          // cache de conteo por nombre
-    let _nombresOrden = [];          // lista de nombres de cartas
-    let _renderIndex = 0;            // índice de render progresivo
-    const RENDER_CHUNK = 12;         // cuántas cartas por bloque
+    let _imagenesIndex = null;
+    let _cartasData = null;
+    let _nombresOrden = [];
+    let _renderIndex = 0;
+    const RENDER_CHUNK = 12;
 
     async function cargarCartas(alumno) {
       document.getElementById("nombreAlumno").innerText = alumno;
@@ -425,7 +434,6 @@
       contenedor.innerHTML = "Cargando cartas...";
 
       try {
-        // Pedidos en paralelo, con cache inteligente
         const [resCartas, resImagenes] = await Promise.all([
           fetch(`${apiCartas}?alumno=${encodeURIComponent(alumno)}`, { cache: "no-store" }),
           _imagenesIndex ? Promise.resolve({ ok:true, json: async()=>_imagenesIndex })
@@ -445,14 +453,10 @@
           return;
         }
 
-        // Prepara container
         contenedor.innerHTML = "";
         _renderIndex = 0;
 
-        // Primer bloque inmediato
         renderChunk(contenedor);
-
-        // Configura IO para carga progresiva
         prepararCargaProgresiva(contenedor);
 
         showOnomato(contenedor, '¡POW!', 'ok');
@@ -461,7 +465,7 @@
       } catch (error) {
         document.getElementById("cartasContainer").innerText = "Error al cargar las cartas.";
         showOnomato(document.getElementById("cartasContainer"), '¡BANG!', 'error');
-        showBubble(document.getElementById("cartasContainer"), 'Error al conectar con el servidor', 'error');
+        showBubble(document.getElementById("cartasContainer"}, 'Error al conectar con el servidor', 'error');
       }
     }
 
@@ -479,7 +483,7 @@
 
         const img = new Image();
         img.alt = nombre;
-        img.loading = (i < 6) ? "eager" : "lazy";  // primeras visibles con prioridad
+        img.loading = (i < 6) ? "eager" : "lazy";
         if (i < 3) img.fetchPriority = "high";
         img.decoding = "async";
         img.crossOrigin = "anonymous";
@@ -487,7 +491,6 @@
 
         const PLACEHOLDER = "https://i.imgur.com/U3F4gA1.png";
 
-        // ===== IMAGEN (override para Pac-Man Arcade) =====
         const rawURL = carta?.["URL Pública"] || "";
         const normalizedBase = normalizarImgur(rawURL);
         if (nombre === "Pac-Man Arcade") {
@@ -531,15 +534,15 @@
           <div><strong>${nombre}</strong></div>
           <div class="cantidad">Cantidad: ${cantidad}</div>
           <div style="font-family:Arial,sans-serif;font-size:12px;opacity:.8;margin-top:4px;">
-            (Doble toque o doble clic para ver la descripción)
+            (Mantén presionado o usa el botón para ver la descripción)
           </div>
         `;
 
-        const boton = document.createElement("button");
-        boton.className = "btn boton-canje";
-        boton.innerText = "Solicitar Canje";
-        boton.disabled = cantidad < 1;
-        boton.onclick = async (ev) => {
+        const botonCanje = document.createElement("button");
+        botonCanje.className = "btn boton-canje";
+        botonCanje.innerText = "Solicitar Canje";
+        botonCanje.disabled = cantidad < 1;
+        botonCanje.onclick = async (ev) => {
           ev.stopPropagation();
           const ok = confirm(`¿Confirmas solicitar el canje de '${nombre}'?`);
           if (!ok) return;
@@ -547,34 +550,42 @@
           try {
             const res = await fetch(url, { method: "GET", keepalive: true });
             const texto = await res.text();
-            showOnomato(boton, '¡POW!', 'ok');
-            showBubble(boton, 'Solicitud enviada al profesor', 'ok');
+            showOnomato(botonCanje, '¡POW!', 'ok');
+            showBubble(botonCanje, 'Solicitud enviada al profesor', 'ok');
             alert("Solicitud enviada al profesor.\n" + texto);
           } catch {
-            showOnomato(boton, '¡BANG!', 'error');
-            showBubble(boton, 'No se pudo enviar la solicitud', 'error');
+            showOnomato(botonCanje, '¡BANG!', 'error');
+            showBubble(botonCanje, 'No se pudo enviar la solicitud', 'error');
             alert("No se pudo enviar la solicitud por un error de red.");
           }
         };
+
+        const botonDesc = document.createElement('button');
+        botonDesc.className = 'btn btn-desc';
+        botonDesc.type = 'button';
+        botonDesc.setAttribute('aria-expanded','false');
+        botonDesc.textContent = 'ℹ️ Ver descripción';
 
         const descripcion = document.createElement("div");
         descripcion.className = "descripcion";
         descripcion.innerText = descripcionTxt;
         descripcion.setAttribute('aria-hidden', 'true');
 
-        const toggleDescripcion = () => {
-          const visible = descripcion.style.display === "block";
-          descripcion.style.display = visible ? "none" : "block";
-          descripcion.setAttribute('aria-hidden', visible ? 'true' : 'false');
-          if (!visible) {
-            showOnomato(div, '¡WOW!', 'wow');
-            showBubble(div, 'Descripción de la carta', 'ok');
-          }
-        };
-        habilitarDobleToque(div, toggleDescripcion);
+        // Toggle por botón
+        botonDesc.addEventListener('click', (ev)=>{
+          ev.stopPropagation();
+          toggleDescripcion(div, descripcion, botonDesc);
+        });
+
+        // Toggle por pulsación larga (en toda la carta)
+        habilitarLongPress(div, ()=>{
+          toggleDescripcion(div, descripcion, botonDesc);
+        });
 
         row.appendChild(info);
-        row.appendChild(boton);
+        row.appendChild(botonDesc);
+        row.appendChild(botonCanje);
+
         div.appendChild(img);
         div.appendChild(row);
         div.appendChild(descripcion);
@@ -590,14 +601,13 @@
       const io = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
-            // Render siguiente bloque en microtarea para no trabar scroll
             queueMicrotask(()=> {
               renderChunk(contenedor);
               if (_renderIndex >= _nombresOrden.length) io.disconnect();
             });
           }
         });
-      }, { rootMargin: '1200px 0px 1200px 0px' }); // pre-carga generosa
+      }, { rootMargin: '1200px 0px 1200px 0px' });
 
       io.observe(sentinel);
     }
