@@ -15,97 +15,45 @@
 
   <style>
     :root{
-      --ink:#000;                 /* “tinta” */
-      --paper:#fff;               /* “papel” */
-      --accent:#ffa500;           /* acento arcade */
-      --shadow:8px 8px 0 var(--ink);
-      --radius:18px;
-      --bar-h:64px;
+      --ink:#000; --paper:#fff; --accent:#ffa500;
+      --shadow:8px 8px 0 var(--ink); --radius:18px; --bar-h:64px;
     }
     *{ margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; }
     html,body{ height:100%; }
     body{
-      background:var(--paper);
-      color:var(--ink);
-      font-family: Arial, Helvetica, sans-serif;
+      background:var(--paper); color:var(--ink); font-family: Arial, Helvetica, sans-serif;
       padding:env(safe-area-inset-top) env(safe-area-inset-right) calc(var(--bar-h) + env(safe-area-inset-bottom)) env(safe-area-inset-left);
     }
 
-    /* Contenedor principal con “tarjeta” CAOS */
-    .container{
-      width:100%; min-height:calc(100dvh - var(--bar-h));
-      max-width:900px; margin:0 auto; padding:12px;
-      display:flex; flex-direction:column; gap:12px;
-    }
-    .panel{
-      background:var(--paper);
-      border:3px solid var(--ink);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      padding:14px;
-      position:relative;
-    }
+    .container{ width:100%; min-height:calc(100dvh - var(--bar-h)); max-width:900px; margin:0 auto; padding:12px; display:flex; flex-direction:column; gap:12px; }
+    .panel{ background:var(--paper); border:3px solid var(--ink); border-radius:var(--radius); box-shadow:var(--shadow); padding:14px; position:relative; }
 
-    /* Encabezado CAOS */
     .header{text-align:center}
     h1{
-      font-family:'Rock Salt', cursive;
-      font-size:clamp(24px,6vw,36px);
-      letter-spacing:2px;
-      margin-bottom:4px;
-      display:inline-block;
-      border:3px dashed var(--ink);
-      border-radius:14px;
-      padding:8px 12px;
-      background:var(--paper);
+      font-family:'Rock Salt', cursive; font-size:clamp(24px,6vw,36px); letter-spacing:2px; margin-bottom:4px;
+      display:inline-block; border:3px dashed var(--ink); border-radius:14px; padding:8px 12px; background:var(--paper);
     }
-    .subtitle{
-      font-weight:700;
-      font-size:clamp(12px,3.5vw,14px);
-    }
+    .subtitle{ font-weight:700; font-size:clamp(12px,3.5vw,14px); }
 
-    /* Stats en tarjeta */
-    .stats{
-      display:flex; justify-content:space-between; gap:10px; width:100%;
-      background:var(--paper);
-      padding:10px 12px; border-radius:12px;
-      border:3px solid var(--ink); box-shadow:4px 4px 0 var(--ink);
-      font-size:clamp(12px,3.5vw,14px);
-    }
+    .stats{ display:flex; justify-content:space-between; gap:10px; width:100%; background:var(--paper);
+      padding:10px 12px; border-radius:12px; border:3px solid var(--ink); box-shadow:4px 4px 0 var(--ink); font-size:clamp(12px,3.5vw,14px); }
     .stat{display:flex; flex-direction:column; align-items:center; min-width:66px}
     .stat-label{opacity:.8; margin-bottom:2px; font-weight:700}
     .stat-value{font-size:clamp(16px,5vw,20px); font-weight:900}
 
     .power-status{display:flex; justify-content:center; gap:12px; margin:8px 0 6px}
-    .power-indicator{
-      width:28px; height:28px; border-radius:50%;
-      background:#fff7e6; border:3px solid var(--ink);
-      display:flex; align-items:center; justify-content:center; font-size:.95rem; transition:.2s;
-      box-shadow:3px 3px 0 var(--ink);
-    }
+    .power-indicator{ width:28px; height:28px; border-radius:50%; background:#fff7e6; border:3px solid var(--ink);
+      display:flex; align-items:center; justify-content:center; font-size:.95rem; transition:.2s; box-shadow:3px 3px 0 var(--ink); }
     .power-indicator.active{ background:#e6ffef; }
 
-    /* Área de juego en tarjeta negra (arcade) dentro de marco CAOS */
-    .game-area{
-      flex:1; width:100%; position:relative; margin:6px 0 8px;
-      border:3px solid var(--ink); border-radius:14px; overflow:hidden;
-      box-shadow:6px 6px 0 var(--ink); background:#000; min-height:240px;
-      display:flex; align-items:center; justify-content:center;
-    }
+    .game-area{ flex:1; width:100%; position:relative; margin:6px 0 8px; border:3px solid var(--ink); border-radius:14px; overflow:hidden;
+      box-shadow:6px 6px 0 var(--ink); background:#000; min-height:240px; display:flex; align-items:center; justify-content:center; }
     canvas{ display:block; }
 
-    /* Botones estilo CAOS */
     .controls{ width:100%; display:flex; flex-direction:column; gap:8px; margin-top:4px }
-    .dpad{
-      display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(3,1fr);
-      gap:6px; width:150px; height:150px; margin:0 auto;
-    }
-    .dpad-btn{
-      background:#fff7e6; border:3px solid var(--ink);
-      border-radius:12px; display:flex; align-items:center; justify-content:center;
-      font-size:1.5rem; color:var(--ink); transition:transform .06s, background .06s; touch-action:none;
-      box-shadow:4px 4px 0 var(--ink); font-weight:900;
-    }
+    .dpad{ display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(3,1fr); gap:6px; width:150px; height:150px; margin:0 auto; }
+    .dpad-btn{ background:#fff7e6; border:3px solid var(--ink); border-radius:12px; display:flex; align-items:center; justify-content:center;
+      font-size:1.5rem; color:var(--ink); transition:transform .06s, background .06s; touch-action:none; box-shadow:4px 4px 0 var(--ink); font-weight:900; }
     .dpad-btn:active{ background:#ffd38c; transform:scale(.95) }
     .dpad-up{grid-column:2; grid-row:1}
     .dpad-left{grid-column:1; grid-row:2}
@@ -114,42 +62,24 @@
     .dpad-down{grid-column:2; grid-row:3}
 
     .game-buttons{ display:flex; gap:10px; margin-top:2px }
-    .btn{
-      flex:1; background:#fff7e6; border:3px solid var(--ink); color:var(--ink);
-      padding:12px 8px; font-size:.95rem; font-weight:900; border-radius:10px;
-      display:flex; align-items:center; justify-content:center; gap:6px;
-      box-shadow:4px 4px 0 var(--ink); cursor:pointer;
-    }
+    .btn{ flex:1; background:#fff7e6; border:3px solid var(--ink); color:var(--ink);
+      padding:12px 8px; font-size:.95rem; font-weight:900; border-radius:10px; display:flex; align-items:center; justify-content:center; gap:6px; box-shadow:4px 4px 0 var(--ink); cursor:pointer; }
     .btn:active{ transform:translate(1px,1px) }
+    .btn[disabled]{ opacity:.6; cursor:not-allowed }
     .btn-pause{ background:#ffffe0 }
 
-    /* Overlays en tarjeta */
     .overlay{ position:absolute; inset:0; display:none; place-items:center; background:rgba(0,0,0,.85); z-index:5 }
-    .overlay .panel{
-      background:var(--paper); color:var(--ink);
-      padding:22px; border-radius:18px; border:3px solid var(--ink);
-      width:min(92%,360px); text-align:center; box-shadow:8px 8px 0 var(--ink);
-    }
-    .overlay h2{
-      font-family:'Rock Salt', cursive; font-size:1.6rem; margin-bottom:10px;
-      display:inline-block; border:3px dashed var(--ink); border-radius:14px; padding:6px 10px;
-    }
+    .overlay .panel{ background:var(--paper); color:var(--ink); padding:22px; border-radius:18px; border:3px solid var(--ink);
+      width:min(92%,360px); text-align:center; box-shadow:8px 8px 0 var(--ink); }
+    .overlay h2{ font-family:'Rock Salt', cursive; font-size:1.6rem; margin-bottom:10px; display:inline-block; border:3px dashed var(--ink); border-radius:14px; padding:6px 10px; }
     .final-score{ font-size:1.05rem; margin:12px 0 16px; font-weight:700 }
 
-    /* Barra fija inferior estilo CAOS */
-    .footer{
-      position:fixed; left:0; right:0; bottom:env(safe-area-inset-bottom,0px); height:var(--bar-h);
-      background:var(--paper); border-top:3px solid var(--ink);
-      display:flex; align-items:center; justify-content:center;
-      padding:8px calc(12px + env(safe-area-inset-left,0px)) calc(8px + env(safe-area-inset-bottom,0px)) calc(12px + env(safe-area-inset-right,0px));
-      z-index:10;
-    }
-    .btn-back{
-      width:100%; max-width:520px; background:#fff; border:3px solid var(--ink); color:var(--ink);
-      font-weight:900; letter-spacing:.3px;
-      padding:12px 16px; border-radius:12px; display:flex; align-items:center; justify-content:center; gap:8px; text-decoration:none;
-      box-shadow:6px 6px 0 var(--ink);
-    }
+    /* Barra inferior */
+    .footer{ position:fixed; left:0; right:0; bottom:env(safe-area-inset-bottom,0px); height:var(--bar-h);
+      background:var(--paper); border-top:3px solid var(--ink); display:flex; align-items:center; justify-content:center;
+      padding:8px calc(12px + env(safe-area-inset-left,0px)) calc(8px + env(safe-area-inset-bottom,0px)) calc(12px + env(safe-area-inset-right,0px)); z-index:10; }
+    .btn-back{ width:100%; max-width:520px; background:#fff; border:3px solid var(--ink); color:var(--ink); font-weight:900; letter-spacing:.3px;
+      padding:12px 16px; border-radius:12px; display:flex; align-items:center; justify-content:center; gap:8px; text-decoration:none; box-shadow:6px 6px 0 var(--ink); }
 
     @media (max-height:700px){ .dpad{width:128px; height:128px} .stats{padding:8px 10px; font-size:.9rem}}
     @media (max-height:600px){ .dpad{width:112px; height:112px} .stats{font-size:.8rem} .stat-value{font-size:.98rem}}
@@ -160,6 +90,14 @@
     <div class="panel header">
       <h1>PAC-MAN</h1>
       <p class="subtitle">Come puntos, evita fantasmas</p>
+    </div>
+
+    <!-- GATE DE ACCESO (solo si canjeó Pac-Man Arcade) -->
+    <div class="panel" id="accessMsg" style="display:none;">
+      <strong>🔒 Acceso restringido:</strong>
+      <div style="margin-top:6px">
+        Necesitas <em>canjear la carta “Pac-Man Arcade”</em> para poder jugar. Pídeselo al profesor desde la pantalla “Mis cartas”.
+      </div>
     </div>
 
     <div class="panel stats">
@@ -178,6 +116,18 @@
 
     <div class="panel game-area" id="gameArea">
       <canvas id="gameCanvas"></canvas>
+
+      <!-- OVERLAY ACCESO BLOQUEADO -->
+      <div class="overlay" id="gateOverlay">
+        <div class="panel">
+          <h2>⛔ Acceso necesario</h2>
+          <div class="final-score">Debes canjear la carta <strong>“Pac-Man Arcade”</strong> para entrar a este juego.</div>
+          <div style="display:flex; gap:8px; margin-top:6px; flex-wrap:wrap; justify-content:center">
+            <a class="btn" id="goBackBtn"><i class="fas fa-arrow-left"></i> Volver a mis cartas</a>
+            <button class="btn" id="retryGate"><i class="fas fa-rotate"></i> Ya canjeé, reintentar</button>
+          </div>
+        </div>
+      </div>
 
       <!-- GAME OVER -->
       <div class="overlay" id="gameOver">
@@ -220,12 +170,39 @@
 
   <script>
     /* ========= Navegación / Retorno ========= */
-    // Si no llega ?ret=..., vuelve a /estudiante/estudiante.html (archivo de alumnos).
     const params = new URLSearchParams(location.search);
-    const RET_URL = params.get('ret')
-      ? decodeURIComponent(params.get('ret'))
-      : '/estudiante/estudiante.html';
+    const RET_URL = params.get('ret') ? decodeURIComponent(params.get('ret')) : '/estudiante/estudiante.html';
     document.getElementById('backBtn').setAttribute('href', RET_URL);
+    document.getElementById('goBackBtn').setAttribute('href', RET_URL);
+
+    /* ========= GATE / Permiso de acceso =========
+       Aprobación actual deja un hash en localStorage: 'canje_last_hash'.
+       (Opcional) El watcher puede enviar ?token=<hash> en el link de redirección.
+    */
+    const GATE_KEY = 'canje_last_hash';
+    function tienePermisoPacman(){
+      const token = params.get('token') || '';
+      const hash = localStorage.getItem(GATE_KEY) || '';
+      if (!hash) return false;              // sin rastro de canje aprobado
+      if (token && token !== hash) return false;  // token presente pero no coincide
+      return true; // hay hash y el token (si vino) no contradice
+    }
+    function bloquearJuegoPorGate(){
+      // Bloquea UI del juego y muestra overlays/mensajes
+      document.getElementById('gateOverlay').style.display = 'grid';
+      document.getElementById('accessMsg').style.display = 'block';
+      document.getElementById('startButton').setAttribute('disabled','');
+      document.getElementById('pauseButton').setAttribute('disabled','');
+      // Si el alumno ya volvió, puede tocar "reintentar"
+      document.getElementById('retryGate').onclick = ()=>{
+        if (tienePermisoPacman()){
+          // permitir y recargar la página para limpiar estados
+          location.reload();
+        }else{
+          alert('Aún no detecto el canje aprobado. Vuelve a "Mis cartas" y solicita el canje.');
+        }
+      };
+    }
 
     /* ========= DOM ========= */
     const canvas = document.getElementById('gameCanvas');
@@ -335,10 +312,10 @@
         el.addEventListener('touchend',   ()=> release(key));
         el.addEventListener('click', ()=>{ press(key); setTimeout(()=>release(key), 80); });
       };
-      bind(document.getElementById('upBtn'),'up');
-      bind(document.getElementById('downBtn'),'down');
-      bind(document.getElementById('leftBtn'),'left');
-      bind(document.getElementById('rightBtn'),'right');
+      ['up','down','left','right'].forEach(dir=>{
+        const id = dir==='up'?'upBtn':dir==='down'?'downBtn':dir==='left'?'leftBtn':'rightBtn';
+        bind(document.getElementById(id), dir);
+      });
 
       const downMap={ArrowUp:'up',KeyW:'up',ArrowDown:'down',KeyS:'down',ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right'};
       window.addEventListener('keydown',e=>{const k=downMap[e.code]; if(k){ e.preventDefault(); press(k);} });
@@ -353,22 +330,6 @@
         localStorage.setItem('pacman_win','1');
         window.location.href = RET_URL;
       });
-
-      // Swipe
-      let sx=0, sy=0, active=false, wrap=document.body;
-      wrap.addEventListener('touchstart', e=>{
-        if(e.target.closest('.dpad-btn') || e.target.closest('.btn')) return;
-        active=true; const t=e.changedTouches[0]; sx=t.clientX; sy=t.clientY;
-      }, {passive:true});
-      wrap.addEventListener('touchend', e=>{
-        if(!active) return; active=false;
-        const t=e.changedTouches[0]; const dx=t.clientX-sx; const dy=t.clientY-sy;
-        const ax=Math.abs(dx), ay=Math.abs(dy), TH=18;
-        if(Math.max(ax,ay)>TH){
-          if(ax>ay){ if(dx>0){ press('right'); setTimeout(()=>release('right'),70);} else { press('left'); setTimeout(()=>release('left'),70);} }
-          else { if(dy>0){ press('down'); setTimeout(()=>release('down'),70);} else { press('up'); setTimeout(()=>release('up'),70);} }
-        }
-      }, {passive:true});
     }
     function ensureStarted(){ if(!gameRunning){ startGame(); } }
 
@@ -477,7 +438,7 @@
     let alreadyWon=false;
     function levelUp(){
       level++;
-      if (level === 2 && !alreadyWon) { // pasó el Nivel 1
+      if (level === 2 && !alreadyWon) {
         alreadyWon = true;
         winText.textContent = '¡Pasaste el Nivel 1! Muestra este mensaje al profesor.';
         gameRunning=false; cancelAnimationFrame(animationId);
@@ -568,7 +529,20 @@
     function restartGame(){ gameOverElem.style.display='none'; initGame(); startGame(); }
 
     /* ========= Init ========= */
-    window.addEventListener('load', ()=>{ initGame(); setupControls(); });
+    window.addEventListener('load', ()=>{
+      // Gate primero
+      if (!tienePermisoPacman()){
+        bloquearJuegoPorGate();
+        // No inicializamos lógica de juego hasta tener permiso
+        setupControls(); // para que funcione "Volver" / etc.
+        resizeCanvas();  // para que el canvas tenga tamaño (solo estético)
+        return;
+      }
+
+      // Con permiso: todo normal
+      initGame();
+      setupControls();
+    });
   </script>
 </body>
 </html>
