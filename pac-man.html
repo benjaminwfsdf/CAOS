@@ -159,30 +159,19 @@
   <script>
     /* ========= Navegación / Retorno ========= */
     const params = new URLSearchParams(location.search);
+    // Si pasas ?ret=<url-encoded>, va ahí; si no, vuelve al panel del alumno de la PWA
     const RET_URL = params.get('ret') ? decodeURIComponent(params.get('ret')) : '/estudiante/estudiante.html';
-    const goBackBtn = document.getElementById('goBackBtn');
+    const goBackBtn = document.getElementById('goBackBtn'); // solo existe en el gate
     if (goBackBtn) goBackBtn.setAttribute('href', RET_URL);
 
-    /* ========= GATE / Permiso de acceso (token de un solo uso) ========= */
+    /* ========= GATE / Permiso de acceso ========= */
     const GATE_KEY = 'canje_last_hash';
     function tienePermisoPacman(){
       const token = params.get('token') || '';
-      const hash  = localStorage.getItem(GATE_KEY) || '';
-      if (!token) return false;              // debe venir en la URL
-      if (token !== hash) return false;      // debe coincidir con el hash concedido
-
-      // ¿Ya se usó este hash en este dispositivo?
-      const usedKey = 'canje_used_' + token;
-      if (localStorage.getItem(usedKey) === '1') return false;
-
+      const hash = localStorage.getItem(GATE_KEY) || '';
+      if (!hash) return false;
+      if (token && token !== hash) return false;
       return true;
-    }
-    function consumirPermiso(){
-      const token = params.get('token') || '';
-      if (!token) return;
-      // Marcar como usado y limpiar el último hash para evitar re-uso
-      localStorage.setItem('canje_used_' + token, '1');
-      try { localStorage.removeItem(GATE_KEY); } catch(e){}
     }
     function bloquearJuegoPorGate(){
       document.getElementById('gateOverlay').style.display = 'grid';
@@ -193,7 +182,7 @@
         if (tienePermisoPacman()){
           location.reload();
         }else{
-          alert('Aún no detecto el canje aprobado o ya fue usado. Vuelve a "Mis cartas".');
+          alert('Aún no detecto el canje aprobado. Vuelve a "Mis cartas" y solicita el canje.');
         }
       };
     }
@@ -519,11 +508,14 @@
       if(score>highScore){ highScore=score; localStorage.setItem('pacmanHighScore', String(highScore)); }
       localStorage.setItem('pacman_last_result','lose');
 
+      // Deshabilitar controles
       startButton.setAttribute('disabled','');
       pauseButton.setAttribute('disabled','');
 
+      // Vibración corta (si el dispositivo soporta)
       try{ navigator.vibrate && navigator.vibrate([120,60,120]); }catch(e){}
 
+      // Mostrar overlay con cuenta regresiva y luego volver
       let secs = 3;
       goCountdown.textContent = String(secs);
       gameOverOverlay.style.display = 'grid';
@@ -544,17 +536,15 @@
       // Gate primero
       if (!tienePermisoPacman()){
         bloquearJuegoPorGate();
-        // tamaño / botones "volver" visibles aún con gate
-        new ResizeObserver(()=>{}).observe(document.getElementById('gameArea'));
+        setupControls(); // para que funcione "Volver" / etc.
+        resizeCanvas();  // tamaño canvas (estético)
         return;
       }
 
-      // Consumir el permiso (un solo uso) y continuar
-      consumirPermiso();
+      // Con permiso: todo normal
       initGame();
       setupControls();
     });
   </script>
 </body>
 </html>
-<script async data-explicit-opt-in="true" data-cookie-opt-in="true" data-deployment-id="dpl_52XDEsC6wDskd7h2V8ioX4cTGWMn" src="https://vercel.live/_next-live/feedback/feedback.js"></script>
