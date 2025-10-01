@@ -62,7 +62,7 @@
     .carta img{ width:100%; max-width:320px; height:auto; place-self:center; border-radius:12px; }
     .carta-row{ display:flex; align-items:center; gap:10px; justify-content:space-between; flex-wrap:wrap; }
     .carta-info{ font-family:Arial, sans-serif; font-size:var(--fz-body); flex:1; min-width:180px; }
-    .carta-info .desc{ margin-top:6px; font-size:clamp(13px,3.6vw,16px); line-height:1.3; font-family:Arial, sans-serif; }
+    /* .carta-info .desc { ELIMINADA (era la descripción permanente) } */
     .cantidad{ font-weight:700; font-size:clamp(18px,5vw,28px); margin-top:4px }
     .boton-canje{ min-width:160px }
     .descripcion{ display:none; font-family:Arial, sans-serif; font-size:clamp(16px,4.6vw,20px); line-height:1.35; margin-top:6px; color:var(--ink); }
@@ -142,7 +142,7 @@
 
     /* ===== UI helpers ===== */
     function showBubble(anchorEl, texto, tipo='ok'){
-      const panel = anchorEl.closest('.panel') || document.querySelector('.panel');
+      const panel = anchorEl.closest?.('.panel') || document.querySelector('.panel');
       const rect = anchorEl.getBoundingClientRect();
       const parentRect = panel.getBoundingClientRect();
       const b = document.createElement('div');
@@ -154,7 +154,7 @@
       setTimeout(()=> b.remove(), 3200);
     }
     function showOnomato(anchorEl, texto='¡POW!', estilo='ok'){
-      const panel = anchorEl.closest('.panel') || document.querySelector('.panel');
+      const panel = anchorEl.closest?.('.panel') || document.querySelector('.panel');
       const rect = anchorEl.getBoundingClientRect();
       const parentRect = panel.getBoundingClientRect();
       const o = document.createElement('div');
@@ -241,15 +241,11 @@
       if(!url) return '';
       try{
         const u = String(url).trim();
-        // Directo i.imgur.com/ID.ext -> normalizamos a ID (sin extensión fija)
         const direct = u.match(/^https?:\/\/i\.imgur\.com\/([A-Za-z0-9]+)\.(jpg|jpeg|png|webp|gif)/i);
         if(direct){ return `https://i.imgur.com/${direct[1]}`; }
-        // Página simple imgur.com/ID
         const pageImg = u.match(/^https?:\/\/imgur\.com\/([A-Za-z0-9]{5,})$/i);
         if(pageImg){ return `https://i.imgur.com/${pageImg[1]}`; }
-        // Álbum/Gallery -> no sirve como imagen directa
         if (/imgur\.com\/(a|gallery)\//i.test(u)) { return ''; }
-        // Solo ID
         const onlyId = u.match(/^([A-Za-z0-9]{5,})$/);
         if(onlyId){ return `https://i.imgur.com/${onlyId[1]}`; }
         return u;
@@ -361,6 +357,24 @@
       }
     });
 
+    /* ===== Doble toque / doble clic (helper) ===== */
+    function habilitarDobleToque(elemento, callback){
+      let ultimoToque = 0;
+      // Soporte móvil (touch)
+      elemento.addEventListener('touchend', (ev) => {
+        const ahora = Date.now();
+        if (ahora - ultimoToque < 300) { // ventana de 300ms
+          callback(ev);
+          ev.preventDefault();
+        }
+        ultimoToque = ahora;
+      }, {passive:false});
+      // Soporte desktop (doble clic)
+      elemento.addEventListener('dblclick', (ev) => {
+        callback(ev);
+      });
+    }
+
     /* ===== Cartas ===== */
     async function cargarCartas(alumno) {
       const api = apiCartas;
@@ -390,6 +404,8 @@
 
           const div = document.createElement("div");
           div.className = "carta";
+          div.setAttribute('role','group');
+          div.setAttribute('aria-label', nombre);
 
           const img = new Image();
           img.alt = nombre;
@@ -402,29 +418,24 @@
 
           // ===== IMAGEN (override para Pac-Man Arcade) =====
           const rawURL = carta?.["URL Pública"] || "";
-          const normalizedBase = normalizarImgur(rawURL); // puede quedar '' si era album
+          const normalizedBase = normalizarImgur(rawURL);
           if (nombre === "Pac-Man Arcade") {
-            // ID de Imgur que mostraron: DGuyJYb
             const PACMAN_ID = "DGuyJYb";
             const candidates = [
-              // primero los directos que sabemos
               `https://i.imgur.com/${PACMAN_ID}.png`,
               `https://i.imgur.com/${PACMAN_ID}.jpg`,
               `https://i.imgur.com/${PACMAN_ID}.jpeg`,
               `https://i.imgur.com/${PACMAN_ID}.webp`,
-              // luego lo que venga desde la planilla, probando extensiones
               ...(normalizedBase ? [
                 `${normalizedBase}.png`,
                 `${normalizedBase}.jpg`,
                 `${normalizedBase}.jpeg`,
                 `${normalizedBase}.webp`,
               ] : []),
-              // finalmente el raw tal cual (por si ya trae extensión)
               rawURL
             ];
             tryImageCandidates(img, candidates, PLACEHOLDER);
           } else {
-            // Cartas normales: usar URL de planilla (normalizada) con fallback
             const candidates = [];
             if (normalizedBase && /^https?:\/\/i\.imgur\.com\/[A-Za-z0-9]+$/i.test(normalizedBase)) {
               candidates.push(
@@ -434,7 +445,6 @@
                 `${normalizedBase}.webp`
               );
             }
-            // si venía un link directo (postimg, png, etc.)
             if (rawURL) candidates.unshift(rawURL);
             tryImageCandidates(img, candidates, PLACEHOLDER);
           }
@@ -446,10 +456,13 @@
 
           const info = document.createElement("div");
           info.className = "carta-info";
+          // 🔧 Quitamos la descripción permanente (.desc)
           info.innerHTML = `
             <div><strong>${nombre}</strong></div>
             <div class="cantidad">Cantidad: ${cantidad}</div>
-            <div class="desc">${descripcionTxt}</div>
+            <div style="font-family:Arial,sans-serif;font-size:12px;opacity:.8;margin-top:4px;">
+              (Doble toque o doble clic para ver la descripción)
+            </div>
           `;
 
           const boton = document.createElement("button");
@@ -474,19 +487,23 @@
             }
           };
 
-          // (Opcional) descripción plegable, reutiliza el mismo texto
+          // Descripción plegable (solo visible con doble toque/clic)
           const descripcion = document.createElement("div");
           descripcion.className = "descripcion";
           descripcion.innerText = descripcionTxt;
+          descripcion.setAttribute('aria-hidden', 'true');
 
-          div.onclick = () => {
+          // 🔧 Doble toque / doble clic para alternar la descripción
+          const toggleDescripcion = () => {
             const visible = descripcion.style.display === "block";
             descripcion.style.display = visible ? "none" : "block";
+            descripcion.setAttribute('aria-hidden', visible ? 'true' : 'false');
             if (!visible) {
               showOnomato(div, '¡WOW!', 'wow');
               showBubble(div, 'Descripción de la carta', 'ok');
             }
           };
+          habilitarDobleToque(div, toggleDescripcion);
 
           row.appendChild(info);
           row.appendChild(boton);
@@ -544,14 +561,10 @@
             const ir = confirm('✅ Canje aprobado: Pac-Man Arcade.\n¿Ir a jugar Pac-Man ahora?');
             if (ir) {
               const ret = encodeURIComponent(location.pathname + location.search);
-              // Usa URL del backend o cae por defecto al archivo local
-             // DESPUÉS — usa ruta RELATIVA desde /estudiante/
-const base = (data.accion && data.accion.url) ? data.accion.url : '/estudiante/pac-man.html';
-// si no viene absoluta (http/https o empieza con "/"), la dejamos relativa
-const destino = (/^https?:\/\//.test(base) || base.startsWith('/')) ? base : base;
-const urlJuego = `${destino}${destino.includes('?') ? '&' : '?'}ret=${ret}`;
-window.location.assign(urlJuego);
-
+              const base = (data.accion && data.accion.url) ? data.accion.url : '/estudiante/pac-man.html';
+              const destino = (/^https?:\/\//.test(base) || base.startsWith('/')) ? base : base;
+              const urlJuego = `${destino}${destino.includes('?') ? '&' : '?'}ret=${ret}`;
+              window.location.assign(urlJuego);
             }
           } else if (data.mensaje) {
             alert(data.mensaje);
