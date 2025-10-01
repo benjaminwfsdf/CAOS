@@ -130,6 +130,14 @@
           <button class="btn" id="closeWin"><i class="fas fa-check"></i> CERRAR (mostrar al profe)</button>
         </div>
       </div>
+
+      <!-- GAME OVER -->
+      <div class="overlay" id="gameOverOverlay">
+        <div class="panel">
+          <h2>💀 GAME OVER</h2>
+          <div class="final-score">Volverás a “Mis cartas” en <span id="goCountdown">3</span>…</div>
+        </div>
+      </div>
     </div>
 
     <div class="panel controls">
@@ -151,32 +159,27 @@
   <script>
     /* ========= Navegación / Retorno ========= */
     const params = new URLSearchParams(location.search);
+    // Si pasas ?ret=<url-encoded>, va ahí; si no, vuelve al panel del alumno de la PWA
     const RET_URL = params.get('ret') ? decodeURIComponent(params.get('ret')) : '/estudiante/estudiante.html';
     const goBackBtn = document.getElementById('goBackBtn'); // solo existe en el gate
     if (goBackBtn) goBackBtn.setAttribute('href', RET_URL);
 
-    /* ========= GATE / Permiso de acceso =========
-       Aprobación actual deja un hash en localStorage: 'canje_last_hash'.
-       (Opcional) El watcher puede enviar ?token=<hash> en el link de redirección.
-    */
+    /* ========= GATE / Permiso de acceso ========= */
     const GATE_KEY = 'canje_last_hash';
     function tienePermisoPacman(){
       const token = params.get('token') || '';
       const hash = localStorage.getItem(GATE_KEY) || '';
-      if (!hash) return false;              // sin rastro de canje aprobado
-      if (token && token !== hash) return false;  // token presente pero no coincide
-      return true; // hay hash y el token (si vino) no contradice
+      if (!hash) return false;
+      if (token && token !== hash) return false;
+      return true;
     }
     function bloquearJuegoPorGate(){
-      // Bloquea UI del juego y muestra overlays/mensajes
       document.getElementById('gateOverlay').style.display = 'grid';
       document.getElementById('accessMsg').style.display = 'block';
       document.getElementById('startButton').setAttribute('disabled','');
       document.getElementById('pauseButton').setAttribute('disabled','');
-      // Si el alumno ya volvió, puede tocar "reintentar"
       document.getElementById('retryGate').onclick = ()=>{
         if (tienePermisoPacman()){
-          // permitir y recargar la página para limpiar estados
           location.reload();
         }else{
           alert('Aún no detecto el canje aprobado. Vuelve a "Mis cartas" y solicita el canje.');
@@ -198,6 +201,8 @@
     const winText = document.getElementById('winText');
     const closeWin = document.getElementById('closeWin');
     const powerIndicators = [ 'power1','power2','power3','power4' ].map(id=>document.getElementById(id));
+    const gameOverOverlay = document.getElementById('gameOverOverlay');
+    const goCountdown = document.getElementById('goCountdown');
 
     /* ========= Canvas / Tamaño ========= */
     const gridSize = 19;
@@ -497,12 +502,33 @@
       if(!gamePaused) gameLoop();
     }
 
-    // *** GAME OVER: sin opción de reintento, devuelve al estudiante ***
+    // ========= GAME OVER con espera y retorno =========
     function gameOver(){
       gameRunning=false; cancelAnimationFrame(animationId);
       if(score>highScore){ highScore=score; localStorage.setItem('pacmanHighScore', String(highScore)); }
-      // Redirigir inmediatamente al panel del estudiante
-      window.location.href = RET_URL;
+      localStorage.setItem('pacman_last_result','lose');
+
+      // Deshabilitar controles
+      startButton.setAttribute('disabled','');
+      pauseButton.setAttribute('disabled','');
+
+      // Vibración corta (si el dispositivo soporta)
+      try{ navigator.vibrate && navigator.vibrate([120,60,120]); }catch(e){}
+
+      // Mostrar overlay con cuenta regresiva y luego volver
+      let secs = 3;
+      goCountdown.textContent = String(secs);
+      gameOverOverlay.style.display = 'grid';
+
+      const t = setInterval(()=>{
+        secs--;
+        if(secs<=0){
+          clearInterval(t);
+          window.location.href = RET_URL;
+        }else{
+          goCountdown.textContent = String(secs);
+        }
+      }, 1000);
     }
 
     /* ========= Init ========= */
