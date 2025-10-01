@@ -47,9 +47,9 @@
     .splash-wrap{display:flex; flex-direction:column; align-items:center; gap:20px; animation:splashIn 1200ms ease forwards;}
     .logo-card{width:210px; height:210px; background:#fff; border:4px solid #000; border-radius:26px; box-shadow:16px 16px 0 #000; display:grid; place-items:center; overflow:hidden;}
     .logo-bg{width:100%; height:100%; background-image:url("/estudiante/icons/icon-alumno-192.png"); background-position:center; background-repeat:no-repeat; background-size:120% 120%;}
-    .brand{ font-family:'Rock Salt', cursive; font-size:32px; }
+    .brand{ font-family:'Rock Salt', cursive; font-size:32px; letter-spacing:1px; }
     @keyframes splashIn{0%{transform:translateY(6px) scale(.86); opacity:0;}45%{transform:translateY(0) scale(1.06); opacity:1;}70%{transform:translateY(0) scale(.98);}100%{transform:translateY(0) scale(1);}}
-    @media (prefers-reduced-motion: reduce){ .splash-wrap{ animation:none } }
+    @media (min-width:800px){ .carta{ grid-template-columns:240px 1fr; align-items:center } .carta img{ width:240px } .boton-canje{ min-width:200px } }
 
     .app{ max-width:900px; margin:0 auto; display:grid; gap:var(--gap); padding:12px; }
     .panel{ background:var(--paper); border:3px solid var(--ink); border-radius:var(--radius); padding:var(--pad); box-shadow:var(--shadow); position:relative; }
@@ -70,19 +70,18 @@
     #sugerencias{ display:none; margin-top:8px }
     .sug{ display:inline-block; margin:4px 6px 0 0; padding:6px 10px; border:2px solid var(--ink); background:var(--paper); box-shadow:3px 3px 0 var(--ink); cursor:pointer; border-radius:999px; font-family:Arial,sans-serif; font-weight:700; font-size:14px; }
 
-    .bubble{ position:absolute; z-index:999; max-width:320px; background:var(--paper); color:var(--ink); border:3px solid var(--ink); box-shadow:6px 6px 0 var(--ink); padding:12px 14px; font-weight:700; line-height:1.2; border-radius:14px; transform:translate(-50%,-110%) scale(0.98); opacity:0; pointer-events:none; animation:bubble-in 250ms ease-out forwards, bubble-out 3s 2.4s ease-in forwards; }
+    .bubble{ position:absolute; z-index:999; max-width:320px; background:var(--paper); color:var(--ink); border:3px solid var(--ink); box-shadow:6px 6px 0 var(--ink); padding:12px 14px; font-weight:700; line-height:1.2; border-radius:14px; transform:translate(-50%,-110%) scale(0.98); opacity:0; pointer-events:none; animation:bubble-in .25s ease-out forwards, bubble-out 3s 2.4s ease-in forwards; }
     .bubble::after{ content:""; position:absolute; bottom:-18px; left:50%; transform:translateX(-50%) rotate(8deg); width:24px; height:24px; background:var(--paper); border-left:3px solid var(--ink); border-bottom:3px solid var(--ink); box-shadow:6px 6px 0 var(--ink); clip-path:polygon(0 0,100% 0,100% 100%); }
     .bubble--ok{ border-color:#09b37a; box-shadow:6px 6px 0 #09b37a; }
     .bubble--warn{ border-color:#f59e0b; box-shadow:6px 6px 0 #f59e0b; }
     .bubble--error{ border-color:#e02424; box-shadow:6px 6px 0 #e02424; }
     @keyframes bubble-in{ to{ opacity:1; transform:translate(-50%,-110%) scale(1);} }
-    @keyframes bubble-out{ to{ opacity:0; transform:translate(-50%,-130%) scale(0.96);} }
-    .onomato{ position:absolute; z-index:998; font-weight:900; letter-spacing:2px; font-size:28px; -webkit-text-stroke:2px var(--ink); transform:translate(-50%,-50%) scale(0.6) rotate(-6deg); opacity:0; pointer-events:none; animation:ono-pop 520ms ease-out forwards; }
+    @keyframes bubble-out{ to{ opacity:0; transform:translate(-50%,-130%) scale(.96);} }
+    .onomato{ position:absolute; z-index:998; font-weight:900; letter-spacing:2px; font-size:28px; -webkit-text-stroke:2px var(--ink); transform:translate(-50%,-50%) scale(.6) rotate(-6deg); opacity:0; pointer-events:none; animation:ono-pop 520ms ease-out forwards; }
     .onomato--ok{ color:#33e6a4; text-shadow:6px 6px 0 #09b37a; }
     .onomato--error{ color:#ff6b6b; text-shadow:6px 6px 0 #e02424; }
     .onomato--wow{ color:#ffd45a; text-shadow:6px 6px 0 #f59e0b; }
-    @keyframes ono-pop{ 20%{ opacity:1; transform:translate(-50%,-50%) scale(1.1) rotate(2deg); } 60%{ transform:translate(-50%,-54%) scale(1) rotate(-2deg); } 100%{ opacity:0; transform:translate(-50%,-60%) scale(0.9) rotate(0deg); } }
-    @media (min-width:800px){ .carta{ grid-template-columns:240px 1fr; align-items:center } .carta img{ width:240px } .boton-canje{ min-width:200px } }
+    @keyframes ono-pop{ 20%{ opacity:1; transform:translate(-50%,-50%) scale(1.1) rotate(2deg);} 60%{ transform:translate(-50%,-54%) scale(1) rotate(-2deg);} 100%{ opacity:0; transform:translate(-50%,-60%) scale(.9) rotate(0);} }
   </style>
 </head>
 <body>
@@ -170,7 +169,6 @@
     /* ===== Config ===== */
     const apiURL    = "https://script.google.com/macros/s/AKfycbwSQyV9rXDNbxPrFD5jhjjWF6_EGqUC8ucznWUZYqsRqiY3hNDsJOwmlqmYVbdSc7WcNg/exec";
     const apiCartas = "https://script.google.com/macros/s/AKfycbwzMrJJLqcu0iE4hHNUtinB4iiTuRAA54xFoLOX0Izhg4HHh2Tnxz29yNQVK-j_LN3c/exec";
-    const PACMAN_PATH = "/estudiante/pac-man.html"; /* <- cambio pedido: ruta fija al juego */
 
     /* ===== Normalización ===== */
     const sinTildes = s => (s||"").normalize('NFD').replace(/[\u0300-\u036f]/g,'');
@@ -238,23 +236,36 @@
       return await res.json();
     }
 
-    /* ===== Util: normalizar URLs de Imgur ===== */
+    /* ===== Util: normalizar URLs de Imgur + helper de candidatos ===== */
     function normalizarImgur(url){
       if(!url) return '';
       try{
         const u = String(url).trim();
+        // Directo i.imgur.com/ID.ext -> normalizamos a ID (sin extensión fija)
         const direct = u.match(/^https?:\/\/i\.imgur\.com\/([A-Za-z0-9]+)\.(jpg|jpeg|png|webp|gif)/i);
-        if(direct){ return `https://i.imgur.com/${direct[1]}.png`; }
+        if(direct){ return `https://i.imgur.com/${direct[1]}`; }
+        // Página simple imgur.com/ID
         const pageImg = u.match(/^https?:\/\/imgur\.com\/([A-Za-z0-9]{5,})$/i);
-        if(pageImg){ return `https://i.imgur.com/${pageImg[1]}.png`; }
-        if (/imgur\.com\/(a|gallery)\//i.test(u)) {
-          console.warn('[CAOS] Link de álbum/gallery detectado; se necesita el link directo de la imagen.');
-          return '';
-        }
+        if(pageImg){ return `https://i.imgur.com/${pageImg[1]}`; }
+        // Álbum/Gallery -> no sirve como imagen directa
+        if (/imgur\.com\/(a|gallery)\//i.test(u)) { return ''; }
+        // Solo ID
         const onlyId = u.match(/^([A-Za-z0-9]{5,})$/);
-        if(onlyId){ return `https://i.imgur.com/${onlyId[1]}.png`; }
+        if(onlyId){ return `https://i.imgur.com/${onlyId[1]}`; }
         return u;
       }catch{ return String(url); }
+    }
+
+    // Intenta varias URLs hasta que una cargue
+    function tryImageCandidates(imgEl, sources, fallback){
+      let i = 0;
+      const next = () => {
+        if (i >= sources.length){ imgEl.src = fallback; return; }
+        const url = sources[i++];
+        imgEl.onerror = next;
+        imgEl.src = url;
+      };
+      next();
     }
 
     /* ===== Login ===== */
@@ -386,10 +397,47 @@
           img.decoding = "async";
           img.crossOrigin = "anonymous";
           img.referrerPolicy = "no-referrer";
+
+          const PLACEHOLDER = "https://i.imgur.com/U3F4gA1.png";
+
+          // ===== IMAGEN (override para Pac-Man Arcade) =====
           const rawURL = carta?.["URL Pública"] || "";
-          const normalized = normalizarImgur(rawURL);
-          img.src = normalized || "https://i.imgur.com/U3F4gA1.png";
-          img.onerror = () => { img.src = "https://i.imgur.com/U3F4gA1.png"; };
+          const normalizedBase = normalizarImgur(rawURL); // puede quedar '' si era album
+          if (nombre === "Pac-Man Arcade") {
+            // ID de Imgur que mostraron: DGuyJYb
+            const PACMAN_ID = "DGuyJYb";
+            const candidates = [
+              // primero los directos que sabemos
+              `https://i.imgur.com/${PACMAN_ID}.png`,
+              `https://i.imgur.com/${PACMAN_ID}.jpg`,
+              `https://i.imgur.com/${PACMAN_ID}.jpeg`,
+              `https://i.imgur.com/${PACMAN_ID}.webp`,
+              // luego lo que venga desde la planilla, probando extensiones
+              ...(normalizedBase ? [
+                `${normalizedBase}.png`,
+                `${normalizedBase}.jpg`,
+                `${normalizedBase}.jpeg`,
+                `${normalizedBase}.webp`,
+              ] : []),
+              // finalmente el raw tal cual (por si ya trae extensión)
+              rawURL
+            ];
+            tryImageCandidates(img, candidates, PLACEHOLDER);
+          } else {
+            // Cartas normales: usar URL de planilla (normalizada) con fallback
+            const candidates = [];
+            if (normalizedBase && /^https?:\/\/i\.imgur\.com\/[A-Za-z0-9]+$/i.test(normalizedBase)) {
+              candidates.push(
+                `${normalizedBase}.png`,
+                `${normalizedBase}.jpg`,
+                `${normalizedBase}.jpeg`,
+                `${normalizedBase}.webp`
+              );
+            }
+            // si venía un link directo (postimg, png, etc.)
+            if (rawURL) candidates.unshift(rawURL);
+            tryImageCandidates(img, candidates, PLACEHOLDER);
+          }
 
           const row = document.createElement("div");
           row.className = "carta-row";
@@ -426,6 +474,7 @@
             }
           };
 
+          // (Opcional) descripción plegable, reutiliza el mismo texto
           const descripcion = document.createElement("div");
           descripcion.className = "descripcion";
           descripcion.innerText = descripcionTxt;
@@ -495,8 +544,9 @@
             const ir = confirm('✅ Canje aprobado: Pac-Man Arcade.\n¿Ir a jugar Pac-Man ahora?');
             if (ir) {
               const ret = encodeURIComponent(location.pathname + location.search);
-              /* ==== CAMBIO: usar siempre la ruta fija del juego ==== */
-              const urlJuego = `${PACMAN_PATH}?alumno=${encodeURIComponent(alumno)}&ret=${ret}`;
+              // Usa URL del backend o cae por defecto al archivo local
+              const destino = data.accion.url || '/estudiante/pac-man.html';
+              const urlJuego = `${destino}${destino.includes('?') ? '&' : '?'}ret=${ret}`;
               window.location.href = urlJuego;
             }
           } else if (data.mensaje) {
