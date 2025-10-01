@@ -16,16 +16,16 @@
   <style>
     :root{
       --ink:#000; --paper:#fff; --accent:#ffa500;
-      --shadow:8px 8px 0 var(--ink); --radius:18px; --bar-h:64px;
+      --shadow:8px 8px 0 var(--ink); --radius:18px;
     }
     *{ margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; }
     html,body{ height:100%; }
     body{
       background:var(--paper); color:var(--ink); font-family: Arial, Helvetica, sans-serif;
-      padding:env(safe-area-inset-top) env(safe-area-inset-right) calc(var(--bar-h) + env(safe-area-inset-bottom)) env(safe-area-inset-left);
+      padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     }
 
-    .container{ width:100%; min-height:calc(100dvh - var(--bar-h)); max-width:900px; margin:0 auto; padding:12px; display:flex; flex-direction:column; gap:12px; }
+    .container{ width:100%; min-height:100dvh; max-width:900px; margin:0 auto; padding:12px; display:flex; flex-direction:column; gap:12px; }
     .panel{ background:var(--paper); border:3px solid var(--ink); border-radius:var(--radius); box-shadow:var(--shadow); padding:14px; position:relative; }
 
     .header{text-align:center}
@@ -73,13 +73,6 @@
       width:min(92%,360px); text-align:center; box-shadow:8px 8px 0 var(--ink); }
     .overlay h2{ font-family:'Rock Salt', cursive; font-size:1.6rem; margin-bottom:10px; display:inline-block; border:3px dashed var(--ink); border-radius:14px; padding:6px 10px; }
     .final-score{ font-size:1.05rem; margin:12px 0 16px; font-weight:700 }
-
-    /* Barra inferior */
-    .footer{ position:fixed; left:0; right:0; bottom:env(safe-area-inset-bottom,0px); height:var(--bar-h);
-      background:var(--paper); border-top:3px solid var(--ink); display:flex; align-items:center; justify-content:center;
-      padding:8px calc(12px + env(safe-area-inset-left,0px)) calc(8px + env(safe-area-inset-bottom,0px)) calc(12px + env(safe-area-inset-right,0px)); z-index:10; }
-    .btn-back{ width:100%; max-width:520px; background:#fff; border:3px solid var(--ink); color:var(--ink); font-weight:900; letter-spacing:.3px;
-      padding:12px 16px; border-radius:12px; display:flex; align-items:center; justify-content:center; gap:8px; text-decoration:none; box-shadow:6px 6px 0 var(--ink); }
 
     @media (max-height:700px){ .dpad{width:128px; height:128px} .stats{padding:8px 10px; font-size:.9rem}}
     @media (max-height:600px){ .dpad{width:112px; height:112px} .stats{font-size:.8rem} .stat-value{font-size:.98rem}}
@@ -129,15 +122,6 @@
         </div>
       </div>
 
-      <!-- GAME OVER -->
-      <div class="overlay" id="gameOver">
-        <div class="panel">
-          <h2>¡GAME OVER!</h2>
-          <div class="final-score" id="finalScore">Puntuación: 0</div>
-          <button class="btn" id="restartButton"><i class="fas fa-redo"></i> JUGAR DE NUEVO</button>
-        </div>
-      </div>
-
       <!-- VICTORIA NIVEL 1 -->
       <div class="overlay" id="winOverlay">
         <div class="panel">
@@ -164,16 +148,12 @@
     </div>
   </div>
 
-  <div class="footer">
-    <a class="btn-back" id="backBtn" href="#"><i class="fas fa-arrow-left"></i> Volver</a>
-  </div>
-
   <script>
     /* ========= Navegación / Retorno ========= */
     const params = new URLSearchParams(location.search);
     const RET_URL = params.get('ret') ? decodeURIComponent(params.get('ret')) : '/estudiante/estudiante.html';
-    document.getElementById('backBtn').setAttribute('href', RET_URL);
-    document.getElementById('goBackBtn').setAttribute('href', RET_URL);
+    const goBackBtn = document.getElementById('goBackBtn'); // solo existe en el gate
+    if (goBackBtn) goBackBtn.setAttribute('href', RET_URL);
 
     /* ========= GATE / Permiso de acceso =========
        Aprobación actual deja un hash en localStorage: 'canje_last_hash'.
@@ -214,9 +194,6 @@
     const highScoreElem = document.getElementById('highScore');
     const startButton = document.getElementById('startButton');
     const pauseButton = document.getElementById('pauseButton');
-    const restartButton = document.getElementById('restartButton');
-    const gameOverElem = document.getElementById('gameOver');
-    const finalScoreElem = document.getElementById('finalScore');
     const winOverlay = document.getElementById('winOverlay');
     const winText = document.getElementById('winText');
     const closeWin = document.getElementById('closeWin');
@@ -323,7 +300,6 @@
 
       document.getElementById('startButton').addEventListener('click', ()=>{ startGame(); });
       document.getElementById('pauseButton').addEventListener('click', ()=>{ togglePause(); });
-      document.getElementById('restartButton').addEventListener('click', ()=>{ restartGame(); });
 
       // Cerrar victoria => vuelve al panel y deja constancia
       closeWin.addEventListener('click', ()=>{
@@ -511,7 +487,7 @@
     }
     function startGame(){
       if(gameRunning) return;
-      gameRunning=true; gamePaused=false; gameOverElem.style.display='none'; winOverlay.style.display='none';
+      gameRunning=true; gamePaused=false; winOverlay.style.display='none';
       gameLoop();
     }
     function togglePause(){
@@ -520,22 +496,22 @@
       document.getElementById('pauseButton').innerHTML = gamePaused ? '<i class="fas fa-play"></i> REANUDAR' : '<i class="fas fa-pause"></i> PAUSAR';
       if(!gamePaused) gameLoop();
     }
+
+    // *** GAME OVER: sin opción de reintento, devuelve al estudiante ***
     function gameOver(){
       gameRunning=false; cancelAnimationFrame(animationId);
       if(score>highScore){ highScore=score; localStorage.setItem('pacmanHighScore', String(highScore)); }
-      finalScoreElem.textContent = `Puntuación Final: ${score}`;
-      gameOverElem.style.display='grid';
+      // Redirigir inmediatamente al panel del estudiante
+      window.location.href = RET_URL;
     }
-    function restartGame(){ gameOverElem.style.display='none'; initGame(); startGame(); }
 
     /* ========= Init ========= */
     window.addEventListener('load', ()=>{
       // Gate primero
       if (!tienePermisoPacman()){
         bloquearJuegoPorGate();
-        // No inicializamos lógica de juego hasta tener permiso
         setupControls(); // para que funcione "Volver" / etc.
-        resizeCanvas();  // para que el canvas tenga tamaño (solo estético)
+        resizeCanvas();  // tamaño canvas (estético)
         return;
       }
 
