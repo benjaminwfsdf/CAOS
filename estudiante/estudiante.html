@@ -546,7 +546,7 @@
               const ret = encodeURIComponent(location.pathname + location.search);
               // Usa URL del backend o cae por defecto al archivo local
              // DESPUÉS — usa ruta RELATIVA desde /estudiante/
-const base = (data.accion && data.accion.url) ? data.accion.url : 'pac-man.html';
+const base = (data.accion && data.accion.url) ? data.accion.url : '/estudiante/pac-man.html';
 // si no viene absoluta (http/https o empieza con "/"), la dejamos relativa
 const destino = (/^https?:\/\//.test(base) || base.startsWith('/')) ? base : base;
 const urlJuego = `${destino}${destino.includes('?') ? '&' : '?'}ret=${ret}`;
