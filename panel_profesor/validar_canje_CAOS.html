@@ -21,17 +21,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
   <style>
-    :root{
-      --ink:#000; --paper:#fff; --shadow:8px 8px 0 var(--ink);
-      --r:18px; --pad:16px;
-    }
+    :root{ --ink:#000; --paper:#fff; --shadow:8px 8px 0 var(--ink); --r:18px; --pad:16px; }
     *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
     html,body{max-width:100%; overflow-x:hidden}
     body{
       margin:0;
       padding:env(safe-area-inset-top) 12px calc(16px + env(safe-area-inset-bottom)) 12px;
-      background:var(--paper);
-      color:var(--ink);
+      background:var(--paper); color:var(--ink);
       background-image:repeating-linear-gradient(45deg, rgba(0,0,0,.12) 0px, rgba(0,0,0,.12) 1px, transparent 1px, transparent 6px);
       background-attachment:fixed;
       font-family:'Rock Salt',cursive;
@@ -65,6 +61,7 @@
     td button{ min-width:44px }
     @media (max-width:480px){ td button{ padding:8px 10px; font-size:15px } }
 
+    .hint{ font:700 12px/1.2 Arial, sans-serif; margin-top:6px; opacity:.86 }
     .bubble{position:absolute;z-index:999;max-width:320px;background:#fff;color:#000;border:3px solid #000;
       box-shadow:6px 6px 0 #000;padding:12px 14px;font-weight:700;line-height:1.2;border-radius:14px;
       transform:translate(-50%,-110%) scale(.98);opacity:0;pointer-events:none;
@@ -99,6 +96,7 @@
   </div>
 
   <script>
+    /* ==== UI helpers ==== */
     function showBubble(anchorEl, texto, tipo='ok'){
       const panel = anchorEl.closest('.caos-relative') || document.body;
       const rect = anchorEl.getBoundingClientRect();
@@ -124,7 +122,8 @@
       setTimeout(()=> o.remove(), 600);
     }
 
-    const API_URL = "https://script.google.com/macros/s/AKfycbyweuEnzESlpgc9wt00STNPsQknhIJW94AYQUrina3acZnXWF6FhhmoIagrtKzV4IgD/exec";
+    /* ==== Config ==== */
+    const API_URL = "https://script.google.com/macros/s/AKfycbxCZrRqpreei38mQkq3Csp8M4hDM5uS4HhPu5KQOlKxhGg8DpvQj1RTGLNChlfG-aNb/exec";
     const params = new URLSearchParams(window.location.search);
     const usuario = params.get("usuario");
 
@@ -134,9 +133,34 @@
       showBubble(panel, 'Sesión no iniciada. Redirigiendo…', 'error');
       setTimeout(()=> window.location.href = "../login.html", 900);
     }
-
     document.getElementById("volverBtn").href = `../index.html?usuario=${encodeURIComponent(usuario||'')}`;
 
+    /* ==== Habilidades (mapeo para mostrar texto) ==== */
+    function habilidadDe(nombre){
+      switch(String(nombre||'')){
+        case "Perro Bomba": return "Evade una pregunta y cárgala a un(a) compañero(a).";
+        case "Pinta Mono": return "Evita una sanción o pide una anotación positiva.";
+        case "Kodama": return "Junta dos y evita una tarea.";
+        case "Niño Chocolate": return "Puedes comer en clase.";
+        case "1UP": return "0,5 décimas para una nota.";
+        case "Violeta Parra": return "Eres DJ durante una actividad o usa audífonos.";
+        case "El Reto": return "Puedes subir un punto en una nota con una tarea extra.";
+        case "BME": return "Puedes utilizar tu celular para buscar información en una actividad.";
+        case "GAMER": return "Juega con tu celular si terminaste la actividad.";
+        case "Iluminati": return "Puedes elegir la carta que desees dentro del mazo.";
+        case "Leftraru": return "Pepiwiñoimi tami tuwvn.";
+        case "Juan Carlos Bodoque":
+        case "Juan Carlos Bodoque — Reportaje Verde": return "Si respondes una pregunta de la clase recuperas una carta canjeada.";
+        case "Pac-Man Arcade": return "Si ganas el Pac-Man (pasas el Nivel 1), puedes elegir cualquier carta del mazo.";
+        case "Tulio Triviño — Edición Especial": return "Repite la habilidad de la última carta jugada.";
+        default: return "Habilidad desconocida.";
+      }
+    }
+
+    function esTulio(c){ return /tulio/i.test(String(c||'')); }
+    function esBodoque(c){ return /bodoque/i.test(String(c||'')); }
+
+    /* ==== Cargar solicitudes ==== */
     async function cargarSolicitudes() {
       const contenedor = document.getElementById("solicitudesContainer");
       try {
@@ -178,24 +202,46 @@
         `;
         contenedor.innerHTML = html;
 
-        // 🔧 NUEVO BLOQUE: mostrar qué carta recuperaría Bodoque
+        // Hints especiales por fila
         const filas = Array.from(document.querySelectorAll('#solicitudesContainer tbody tr'));
         for (const tr of filas) {
-          const tds = tr.querySelectorAll('td');
-          const alumnoTxt = tds[0]?.textContent || '';
-          const cartaTxt  = tds[1]?.textContent || '';
-          if (cartaTxt.toLowerCase().includes('bodoque')) {
+          const [tdAlumno, tdCarta] = tr.querySelectorAll('td');
+          const alumnoTxt = tdAlumno?.textContent?.trim() || '';
+          const cartaTxt  = tdCarta?.textContent?.trim() || '';
+
+          // Bodoque → qué recuperaría
+          if (esBodoque(cartaTxt)) {
             const hint = document.createElement('div');
-            hint.style.font = '700 12px/1.2 Arial, sans-serif';
-            hint.style.marginTop = '6px';
-            hint.style.opacity = '.85';
+            hint.className = 'hint';
             hint.textContent = '♻ Recuperaría: … (cargando)';
-            tds[1].appendChild(hint);
+            tdCarta.appendChild(hint);
             fetch(`${API_URL}?accion=ultimo_canje_alumno&alumno=${encodeURIComponent(alumnoTxt)}`)
               .then(r => r.json()).then(data => {
                 const c = (data && data.ok && data.carta) ? data.carta : '';
                 hint.textContent = c ? `♻ Recuperaría: «${c}»` : '♻ Recuperaría: (sin registro previo)';
               }).catch(()=>{ hint.textContent = '♻ Recuperaría: (error)'; });
+          }
+
+          // Tulio → cuál fue la última carta y cuál es su habilidad (que se repetiría)
+          if (esTulio(cartaTxt)) {
+            const hint = document.createElement('div');
+            hint.className = 'hint';
+            hint.textContent = '🎬 Repetirá habilidad de: … (cargando)';
+            tdCarta.appendChild(hint);
+
+            fetch(`${API_URL}?accion=ultimo_canje_alumno&alumno=${encodeURIComponent(alumnoTxt)}`)
+              .then(r=>r.json()).then(data=>{
+                const ultima = (data && data.ok && data.carta) ? data.carta : '';
+                const hab = ultima ? habilidadDe(ultima) : '';
+                hint.textContent = ultima
+                  ? `🎬 Repetirá: «${ultima}» → ${hab}`
+                  : '🎬 Repetirá: (sin carta previa registrada)';
+                // Guardamos en dataset por si el profe aprueba y queremos mostrarlo al vuelo
+                tr.dataset.tulioUltima = ultima || '';
+                tr.dataset.tulioHabilidad = hab || '';
+              }).catch(()=>{
+                hint.textContent = '🎬 Repetirá: (error al consultar)';
+              });
           }
         }
 
@@ -208,14 +254,39 @@
       }
     }
 
+    /* ==== Aprobar / Rechazar ==== */
     async function aprobar(alumno, carta, btnEl) {
+      // Para Tulio, recuerda antes la previa (por si aún no está en dataset)
+      let previa = '', habPrev = '';
+      if (esTulio(carta)) {
+        const tr = btnEl.closest('tr');
+        previa  = tr?.dataset?.tulioUltima || '';
+        habPrev = tr?.dataset?.tulioHabilidad || '';
+        if (!previa) {
+          try {
+            const j = await (await fetch(`${API_URL}?accion=ultimo_canje_alumno&alumno=${encodeURIComponent(alumno)}`)).json();
+            previa = (j && j.ok && j.carta) ? j.carta : '';
+            habPrev = previa ? habilidadDe(previa) : '';
+          } catch {}
+        }
+      }
+
       if (!confirm(`¿Aprobar canje de '${carta}' para ${alumno}?`)) return;
       try{
         const url = `${API_URL}?accion=aprobar_canje&alumno=${encodeURIComponent(alumno)}&carta=${encodeURIComponent(carta)}`;
         const res = await fetch(url);
         const mensaje = await res.text();
+
+        // Feedback visual
         showOnomato(btnEl, '¡POW!', 'ok');
-        showBubble(btnEl, `✅ ${mensaje || 'Canje aprobado.'}`, 'ok');
+        // Si es Tulio, añade el detalle de la habilidad repetida
+        if (esTulio(carta)) {
+          const extra = previa ? `\n🎬 Tulio repite «${previa}»: ${habPrev}` : '\n🎬 Tulio no tiene carta previa registrada para repetir.';
+          showBubble(btnEl, `✅ ${mensaje || 'Canje aprobado.'}${extra}`, 'ok');
+        } else {
+          showBubble(btnEl, `✅ ${mensaje || 'Canje aprobado.'}`, 'ok');
+        }
+
         const tr = btnEl.closest('tr');
         if (tr) tr.remove();
         const tbody = document.querySelector('tbody');
