@@ -514,6 +514,24 @@
           ];
           tryImageCandidates(img, candidates, PLACEHOLDER);
 
+        // === IMAGEN ESPECIAL: TULIO TRIVIÑO ===
+        } else if (/tulio/i.test(nombre)) {
+          const TULIO_ID = "OyZxic5";
+          const candidates = [
+            `https://i.imgur.com/${TULIO_ID}.png`,
+            `https://i.imgur.com/${TULIO_ID}.jpg`,
+            `https://i.imgur.com/${TULIO_ID}.jpeg`,
+            `https://i.imgur.com/${TULIO_ID}.webp`,
+            ...(normalizedBase ? [
+              `${normalizedBase}.png`,
+              `${normalizedBase}.jpg`,
+              `${normalizedBase}.jpeg`,
+              `${normalizedBase}.webp`,
+            ] : []),
+            rawURL
+          ];
+          tryImageCandidates(img, candidates, PLACEHOLDER);
+
         // === IMÁGENES GENERALES ===
         } else {
           const candidates = [];
@@ -632,6 +650,10 @@
         case "Juan Carlos Bodoque":
         case "Juan Carlos Bodoque — Reportaje Verde":
           return "Si respondes una pregunta de la clase recuperas una carta canjeada.";
+        case "Tulio Triviño — Edición Especial":
+        case "Tulio Triviño":
+        case "Tulio — Edición Especial":
+          return "Puedes repetir la habilidad de la última carta jugada (no Tulio).";
         case "Pac-Man Arcade":
           return "Si ganas el Pac-Man (pasas el Nivel 1), puedes elegir cualquier carta del mazo.";
         default: return "Sin descripción disponible para esta carta.";
