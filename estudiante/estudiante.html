@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -251,7 +252,6 @@
       }catch{ return String(url); }
     }
 
-    // Intenta varias URLs hasta que una cargue (prefiere WebP -> JPG -> PNG)
     function tryImageCandidates(imgEl, sources, fallback){
       let i = 0;
       const ordered = [];
@@ -285,7 +285,6 @@
         return;
       }
 
-      // 1) Resolver alumno
       let alumnoDisplay = "";
       let alumnoKey     = "";
       try {
@@ -316,7 +315,6 @@
         return;
       }
 
-      // 2) Validar contraseña
       try {
         const urlLogin = `${apiURL}?accion=login&nombre=${encodeURIComponent(alumnoDisplay)}&nombre_norm=${encodeURIComponent(alumnoKey)}&pass=${encodeURIComponent(pass)}`;
         const res = await fetch(urlLogin);
@@ -341,7 +339,6 @@
             }
           }
 
-          // Acceso concedido
           showOnomato(btn, '¡POW!', 'ok');
           showBubble(btn, 'Acceso concedido', 'ok');
           document.getElementById("loginPanel").style.display = "none";
@@ -362,7 +359,7 @@
       }
     });
 
-    /* ===== Pulsación larga + botón para descripción (sin doble-toque) ===== */
+    /* ===== Pulsación larga + botón para descripción ===== */
     function habilitarLongPress(elemento, onLongPress){
       let timer = null, startX=0, startY=0, moved=false;
       const clear = ()=>{ if(timer){ clearTimeout(timer); timer=null; } };
@@ -404,18 +401,25 @@
         showBubble(divCarta, 'Descripción de la carta', 'ok');
       }
     }
-
-    /* ===== Carga de cartas (optimizada) ===== */
+    
+        /* ===== Carga de cartas (OPTIMIZADA Y CORREGIDA) ===== */
     let _imagenesIndex = null;
     let _cartasData = null;
     let _nombresOrden = [];
     let _renderIndex = 0;
+    let _currentObserver = null;
     const RENDER_CHUNK = 12;
 
     async function cargarCartas(alumno) {
       document.getElementById("nombreAlumno").innerText = alumno;
       const contenedor = document.getElementById("cartasContainer");
       contenedor.innerHTML = "Cargando cartas...";
+
+      // Limpiar observer previo si existe
+      if (_currentObserver) {
+        _currentObserver.disconnect();
+        _currentObserver = null;
+      }
 
       try {
         const [resCartas, resImagenes] = await Promise.all([
@@ -428,7 +432,11 @@
         _imagenesIndex = _imagenesIndex || await resImagenes.json();
 
         _cartasData = dataCartas.conteo || {};
-        _nombresOrden = Object.keys(_cartasData);
+        
+        // SOLUCIÓN: Ordenar alfabéticamente para evitar que Tulio/Bodoque/Pac-Man aparezcan primero
+        _nombresOrden = Object.keys(_cartasData).sort((a, b) => {
+          return a.localeCompare(b, 'es', { sensitivity: 'base' });
+        });
 
         if (!_nombresOrden.length) {
           contenedor.innerHTML = "<p style='text-align:center;font-family:Arial,sans-serif;'>📭 No tienes cartas todavía.</p>";
@@ -620,18 +628,27 @@
       const sentinel = document.getElementById('sentinel');
       if (!('IntersectionObserver' in window) || !sentinel) return;
 
-      const io = new IntersectionObserver((entries) => {
+      // Desconectar observer anterior si existe
+      if (_currentObserver) {
+        _currentObserver.disconnect();
+      }
+
+      _currentObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-          if (entry.isIntersecting) {
+          if (entry.isIntersecting && _renderIndex < _nombresOrden.length) {
             queueMicrotask(()=> {
               renderChunk(contenedor);
-              if (_renderIndex >= _nombresOrden.length) io.disconnect();
+              // SOLUCIÓN: Desconectar cuando ya no hay más cartas que cargar
+              if (_renderIndex >= _nombresOrden.length && _currentObserver) {
+                _currentObserver.disconnect();
+                _currentObserver = null;
+              }
             });
           }
         });
       }, { rootMargin: '1200px 0px 1200px 0px' });
 
-      io.observe(sentinel);
+      _currentObserver.observe(sentinel);
     }
 
     function obtenerDescripcion(nombre) {
@@ -697,8 +714,8 @@
     /* ===== Splash con duración mínima y tope ===== */
     (function(){
       const splash = document.getElementById('splash');
-      const SPLASH_MIN_MS = 1100; // mínimo visible ~1.1s
-      const SPLASH_MAX_MS = 2000; // máximo visible 2.0s
+      const SPLASH_MIN_MS = 1100;
+      const SPLASH_MAX_MS = 2000;
       const start = performance.now();
       let hidden = false;
 
@@ -731,3 +748,5 @@
   </script>
 </body>
 </html>
+
+
