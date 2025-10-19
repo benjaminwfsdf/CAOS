@@ -333,15 +333,27 @@
     }
     function pintarCursos(cursos){
       cursoSelect.innerHTML='<option>Selecciona un curso</option>';
-      const sufijos=["ro","do","ro","to","to","to","mo","vo"];
-      const medios=["1ro","2do","3ro","4to"];
+      const sufijos=["ro","do","ro","to","to","to","mo","vo"]; // 1ro..8vo Básico
+      const medios=["1ro","2do","3ro","4to","5to"];            // AHORA soporta hasta 5° Medio
       (cursos||[]).forEach(raw=>{
         let label="";
-        const m=raw.match(/^(\d+)(?:º|\s)?\s?(Básico|Medio)\s([ABC])$/);
+        const m=raw.match(/^(\d+)(?:º|°|\s)?\s?(Básico|Medio)\s([ABC])$/i);
         if(m){
-          const grado=parseInt(m[1]); const nivel=m[2]; const letra=m[3];
-          label = nivel==="Básico" ? `${grado}${sufijos[grado-1]} Básico ${letra}` : `${medios[grado-1]} Medio ${letra}`;
-        }else{ label=raw; }
+          const grado=parseInt(m[1],10); const nivel=m[2]; const letra=m[3].toUpperCase();
+          if(nivel.toLowerCase()==="básico" || nivel.toLowerCase()==="basico"){
+            // 1..8 con sufijo; si está fuera de rango, fallback genérico
+            label = (grado>=1 && grado<=8)
+              ? `${grado}${sufijos[grado-1]} Básico ${letra}`
+              : `${grado}° Básico ${letra}`;
+          }else{
+            // Medio 1..5 con array; fuera de rango, fallback genérico
+            label = (grado>=1 && grado<=medios.length)
+              ? `${medios[grado-1]} Medio ${letra}`
+              : `${grado}° Medio ${letra}`;
+          }
+        }else{
+          label=raw;
+        }
         const opt=document.createElement('option'); opt.value=raw; opt.textContent=label; cursoSelect.appendChild(opt);
       });
     }
