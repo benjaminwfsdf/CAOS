@@ -97,9 +97,8 @@
   </div>
 
   <script>
-    /* ==== Configuración ==== */
-    const API_CARTAS = "https://script.google.com/macros/s/AKfycbwsjFQFPDNHQFRTu_gVRw6dyAA9THx3kpFn75k1H7dn-qgxkCqm2IsJ0eMOfqkL7bEZ/exec";
-    const API_ESTUDIANTES = "https://script.google.com/macros/s/AKfycbxvI7915RmImQv1rloz7LXa6XGdFhchjcr2XRcO_tQmVnVQ3TUluiC0vcwn3nuW3F7WMA/exec";
+    /* ==== CONFIGURACIÓN ==== */
+    const API_CARTAS = "https://script.google.com/macros/s/AKfycbx0rVQHhECkXVnm-YrSYoPVpQoK9mHVa74FZhq2iwJ2soWs0-5Pi-J7n9STa8dKoOY/exec"; // 👉 reemplaza por la URL del Apps Script
     const params = new URLSearchParams(window.location.search);
     const usuario = params.get("usuario");
     const cursoSeleccionado = localStorage.getItem("cursoSeleccionado");
@@ -112,7 +111,7 @@
     document.getElementById("volverBtn").href = `../index.html?usuario=${encodeURIComponent(usuario||'')}`;
     document.getElementById("cursoSpan").textContent = cursoSeleccionado || "No seleccionado ⚠️";
 
-    /* ==== Cargar solicitudes por curso ==== */
+    /* ==== CARGAR SOLICITUDES ==== */
     async function cargarSolicitudes() {
       const contenedor = document.getElementById("solicitudesContainer");
 
@@ -163,7 +162,7 @@
 
     async function aprobar(alumno, carta, btn) {
       if (!confirm(`¿Aprobar canje de '${carta}' para ${alumno}?`)) return;
-      const res = await fetch(`${API_CARTAS}?accion=aprobar_canje&alumno=${encodeURIComponent(alumno)}&carta=${encodeURIComponent(carta)}`);
+      const res = await fetch(`${API_CARTAS}?accion=aprobar_canje&alumno=${encodeURIComponent(alumno)}&carta=${encodeURIComponent(carta)}&curso=${encodeURIComponent(cursoSeleccionado)}`);
       const msg = await res.text();
       alert(msg);
       btn.closest("tr").remove();
