@@ -101,6 +101,54 @@
       padding: 8px;
     }
 
+    /* Notificación elegante para Pac-Man */
+    .notificacion-pacman {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--paper);
+      border: 3px solid var(--ink);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      max-width: 300px;
+      z-index: 10000;
+      transform: translateX(400px);
+      transition: transform 0.4s cubic-bezier(0.4, 0.2, 0.3, 1.2);
+      font-family: Arial, sans-serif;
+    }
+    .notificacion-pacman.mostrar {
+      transform: translateX(0);
+    }
+    .notificacion-pacman h3 {
+      margin: 0 0 8px 0;
+      color: var(--ink);
+      font-size: 18px;
+    }
+    .notificacion-pacman p {
+      margin: 0 0 12px 0;
+      color: var(--ink);
+      font-size: 14px;
+    }
+    .notificacion-botones {
+      display: flex;
+      gap: 8px;
+    }
+    .notificacion-botones button {
+      flex: 1;
+      padding: 8px 12px;
+      border: 2px solid var(--ink);
+      border-radius: 8px;
+      background: var(--paper);
+      font-family: Arial, sans-serif;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-ir {
+      background: #000 !important;
+      color: #fff !important;
+    }
+
     .app{ max-width:900px; margin:0 auto; display:grid; gap:var(--gap); padding:12px; }
     .panel{ background:var(--paper); border:3px solid var(--ink); border-radius:var(--radius); padding:var(--pad); box-shadow:var(--shadow); position:relative; }
     .titulo{ font-size:var(--fz-title); text-align:center; border:3px dashed var(--ink); border-radius:14px; padding:10px 12px; margin:0 0 6px 0; background:var(--paper); }
@@ -153,6 +201,16 @@
     <div class="splash-wrap">
       <div class="logo-card"><div class="logo-bg"></div></div>
       <div class="brand">CAOS</div>
+    </div>
+  </div>
+
+  <!-- Notificación Pac-Man -->
+  <div id="notificacionPacman" class="notificacion-pacman" style="display:none;">
+    <h3>🎮 Canje Aprobado</h3>
+    <p>¡Pac-Man Arcade está listo para jugar! ¿Quieres ir ahora?</p>
+    <div class="notificacion-botones">
+      <button id="btnCancelarPacman" class="btn-cancelar">Ahora no</button>
+      <button id="btnIrPacman" class="btn-ir">¡Jugar!</button>
     </div>
   </div>
 
@@ -461,18 +519,16 @@
     let _nombresOrden = [];
     let _renderIndex = 0;
     let _currentObserver = null;
-    let _cargaCompletada = false; // Bandera para evitar recargas
+    let _cargaCompletada = false;
     const RENDER_CHUNK = 12;
 
     async function cargarCartas(alumno) {
-      // Si ya se completó la carga, no hacer nada
       if (_cargaCompletada) return;
       
       document.getElementById("nombreAlumno").innerText = alumno;
       const contenedor = document.getElementById("cartasContainer");
       contenedor.innerHTML = "Cargando cartas...";
 
-      // Limpiar observer previo si existe
       if (_currentObserver) {
         _currentObserver.disconnect();
         _currentObserver = null;
@@ -490,7 +546,6 @@
 
         _cartasData = dataCartas.conteo || {};
         
-        // Ordenar alfabéticamente
         _nombresOrden = Object.keys(_cartasData).sort((a, b) => {
           return a.localeCompare(b, 'es', { sensitivity: 'base' });
         });
@@ -532,14 +587,12 @@
         div.setAttribute('role','group');
         div.setAttribute('aria-label', nombre);
 
-        // === ESTRUCTURA DE CARTA FLIP ===
         const cartaFlip = document.createElement("div");
         cartaFlip.className = "carta-flip";
         
         const cartaInner = document.createElement("div");
         cartaInner.className = "carta-inner";
         
-        // Cara frontal (imagen de la carta)
         const caraFront = document.createElement("div");
         caraFront.className = "cara front";
         const img = new Image();
@@ -555,7 +608,6 @@
         const rawURL = carta?.["URL Pública"] || "";
         const normalizedBase = normalizarImgur(rawURL);
 
-        // === IMAGEN ESPECIAL: PAC-MAN ===
         if (nombre === "Pac-Man Arcade") {
           const PACMAN_ID = "DGuyJYb";
           const candidates = [
@@ -573,7 +625,6 @@
           ];
           tryImageCandidates(img, candidates, PLACEHOLDER);
 
-        // === IMAGEN ESPECIAL: JUAN CARLOS BODOQUE ===
         } else if (/bodoque/i.test(nombre)) {
           const BODOQUE_ID = "YiXHOY3";
           const candidates = [
@@ -591,7 +642,6 @@
           ];
           tryImageCandidates(img, candidates, PLACEHOLDER);
 
-        // === IMAGEN ESPECIAL: TULIO TRIVIÑO ===
         } else if (/tulio/i.test(nombre)) {
           const TULIO_ID = "OyZxic5";
           const candidates = [
@@ -609,7 +659,6 @@
           ];
           tryImageCandidates(img, candidates, PLACEHOLDER);
 
-        // === IMÁGENES GENERALES ===
         } else {
           const candidates = [];
           if (normalizedBase && /^https?:\/\/i\.imgur\.com\/[A-Za-z0-9]+$/i.test(normalizedBase)) {
@@ -626,7 +675,6 @@
 
         caraFront.appendChild(img);
         
-        // === CARA TRASERA - CON IMAGEN /img/contracara.png MEJORADA ===
         const caraBack = document.createElement("div");
         caraBack.className = "cara back";
         
@@ -642,12 +690,10 @@
         
         caraBack.appendChild(imgContracara);
         
-        // Ensamblar la carta flip
         cartaInner.appendChild(caraFront);
         cartaInner.appendChild(caraBack);
         cartaFlip.appendChild(cartaInner);
         
-        // Evento para girar la carta
         cartaFlip.addEventListener('click', () => toggleFlip(cartaInner));
         cartaFlip.addEventListener('touchstart', (e) => {
           e.preventDefault();
@@ -722,7 +768,6 @@
       }
       _renderIndex = fin;
       
-      // Marcar como completado cuando se renderizan todas las cartas
       if (_renderIndex >= _nombresOrden.length) {
         _cargaCompletada = true;
         if (_currentObserver) {
@@ -736,7 +781,6 @@
       const sentinel = document.getElementById('sentinel');
       if (!('IntersectionObserver' in window) || !sentinel || _cargaCompletada) return;
 
-      // Desconectar observer anterior si existe
       if (_currentObserver) {
         _currentObserver.disconnect();
       }
@@ -744,7 +788,6 @@
       _currentObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting && _renderIndex < _nombresOrden.length && !_cargaCompletada) {
-            // Usar requestAnimationFrame para evitar recargas múltiples
             requestAnimationFrame(() => {
               renderChunk(contenedor);
             });
@@ -784,38 +827,86 @@
       }
     }
 
-    /* ===== Watcher de aprobaciones de canje (lleva al juego) ===== */
+    /* ===== Watcher de aprobaciones de canje MEJORADO ===== */
     let watcherTimer = null;
+    let _notificacionMostrada = false; // Evitar notificaciones repetidas
+
     function iniciarWatcherEstadoCanje(alumno){
       const KEY = 'canje_last_hash';
+      const NOTIFICACION_KEY = 'notificacion_pacman_vista'; // Para evitar repeticiones
+      
       async function tick(){
         try{
+          // Si ya se mostró la notificación en esta sesión, no verificar
+          if (sessionStorage.getItem(NOTIFICACION_KEY)) return;
+          
           const url = `${apiCartas}?accion=estado_canje&alumno=${encodeURIComponent(alumno)}`;
           const r = await fetch(url, {cache:'no-store'});
           const data = await r.json();
+          
           if (!data || !data.nuevo) return;
 
           const last = localStorage.getItem(KEY);
           if (data.hash && data.hash === last) return;
+          
+          // Actualizar el hash
           if (data.hash) localStorage.setItem(KEY, data.hash);
 
-          if (data.accion && data.accion.tipo === 'juego' && data.accion.juego === 'pacman') {
-            const ir = confirm('✅ Canje aprobado: Pac-Man Arcade.\n¿Ir a jugar Pac-Man ahora?');
-            if (ir) {
-              const ret = encodeURIComponent(location.pathname + location.search);
-              const base = (data.accion && data.accion.url) ? data.accion.url : '/estudiante/pac-man.html';
-              const destino = (/^https?:\/\//.test(base) || base.startsWith('/')) ? base : base;
-              const urlJuego = `${destino}${destino.includes('?') ? '&' : '?'}ret=${ret}`;
-              window.location.assign(urlJuego);
-            }
-          } else if (data.mensaje) {
-            alert(data.mensaje);
+          // Solo mostrar notificación si es para Pac-Man y no se ha mostrado antes
+          if (data.accion && data.accion.tipo === 'juego' && data.accion.juego === 'pacman' && !_notificacionMostrada) {
+            _notificacionMostrada = true;
+            sessionStorage.setItem(NOTIFICACION_KEY, 'true'); // Marcar como vista en esta sesión
+            
+            mostrarNotificacionPacman(data.accion.url);
+          } else if (data.mensaje && !_notificacionMostrada) {
+            // Para otros tipos de mensajes, mostrar de forma más discreta
+            console.log('Notificación de canje:', data.mensaje);
           }
-        }catch{}
+        }catch(error){
+          console.error('Error en watcher:', error);
+        }
       }
+      
       if (watcherTimer) clearInterval(watcherTimer);
-      watcherTimer = setInterval(tick, 10000);
-      tick();
+      watcherTimer = setInterval(tick, 15000); // Reducido a 15 segundos
+      tick(); // Ejecutar inmediatamente al iniciar
+    }
+
+    /* ===== Notificación elegante para Pac-Man ===== */
+    function mostrarNotificacionPacman(urlJuego) {
+      const notificacion = document.getElementById('notificacionPacman');
+      notificacion.style.display = 'block';
+      
+      // Mostrar con animación
+      setTimeout(() => {
+        notificacion.classList.add('mostrar');
+      }, 100);
+
+      // Configurar botones
+      document.getElementById('btnIrPacman').onclick = () => {
+        const ret = encodeURIComponent(location.pathname + location.search);
+        const base = urlJuego || '/estudiante/pac-man.html';
+        const destino = (/^https?:\/\//.test(base) || base.startsWith('/')) ? base : base;
+        const urlFinal = `${destino}${destino.includes('?') ? '&' : '?'}ret=${ret}`;
+        window.location.assign(urlFinal);
+      };
+
+      document.getElementById('btnCancelarPacman').onclick = () => {
+        notificacion.classList.remove('mostrar');
+        setTimeout(() => {
+          notificacion.style.display = 'none';
+        }, 400);
+      };
+
+      // Auto-ocultar después de 10 segundos
+      setTimeout(() => {
+        if (notificacion.classList.contains('mostrar')) {
+          notificacion.classList.remove('mostrar');
+          setTimeout(() => {
+            notificacion.style.display = 'none';
+          }, 400);
+        }
+      }, 10000);
     }
 
     /* ===== Splash con duración mínima y tope ===== */
