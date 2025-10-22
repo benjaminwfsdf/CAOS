@@ -88,6 +88,18 @@
   <div class="panel caos-relative">
     <h1>🔍 Validar Canje de Cartas</h1>
 
+    <!-- 🔍 Buscador -->
+    <div style="text-align:center; margin-bottom: 12px;">
+      <input 
+        type="text" 
+        id="buscador" 
+        placeholder="Buscar estudiante o carta..." 
+        oninput="filtrarSolicitudes()" 
+        style="padding:10px; width:90%; max-width:420px; border:3px solid #000; border-radius:12px;
+              box-shadow:4px 4px 0 #000; font-family:'Comic Neue', cursive; font-size:16px;"
+      >
+    </div>
+
     <div id="solicitudesContainer">Cargando solicitudes...</div>
 
     <div style="margin-top: 18px; text-align: center;">
@@ -135,7 +147,7 @@
     }
     document.getElementById("volverBtn").href = `../index.html?usuario=${encodeURIComponent(usuario||'')}`;
 
-    /* ==== Habilidades (mapeo para mostrar texto) ==== */
+    /* ==== Habilidades ==== */
     function habilidadDe(nombre){
       switch(String(nombre||'')){
         case "Perro Bomba": return "Evade una pregunta y cárgala a un(a) compañero(a).";
@@ -202,49 +214,6 @@
         `;
         contenedor.innerHTML = html;
 
-        // Hints especiales por fila
-        const filas = Array.from(document.querySelectorAll('#solicitudesContainer tbody tr'));
-        for (const tr of filas) {
-          const [tdAlumno, tdCarta] = tr.querySelectorAll('td');
-          const alumnoTxt = tdAlumno?.textContent?.trim() || '';
-          const cartaTxt  = tdCarta?.textContent?.trim() || '';
-
-          // Bodoque → qué recuperaría
-          if (esBodoque(cartaTxt)) {
-            const hint = document.createElement('div');
-            hint.className = 'hint';
-            hint.textContent = '♻ Recuperaría: … (cargando)';
-            tdCarta.appendChild(hint);
-            fetch(`${API_URL}?accion=ultimo_canje_alumno&alumno=${encodeURIComponent(alumnoTxt)}`)
-              .then(r => r.json()).then(data => {
-                const c = (data && data.ok && data.carta) ? data.carta : '';
-                hint.textContent = c ? `♻ Recuperaría: «${c}»` : '♻ Recuperaría: (sin registro previo)';
-              }).catch(()=>{ hint.textContent = '♻ Recuperaría: (error)'; });
-          }
-
-          // Tulio → cuál fue la última carta y cuál es su habilidad (que se repetiría)
-          if (esTulio(cartaTxt)) {
-            const hint = document.createElement('div');
-            hint.className = 'hint';
-            hint.textContent = '🎬 Repetirá habilidad de: … (cargando)';
-            tdCarta.appendChild(hint);
-
-            fetch(`${API_URL}?accion=ultimo_canje_alumno&alumno=${encodeURIComponent(alumnoTxt)}`)
-              .then(r=>r.json()).then(data=>{
-                const ultima = (data && data.ok && data.carta) ? data.carta : '';
-                const hab = ultima ? habilidadDe(ultima) : '';
-                hint.textContent = ultima
-                  ? `🎬 Repetirá: «${ultima}» → ${hab}`
-                  : '🎬 Repetirá: (sin carta previa registrada)';
-                // Guardamos en dataset por si el profe aprueba y queremos mostrarlo al vuelo
-                tr.dataset.tulioUltima = ultima || '';
-                tr.dataset.tulioHabilidad = hab || '';
-              }).catch(()=>{
-                hint.textContent = '🎬 Repetirá: (error al consultar)';
-              });
-          }
-        }
-
         const panel = document.querySelector('.panel');
         showOnomato(panel, '¡POW!', 'ok');
         showBubble(panel, `✅ ${solicitudes.length} solicitud(es) cargadas`, 'ok');
@@ -254,39 +223,25 @@
       }
     }
 
+    // ===== Buscador dinámico =====
+    function filtrarSolicitudes() {
+      const texto = document.getElementById("buscador").value.toLowerCase();
+      const filas = document.querySelectorAll("#solicitudesContainer tbody tr");
+      filas.forEach(tr => {
+        const contenido = tr.textContent.toLowerCase();
+        tr.style.display = contenido.includes(texto) ? "" : "none";
+      });
+    }
+
     /* ==== Aprobar / Rechazar ==== */
     async function aprobar(alumno, carta, btnEl) {
-      // Para Tulio, recuerda antes la previa (por si aún no está en dataset)
-      let previa = '', habPrev = '';
-      if (esTulio(carta)) {
-        const tr = btnEl.closest('tr');
-        previa  = tr?.dataset?.tulioUltima || '';
-        habPrev = tr?.dataset?.tulioHabilidad || '';
-        if (!previa) {
-          try {
-            const j = await (await fetch(`${API_URL}?accion=ultimo_canje_alumno&alumno=${encodeURIComponent(alumno)}`)).json();
-            previa = (j && j.ok && j.carta) ? j.carta : '';
-            habPrev = previa ? habilidadDe(previa) : '';
-          } catch {}
-        }
-      }
-
       if (!confirm(`¿Aprobar canje de '${carta}' para ${alumno}?`)) return;
       try{
         const url = `${API_URL}?accion=aprobar_canje&alumno=${encodeURIComponent(alumno)}&carta=${encodeURIComponent(carta)}`;
         const res = await fetch(url);
         const mensaje = await res.text();
-
-        // Feedback visual
         showOnomato(btnEl, '¡POW!', 'ok');
-        // Si es Tulio, añade el detalle de la habilidad repetida
-        if (esTulio(carta)) {
-          const extra = previa ? `\n🎬 Tulio repite «${previa}»: ${habPrev}` : '\n🎬 Tulio no tiene carta previa registrada para repetir.';
-          showBubble(btnEl, `✅ ${mensaje || 'Canje aprobado.'}${extra}`, 'ok');
-        } else {
-          showBubble(btnEl, `✅ ${mensaje || 'Canje aprobado.'}`, 'ok');
-        }
-
+        showBubble(btnEl, `✅ ${mensaje || 'Canje aprobado.'}`, 'ok');
         const tr = btnEl.closest('tr');
         if (tr) tr.remove();
         const tbody = document.querySelector('tbody');
