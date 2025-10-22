@@ -7,7 +7,7 @@
   <!-- Fuentes -->
   <link href="https://fonts.googleapis.com/css2?family=Rock+Salt&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
 
-  <!-- PWA (desde subcarpeta) -->
+  <!-- PWA -->
   <link rel="manifest" href="../manifest.json">
   <meta name="theme-color" content="#0b0b0c">
 
@@ -16,12 +16,10 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CAOS">
-  <!-- Evita tintes azules automáticos en iOS -->
   <meta name="format-detection" content="telephone=no, date=no, address=no, email=no, url=no">
 
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
-  <!-- ==================== CAOS Mobile v2 (pack común) ==================== -->
   <style>
     :root{
       --ink:#000; --paper:#fff; --shadow:8px 8px 0 var(--ink);
@@ -117,7 +115,7 @@
         <option value="Leftraru">Leftraru</option>
         <option value="Juan Carlos Bodoque">Juan Carlos Bodoque</option>
         <option value="Tulio Triviño">Tulio Triviño</option>
-         <option value="Pac-Man Arcade">Pac-Man Arcade</option>
+        <option value="Pac-Man Arcade">Pac-Man Arcade</option>
       </select>
     </label>
 
@@ -132,20 +130,20 @@
   </div>
 
   <script>
-    // Globos + onomato
+    // Animaciones
     function showBubble(anchorEl, texto, tipo='ok'){
       const panel = anchorEl.closest('.caos-relative') || document.body;
       const rect = anchorEl.getBoundingClientRect();
       const parentRect = panel.getBoundingClientRect();
       const b = document.createElement('div');
       b.className = `bubble bubble--${tipo}`;
-      b.setAttribute('role','status'); b.setAttribute('aria-live','polite');
       b.textContent = texto;
       b.style.left = (rect.left - parentRect.left + rect.width/2) + 'px';
       b.style.top  = (rect.top  - parentRect.top) + 'px';
       panel.appendChild(b);
       setTimeout(()=> b.remove(), 3200);
     }
+
     function showOnomato(anchorEl, texto='¡POW!', estilo='ok'){
       const panel = anchorEl.closest('.caos-relative') || document.body;
       const rect = anchorEl.getBoundingClientRect();
@@ -159,7 +157,10 @@
       setTimeout(()=> o.remove(), 600);
     }
 
-    const API_URL = "https://script.google.com/macros/s/AKfycbwfLuxwxhECHDAJtJzodgG-_3Qf5-OqMi00ShqSICxXFDhAWqOE-GpgqDoonkSRTQH0/exec";
+    // API y curso
+    const API_URL = "https://script.google.com/macros/s/AKfycbx0rVQHhECkXVnm-YrSYoPVpQoK9mHVa74FZhq2iwJ2soWs0-5Pi-J7n9STa8dKoOY/exec"; // 👉 reemplázala con tu Apps Script
+    const cursoSeleccionado = localStorage.getItem("cursoSeleccionado");
+
     const params = new URLSearchParams(window.location.search);
     const alumno = params.get("alumno");
     const usuario = params.get("usuario");
@@ -174,9 +175,9 @@
     const selectEst = document.getElementById("estudianteSelect");
     const selectCarta = document.getElementById("cartaEspecifica");
     const logDiv = document.getElementById("logReparto");
-    const resumenDiv = document.getElementById("resumenEstudiante");
     const btnAsignar = document.getElementById("btnAsignar");
     const volverBtn = document.getElementById("volverBtn");
+
     volverBtn.onclick = () => { window.location.href = `../index.html?usuario=${encodeURIComponent(usuario||'')}`; };
 
     if (alumno) {
@@ -184,22 +185,17 @@
       selectEst.disabled = false;
       showOnomato(selectEst, '¡POW!', 'ok');
       showBubble(selectEst, `🎓 ${alumno} listo para asignar`, 'ok');
-      (async ()=>{
-        try{
-          const data = await cargarResumenEstudiante(alumno);
-          pintarResumen(data);
-        }catch(e){
-          showOnomato(selectEst, '¡BANG!', 'error');
-          showBubble(selectEst, '❌ Error al cargar resumen', 'error');
-        }
-      })();
     } else {
-      resumenDiv.innerHTML = `<p style="color:red;">⚠️ No se ha seleccionado ningún estudiante.</p>`;
       showOnomato(selectEst, '¡HEY!', 'error');
       showBubble(selectEst, 'Selecciona un estudiante desde el panel.', 'warn');
     }
 
-    function repartirEspecifica() {
+    async function guardarCartaEspecifica(estudiante, carta) {
+      const response = await fetch(`${API_URL}?accion=guardar_carta&alumno=${encodeURIComponent(estudiante)}&carta=${encodeURIComponent(carta)}&curso=${encodeURIComponent(cursoSeleccionado||'')}`);
+      return await response.text();
+    }
+
+    async function repartirEspecifica() {
       const estudiante = selectEst.value;
       const carta = selectCarta.value;
 
@@ -210,36 +206,14 @@
       }
 
       logDiv.innerHTML += `<p>🎯 ${estudiante} recibe: <b>${carta}</b></p>`;
-      guardarCartaEspecifica(estudiante, carta)
-        .then(()=>{
-          showOnomato(btnAsignar, '¡POW!', 'ok');
-          showBubble(btnAsignar, `✅ Carta asignada: ${carta}`, 'ok');
-          return cargarResumenEstudiante(estudiante);
-        })
-        .then((data)=> pintarResumen(data))
-        .catch(()=>{
-          showOnomato(btnAsignar, '¡BANG!', 'error');
-          showBubble(btnAsignar, '❌ Error al guardar la carta.', 'error');
-        });
-    }
-
-    async function guardarCartaEspecifica(estudiante, carta) {
-      const response = await fetch(`${API_URL}?alumno=${encodeURIComponent(estudiante)}&carta=${encodeURIComponent(carta)}`);
-      return await response.text();
-    }
-    async function cargarResumenEstudiante(nombreEstudiante) {
-      const response = await fetch(`${API_URL}?alumno=${encodeURIComponent(nombreEstudiante)}`);
-      return await response.json();
-    }
-    function pintarResumen(data){
-      if (!data || !data.alumno) return;
-      resumenDiv.innerHTML = `
-        <h2 style="margin:0 0 6px 0;font-family:'Comic Neue',cursive">Resumen de Cartas</h2>
-        <p><strong>🎓 Estudiante:</strong> ${data.alumno}</p>
-        <p><strong>🃏 Total cartas:</strong> ${data.total}</p>
-        <p><strong>Cartas obtenidas:</strong></p>
-        <ul style="margin-top:6px;padding-left:18px">${Object.entries(data.conteo).map(([n,c])=>`<li>${n}: ${c}</li>`).join("")}</ul>
-      `;
+      try {
+        await guardarCartaEspecifica(estudiante, carta);
+        showOnomato(btnAsignar, '¡POW!', 'ok');
+        showBubble(btnAsignar, `✅ Carta asignada: ${carta}`, 'ok');
+      } catch {
+        showOnomato(btnAsignar, '¡BANG!', 'error');
+        showBubble(btnAsignar, '❌ Error al guardar la carta.', 'error');
+      }
     }
 
     btnAsignar.addEventListener('click', repartirEspecifica);
@@ -247,16 +221,7 @@
 
   <footer>
     © 2025 CAOS. Todos los derechos reservados. <br>
-    Sitio desarrollado por Benjamín González.
+    Desarrollado por Benjamín González.
   </footer>
-
-  <!-- SW global -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js', { scope: '/' });
-      });
-    }
-  </script>
 </body>
 </html>
