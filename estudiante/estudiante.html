@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -50,6 +49,58 @@
     @keyframes splashIn{0%{transform:translateY(6px) scale(.86); opacity:0;}45%{transform:translateY(0) scale(1.06); opacity:1;}70%{transform:translateY(0) scale(.98);}100%{transform:translateY(0) scale(1);}}
     @media (min-width:800px){ .carta{ grid-template-columns:240px 1fr; align-items:center } .carta img{ width:240px } .boton-canje{ min-width:200px } }
 
+    /* === Efecto de carta giratoria MEJORADO - Estilo Edición Especial === */
+    .carta-flip {
+      perspective: 1200px;
+      width: 100%;
+      max-width: 320px;
+      margin: 0 auto;
+    }
+    .carta-inner {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 3/4.2;
+      transform-style: preserve-3d;
+      transition: transform 0.9s cubic-bezier(.4,.2,.3,1.2);
+      cursor: pointer;
+      border-radius: var(--radius);
+    }
+    .carta-inner.is-flipped {
+      transform: rotateY(180deg);
+    }
+    .cara {
+      position: absolute;
+      inset: 0;
+      border: 3px solid var(--ink);
+      border-radius: var(--radius);
+      background: var(--paper);
+      box-shadow: var(--shadow);
+      backface-visibility: hidden;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .cara img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      background: #f3f3f3;
+    }
+    .cara.back {
+      transform: rotateY(180deg);
+      background: #000;
+      padding: 0;
+    }
+    .cara.back img {
+      object-fit: contain;
+      background: #000;
+      width: 100%;
+      height: 100%;
+      padding: 8px;
+    }
+
     .app{ max-width:900px; margin:0 auto; display:grid; gap:var(--gap); padding:12px; }
     .panel{ background:var(--paper); border:3px solid var(--ink); border-radius:var(--radius); padding:var(--pad); box-shadow:var(--shadow); position:relative; }
     .titulo{ font-size:var(--fz-title); text-align:center; border:3px dashed var(--ink); border-radius:14px; padding:10px 12px; margin:0 0 6px 0; background:var(--paper); }
@@ -64,10 +115,6 @@
       border:2px solid var(--ink); border-radius:14px; padding:12px;
       background:var(--paper); box-shadow:4px 4px 0 var(--ink);
       content-visibility:auto; contain-intrinsic-size: 360px; will-change: transform;
-    }
-    .carta img{
-      width:100%; max-width:320px; height:auto; place-self:center; border-radius:12px;
-      background:#f3f3f3; transition:filter .2s ease; filter:saturate(0.92) contrast(0.98);
     }
     .carta-row{ display:flex; align-items:center; gap:10px; justify-content:space-between; flex-wrap:wrap; }
     .carta-info{ font-family:Arial, sans-serif; font-size:var(--fz-body); flex:1; min-width:180px; }
@@ -96,6 +143,7 @@
     .onomato--error{ color:#ff6b6b; text-shadow:6px 6px 0 #e02424; }
     .onomato--wow{ color:#ffd45a; text-shadow:6px 6px 0 #f59e0b; }
     @keyframes ono-pop{ 20%{ opacity:1; transform:translate(-50%,-50%) scale(1.1) rotate(2deg);} 60%{ transform:translate(-50%,-54%) scale(1) rotate(-2deg);} 100%{ opacity:0; transform:translate(-50%,-60%) scale(.9) rotate(0);} }
+
   </style>
 </head>
 <body>
@@ -401,16 +449,25 @@
         showBubble(divCarta, 'Descripción de la carta', 'ok');
       }
     }
-    
-        /* ===== Carga de cartas (OPTIMIZADA Y CORREGIDA) ===== */
+
+    /* ===== Función para girar cartas ===== */
+    function toggleFlip(cartaInner) {
+      cartaInner.classList.toggle('is-flipped');
+    }
+
+    /* ===== Carga de cartas MEJORADA - Sin bug de recarga ===== */
     let _imagenesIndex = null;
     let _cartasData = null;
     let _nombresOrden = [];
     let _renderIndex = 0;
     let _currentObserver = null;
+    let _cargaCompletada = false; // Bandera para evitar recargas
     const RENDER_CHUNK = 12;
 
     async function cargarCartas(alumno) {
+      // Si ya se completó la carga, no hacer nada
+      if (_cargaCompletada) return;
+      
       document.getElementById("nombreAlumno").innerText = alumno;
       const contenedor = document.getElementById("cartasContainer");
       contenedor.innerHTML = "Cargando cartas...";
@@ -433,7 +490,7 @@
 
         _cartasData = dataCartas.conteo || {};
         
-        // SOLUCIÓN: Ordenar alfabéticamente para evitar que Tulio/Bodoque/Pac-Man aparezcan primero
+        // Ordenar alfabéticamente
         _nombresOrden = Object.keys(_cartasData).sort((a, b) => {
           return a.localeCompare(b, 'es', { sensitivity: 'base' });
         });
@@ -442,6 +499,7 @@
           contenedor.innerHTML = "<p style='text-align:center;font-family:Arial,sans-serif;'>📭 No tienes cartas todavía.</p>";
           showOnomato(contenedor, '¡PING!', 'wow');
           showBubble(contenedor, 'Cuando recibas cartas, aparecerán aquí', 'warn');
+          _cargaCompletada = true;
           return;
         }
 
@@ -455,6 +513,7 @@
         showBubble(contenedor, 'Cartas cargadas', 'ok');
 
       } catch (error) {
+        console.error('Error cargando cartas:', error);
         document.getElementById("cartasContainer").innerText = "Error al cargar las cartas.";
         showOnomato(document.getElementById("cartasContainer"), '¡BANG!', 'error');
         showBubble(document.getElementById("cartasContainer"), 'Error al conectar con el servidor', 'error');
@@ -473,6 +532,16 @@
         div.setAttribute('role','group');
         div.setAttribute('aria-label', nombre);
 
+        // === ESTRUCTURA DE CARTA FLIP ===
+        const cartaFlip = document.createElement("div");
+        cartaFlip.className = "carta-flip";
+        
+        const cartaInner = document.createElement("div");
+        cartaInner.className = "carta-inner";
+        
+        // Cara frontal (imagen de la carta)
+        const caraFront = document.createElement("div");
+        caraFront.className = "cara front";
         const img = new Image();
         img.alt = nombre;
         img.loading = (i < 6) ? "eager" : "lazy";
@@ -555,6 +624,36 @@
           tryImageCandidates(img, candidates, PLACEHOLDER);
         }
 
+        caraFront.appendChild(img);
+        
+        // === CARA TRASERA - CON IMAGEN /img/contracara.png MEJORADA ===
+        const caraBack = document.createElement("div");
+        caraBack.className = "cara back";
+        
+        const imgContracara = new Image();
+        imgContracara.src = "/img/contracara.png";
+        imgContracara.alt = "Contracara CAOS";
+        imgContracara.loading = "lazy";
+        imgContracara.decoding = "async";
+        imgContracara.style.width = "100%";
+        imgContracara.style.height = "100%";
+        imgContracara.style.objectFit = "contain";
+        imgContracara.style.padding = "8px";
+        
+        caraBack.appendChild(imgContracara);
+        
+        // Ensamblar la carta flip
+        cartaInner.appendChild(caraFront);
+        cartaInner.appendChild(caraBack);
+        cartaFlip.appendChild(cartaInner);
+        
+        // Evento para girar la carta
+        cartaFlip.addEventListener('click', () => toggleFlip(cartaInner));
+        cartaFlip.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          toggleFlip(cartaInner);
+        }, { passive: false });
+
         const row = document.createElement("div");
         row.className = "carta-row";
 
@@ -566,7 +665,7 @@
           <div><strong>${nombre}</strong></div>
           <div class="cantidad">Cantidad: ${cantidad}</div>
           <div style="font-family:Arial,sans-serif;font-size:12px;opacity:.8;margin-top:4px;">
-            (Mantén presionado o usa el botón para ver la descripción)
+            (Haz clic en la carta para girarla)
           </div>
         `;
 
@@ -616,17 +715,26 @@
         row.appendChild(botonDesc);
         row.appendChild(botonCanje);
 
-        div.appendChild(img);
+        div.appendChild(cartaFlip);
         div.appendChild(row);
         div.appendChild(descripcion);
         contenedor.appendChild(div);
       }
       _renderIndex = fin;
+      
+      // Marcar como completado cuando se renderizan todas las cartas
+      if (_renderIndex >= _nombresOrden.length) {
+        _cargaCompletada = true;
+        if (_currentObserver) {
+          _currentObserver.disconnect();
+          _currentObserver = null;
+        }
+      }
     }
 
     function prepararCargaProgresiva(contenedor){
       const sentinel = document.getElementById('sentinel');
-      if (!('IntersectionObserver' in window) || !sentinel) return;
+      if (!('IntersectionObserver' in window) || !sentinel || _cargaCompletada) return;
 
       // Desconectar observer anterior si existe
       if (_currentObserver) {
@@ -635,18 +743,17 @@
 
       _currentObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-          if (entry.isIntersecting && _renderIndex < _nombresOrden.length) {
-            queueMicrotask(()=> {
+          if (entry.isIntersecting && _renderIndex < _nombresOrden.length && !_cargaCompletada) {
+            // Usar requestAnimationFrame para evitar recargas múltiples
+            requestAnimationFrame(() => {
               renderChunk(contenedor);
-              // SOLUCIÓN: Desconectar cuando ya no hay más cartas que cargar
-              if (_renderIndex >= _nombresOrden.length && _currentObserver) {
-                _currentObserver.disconnect();
-                _currentObserver = null;
-              }
             });
           }
         });
-      }, { rootMargin: '1200px 0px 1200px 0px' });
+      }, { 
+        rootMargin: '800px 0px 800px 0px',
+        threshold: 0.1 
+      });
 
       _currentObserver.observe(sentinel);
     }
@@ -748,4 +855,3 @@
   </script>
 </body>
 </html>
-
