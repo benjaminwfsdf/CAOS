@@ -97,56 +97,22 @@
   </div>
 
   <script>
-    /* ==== UI helpers ==== */
-    function showBubble(anchorEl, texto, tipo='ok'){
-      const panel = anchorEl.closest('.caos-relative') || document.body;
-      const rect = anchorEl.getBoundingClientRect();
-      const parentRect = panel.getBoundingClientRect();
-      const b = document.createElement('div');
-      b.className = `bubble bubble--${tipo}`;
-      b.textContent = texto;
-      b.style.left = (rect.left - parentRect.left + rect.width/2) + 'px';
-      b.style.top  = (rect.top  - parentRect.top) + 'px';
-      panel.appendChild(b);
-      setTimeout(()=> b.remove(), 3200);
-    }
-    function showOnomato(anchorEl, texto='¡POW!', estilo='ok'){
-      const panel = anchorEl.closest('.caos-relative') || document.body;
-      const rect = anchorEl.getBoundingClientRect();
-      const parentRect = panel.getBoundingClientRect();
-      const o = document.createElement('div');
-      o.className = `onomato onomato--${estilo}`;
-      o.textContent = texto;
-      o.style.left = (rect.left - parentRect.left + rect.width/2) + 'px';
-      o.style.top  = (rect.top  - parentRect.top - 30) + 'px';
-      panel.appendChild(o);
-      setTimeout(()=> o.remove(), 600);
-    }
-
-    /* ==== Config ==== */
-    const API_URL = "https://script.google.com/macros/s/AKfycbwMSDKc_zo3EvKK5w7hQeUsWD1pULkuIcTmW2eqd_wxW_ccNS6hg0eoXoSc4whZdp0/exec";
+    /* ==== Configuración ==== */
+    const API_CARTAS = "https://script.google.com/macros/s/AKfycbwsjFQFPDNHQFRTu_gVRw6dyAA9THx3kpFn75k1H7dn-qgxkCqm2IsJ0eMOfqkL7bEZ/exec";
+    const API_ESTUDIANTES = "https://script.google.com/macros/s/AKfycbwSQyV9rXDNbxPrFD5jhjjWF6_EGqUC8ucznWUZYqsRqiY3hNDsJOwmlqmYVbdSc7WcNg/exec";
     const params = new URLSearchParams(window.location.search);
     const usuario = params.get("usuario");
     const cursoSeleccionado = localStorage.getItem("cursoSeleccionado");
 
     if (!usuario) {
-      const panel = document.querySelector('.panel');
-      showOnomato(panel, '¡BANG!', 'error');
-      showBubble(panel, 'Sesión no iniciada. Redirigiendo…', 'error');
+      alert("Sesión no iniciada. Redirigiendo...");
       setTimeout(()=> window.location.href = "../login.html", 900);
     }
 
     document.getElementById("volverBtn").href = `../index.html?usuario=${encodeURIComponent(usuario||'')}`;
+    document.getElementById("cursoSpan").textContent = cursoSeleccionado || "No seleccionado ⚠️";
 
-    // Mostrar curso actual
-    const cursoSpan = document.getElementById("cursoSpan");
-    if (cursoSeleccionado) {
-      cursoSpan.textContent = cursoSeleccionado;
-    } else {
-      cursoSpan.textContent = "No seleccionado ⚠️";
-    }
-
-    /* ==== Cargar solicitudes ==== */
+    /* ==== Cargar solicitudes por curso ==== */
     async function cargarSolicitudes() {
       const contenedor = document.getElementById("solicitudesContainer");
 
@@ -156,14 +122,11 @@
       }
 
       try {
-        const res = await fetch(`${API_URL}?accion=ver_solicitudes&curso=${encodeURIComponent(cursoSeleccionado)}`);
+        const res = await fetch(`${API_CARTAS}?accion=ver_solicitudes&curso=${encodeURIComponent(cursoSeleccionado)}`);
         const solicitudes = await res.json();
 
         if (!Array.isArray(solicitudes) || solicitudes.length === 0) {
           contenedor.innerHTML = "<p>📭 No hay solicitudes pendientes para este curso.</p>";
-          const panel = document.querySelector('.panel');
-          showOnomato(panel, '¡HEY!', 'error');
-          showBubble(panel, 'No hay solicitudes por ahora.', 'warn');
           return;
         }
 
@@ -182,7 +145,7 @@
                   <tr>
                     <td>${s.alumno}</td>
                     <td>${s.carta}</td>
-                    <td style="white-space:nowrap;">
+                    <td>
                       <button onclick="aprobar('${s.alumno}', '${s.carta}', this)">✅ Aprobar</button>
                       <button onclick="rechazar('${s.alumno}', '${s.carta}', this)">❌ Rechazar</button>
                     </td>
@@ -193,53 +156,25 @@
           </div>
         `;
         contenedor.innerHTML = html;
-
-        const panel = document.querySelector('.panel');
-        showOnomato(panel, '¡POW!', 'ok');
-        showBubble(panel, `✅ ${solicitudes.length} solicitud(es) cargadas`, 'ok');
       } catch (error) {
-        console.error("❌ Error cargando solicitudes:", error);
-        contenedor.innerHTML = `<p style="color:red;">❌ Error al cargar las solicitudes.</p>`;
+        contenedor.innerHTML = `<p style="color:red;">❌ Error al cargar las solicitudes: ${error}</p>`;
       }
     }
 
-    /* ==== Aprobar / Rechazar ==== */
-    async function aprobar(alumno, carta, btnEl) {
+    async function aprobar(alumno, carta, btn) {
       if (!confirm(`¿Aprobar canje de '${carta}' para ${alumno}?`)) return;
-      try{
-        const url = `${API_URL}?accion=aprobar_canje&alumno=${encodeURIComponent(alumno)}&carta=${encodeURIComponent(carta)}`;
-        const res = await fetch(url);
-        const mensaje = await res.text();
-        showOnomato(btnEl, '¡POW!', 'ok');
-        showBubble(btnEl, `✅ ${mensaje || 'Canje aprobado.'}`, 'ok');
-        btnEl.closest('tr').remove();
-        const tbody = document.querySelector('tbody');
-        if (tbody && tbody.children.length === 0) {
-          document.getElementById("solicitudesContainer").innerHTML = "<p>📭 No hay solicitudes pendientes.</p>";
-        }
-      } catch {
-        showOnomato(btnEl, '¡BANG!', 'error');
-        showBubble(btnEl, '❌ Error al aprobar.', 'error');
-      }
+      const res = await fetch(`${API_CARTAS}?accion=aprobar_canje&alumno=${encodeURIComponent(alumno)}&carta=${encodeURIComponent(carta)}`);
+      const msg = await res.text();
+      alert(msg);
+      btn.closest("tr").remove();
     }
 
-    async function rechazar(alumno, carta, btnEl) {
+    async function rechazar(alumno, carta, btn) {
       if (!confirm(`¿Rechazar canje de '${carta}' para ${alumno}?`)) return;
-      try{
-        const url = `${API_URL}?accion=rechazar_canje&alumno=${encodeURIComponent(alumno)}&carta=${encodeURIComponent(carta)}`;
-        const res = await fetch(url);
-        const mensaje = await res.text();
-        showOnomato(btnEl, '¡BANG!', 'error');
-        showBubble(btnEl, `🛑 ${mensaje || 'Canje rechazado.'}`, 'warn');
-        btnEl.closest('tr').remove();
-        const tbody = document.querySelector('tbody');
-        if (tbody && tbody.children.length === 0) {
-          document.getElementById("solicitudesContainer").innerHTML = "<p>📭 No hay solicitudes pendientes.</p>";
-        }
-      } catch {
-        showOnomato(btnEl, '¡BANG!', 'error');
-        showBubble(btnEl, '❌ Error al rechazar.', 'error');
-      }
+      const res = await fetch(`${API_CARTAS}?accion=rechazar_canje&alumno=${encodeURIComponent(alumno)}&carta=${encodeURIComponent(carta)}`);
+      const msg = await res.text();
+      alert(msg);
+      btn.closest("tr").remove();
     }
 
     cargarSolicitudes();
@@ -247,15 +182,7 @@
 
   <footer>
     © 2025 CAOS. Todos los derechos reservados. <br>
-    Sitio desarrollado por Benjamín González.
+    Desarrollado por Benjamín González.
   </footer>
-
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js', { scope: '/' });
-      });
-    }
-  </script>
 </body>
 </html>
