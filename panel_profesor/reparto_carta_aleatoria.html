@@ -7,7 +7,7 @@
   <!-- Fuentes -->
   <link href="https://fonts.googleapis.com/css2?family=Rock+Salt&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
 
-  <!-- PWA (desde subcarpeta) -->
+  <!-- PWA -->
   <link rel="manifest" href="../manifest.json">
   <meta name="theme-color" content="#0b0b0c">
 
@@ -16,12 +16,10 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CAOS">
-  <!-- Evita tintes azules automáticos en iOS -->
   <meta name="format-detection" content="telephone=no, date=no, address=no, email=no, url=no">
 
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
-  <!-- ==================== CAOS Mobile v2 (pack común) ==================== -->
   <style>
     :root{
       --ink:#000; --paper:#fff; --shadow:8px 8px 0 var(--ink);
@@ -113,20 +111,20 @@
   </div>
 
   <script>
-    // Utilidades globos + onomato
+    // Animaciones visuales
     function showBubble(anchorEl, texto, tipo='ok'){
       const panel = anchorEl.closest('.caos-relative') || document.body;
       const rect = anchorEl.getBoundingClientRect();
       const parentRect = panel.getBoundingClientRect();
       const b = document.createElement('div');
       b.className = `bubble bubble--${tipo}`;
-      b.setAttribute('role','status'); b.setAttribute('aria-live','polite');
       b.textContent = texto;
       b.style.left = (rect.left - parentRect.left + rect.width/2) + 'px';
       b.style.top  = (rect.top  - parentRect.top) + 'px';
       panel.appendChild(b);
       setTimeout(()=> b.remove(), 3200);
     }
+
     function showOnomato(anchorEl, texto='¡POW!', estilo='ok'){
       const panel = anchorEl.closest('.caos-relative') || document.body;
       const rect = anchorEl.getBoundingClientRect();
@@ -140,14 +138,16 @@
       setTimeout(()=> o.remove(), 600);
     }
 
-    // === API y parámetros ===
-    const API_URL = "https://script.google.com/macros/s/AKfycbwfLuxwxhECHDAJtJzodgG-_3Qf5-OqMi00ShqSICxXFDhAWqOE-GpgqDoonkSRTQH0/exec";
+    // === API ===
+    const API_URL = "https://script.google.com/macros/s/AKfycbx0rVQHhECkXVnm-YrSYoPVpQoK9mHVa74FZhq2iwJ2soWs0-5Pi-J7n9STa8dKoOY/exec"; // 👉 reemplázala con tu Apps Script
+    const cursoSeleccionado = localStorage.getItem("cursoSeleccionado");
 
+    // Probabilidades y cartas
     const probabilidad = { comun: 0.6, epica: 0.3, legendaria: 0.1 };
     const cartas = {
       comun: ["Perro Bomba", "Pinta Mono", "Kodama", "Niño Chocolate"],
       epica: ["1UP", "Violeta Parra", "El Reto", "BME", "GAMER"],
-      legendaria: ["Iluminati", "Leftraru", "Pac-Man Arcade", "Juan Carlos Bodoque","Tulio Triviño"]
+      legendaria: ["Iluminati", "Leftraru", "Pac-Man Arcade", "Juan Carlos Bodoque", "Tulio Triviño"]
     };
 
     function getRandomCarta() {
@@ -158,11 +158,12 @@
     }
 
     async function guardarCartaEnSheets(estudiante, carta) {
-      const response = await fetch(`${API_URL}?alumno=${encodeURIComponent(estudiante)}&carta=${encodeURIComponent(carta)}`);
+      const response = await fetch(`${API_URL}?accion=guardar_carta&alumno=${encodeURIComponent(estudiante)}&carta=${encodeURIComponent(carta)}&curso=${encodeURIComponent(cursoSeleccionado||'')}`);
       return await response.text();
     }
+
     async function cargarResumenEstudiante(nombreEstudiante) {
-      const response = await fetch(`${API_URL}?alumno=${encodeURIComponent(nombreEstudiante)}`);
+      const response = await fetch(`${API_URL}?accion=ultimo_canje_alumno&alumno=${encodeURIComponent(nombreEstudiante)}`);
       return await response.json();
     }
 
@@ -171,7 +172,7 @@
     const alumno = params.get("alumno");
     const usuario = params.get("usuario");
 
-    // === Refs UI ===
+    // === Referencias ===
     const select = document.getElementById("estudianteSelect");
     const logDiv = document.getElementById("logReparto");
     const resumenDiv = document.getElementById("resumenEstudiante");
@@ -184,38 +185,18 @@
       showBubble(panel, 'Sesión no iniciada. Redirigiendo…', 'error');
       setTimeout(()=> window.location.href = "../login.html", 900);
     }
+
     volverBtn.onclick = () => { window.location.href = `../index.html?usuario=${encodeURIComponent(usuario||'')}`; };
 
-    // Precarga del alumno vía querystring (como ya usabas)
     if (alumno) {
       select.innerHTML = `<option selected>${alumno}</option>`;
       select.disabled = false;
       showOnomato(select, '¡POW!', 'ok');
       showBubble(select, `🎓 ${alumno} listo para repartir`, 'ok');
-      (async ()=>{
-        try{
-          const data = await cargarResumenEstudiante(alumno);
-          pintarResumen(data);
-        }catch(e){
-          showOnomato(select, '¡BANG!', 'error');
-          showBubble(select, '❌ Error al cargar resumen', 'error');
-        }
-      })();
     } else {
       resumenDiv.innerHTML = `<p style="color:red;">⚠️ No se ha seleccionado ningún estudiante.</p>`;
       showOnomato(select, '¡HEY!', 'error');
       showBubble(select, 'Selecciona un estudiante desde el panel.', 'warn');
-    }
-
-    function pintarResumen(data){
-      if (!data || !data.alumno) return;
-      resumenDiv.innerHTML = `
-        <h2 style="margin:0 0 6px 0;font-family:'Comic Neue',cursive">Resumen de Cartas</h2>
-        <p><strong>🎓 Estudiante:</strong> ${data.alumno}</p>
-        <p><strong>🃏 Total cartas:</strong> ${data.total}</p>
-        <p><strong>Cartas obtenidas:</strong></p>
-        <ul style="margin-top:6px;padding-left:18px">${Object.entries(data.conteo).map(([n,c])=>`<li>${n}: ${c}</li>`).join("")}</ul>
-      `;
     }
 
     async function repartirAleatoria() {
@@ -225,17 +206,15 @@
         showBubble(btnRepartir, 'Selecciona un estudiante primero.', 'warn');
         return;
       }
+
       const { nombre, rareza } = getRandomCarta();
       logDiv.innerHTML += `<p>🎲 ${estudiante} recibe: <b>${nombre}</b> <small>(${rareza})</small></p>`;
 
-      try{
+      try {
         await guardarCartaEnSheets(estudiante, nombre);
         showOnomato(btnRepartir, rareza==='legendaria'?'¡WOW!':'¡POW!', rareza==='legendaria'?'wow':'ok');
         showBubble(btnRepartir, `✅ Carta ${rareza} entregada: ${nombre}`, rareza==='legendaria'?'warn':'ok');
-
-        const data = await cargarResumenEstudiante(estudiante);
-        pintarResumen(data);
-      }catch(e){
+      } catch(e) {
         showOnomato(btnRepartir, '¡BANG!', 'error');
         showBubble(btnRepartir, '❌ Error al guardar la carta.', 'error');
       }
@@ -246,16 +225,7 @@
 
   <footer>
     © 2025 CAOS. Todos los derechos reservados. <br>
-    Sitio desarrollado por Benjamín González.
+    Desarrollado por Benjamín González.
   </footer>
-
-  <!-- SW global -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js', { scope: '/' });
-      });
-    }
-  </script>
 </body>
 </html>
