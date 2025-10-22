@@ -570,27 +570,41 @@
           </div>
         `;
 
-        const botonCanje = document.createElement("button");
-        botonCanje.className = "btn boton-canje";
-        botonCanje.innerText = "Solicitar Canje";
-        botonCanje.disabled = cantidad < 1;
-        botonCanje.onclick = async (ev) => {
-          ev.stopPropagation();
-          const ok = confirm(`¿Confirmas solicitar el canje de '${nombre}'?`);
-          if (!ok) return;
-          const url = `${apiCartas}?accion=solicitar_canje&alumno=${encodeURIComponent(document.getElementById('nombreAlumno').innerText)}&carta=${encodeURIComponent(nombre)}`;
-          try {
-            const res = await fetch(url, { method: "GET", keepalive: true });
-            const texto = await res.text();
-            showOnomato(botonCanje, '¡POW!', 'ok');
-            showBubble(botonCanje, 'Solicitud enviada al profesor', 'ok');
-            alert("Solicitud enviada al profesor.\n" + texto);
-          } catch {
-            showOnomato(botonCanje, '¡BANG!', 'error');
-            showBubble(botonCanje, 'No se pudo enviar la solicitud', 'error');
-            alert("No se pudo enviar la solicitud por un error de red.");
-          }
-        };
+       const botonCanje = document.createElement("button");
+botonCanje.className = "btn boton-canje";
+botonCanje.innerText = "Solicitar Canje";
+botonCanje.disabled = cantidad < 1;
+botonCanje.onclick = async (ev) => {
+  ev.stopPropagation();
+  const ok = confirm(`¿Confirmas solicitar el canje de '${nombre}'?`);
+  if (!ok) return;
+
+  // 👇 NUEVO: obtener el curso actual del estudiante desde la API principal
+  const alumnoNombre = document.getElementById('nombreAlumno').innerText;
+  let curso = "";
+  try {
+    const resCurso = await fetch(`${apiURL}?accion=obtener_curso&nombre=${encodeURIComponent(alumnoNombre)}`);
+    const dataCurso = await resCurso.json();
+    curso = dataCurso?.curso || "";
+  } catch (err) {
+    console.warn("No se pudo obtener el curso:", err);
+  }
+
+  // 👇 Enviar también el curso al API de cartas
+  const url = `${apiCartas}?accion=solicitar_canje&alumno=${encodeURIComponent(alumnoNombre)}&carta=${encodeURIComponent(nombre)}&curso=${encodeURIComponent(curso)}`;
+
+  try {
+    const res = await fetch(url, { method: "GET", keepalive: true });
+    const texto = await res.text();
+    showOnomato(botonCanje, '¡POW!', 'ok');
+    showBubble(botonCanje, 'Solicitud enviada al profesor', 'ok');
+    alert("Solicitud enviada al profesor.\n" + texto);
+  } catch {
+    showOnomato(botonCanje, '¡BANG!', 'error');
+    showBubble(botonCanje, 'No se pudo enviar la solicitud', 'error');
+    alert("No se pudo enviar la solicitud por un error de red.");
+  }
+};
 
         const botonDesc = document.createElement('button');
         botonDesc.className = 'btn btn-desc';
