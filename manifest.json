@@ -1,16 +1,22 @@
 {
   "name": "CAOS",
   "short_name": "CAOS",
-  "start_url": "/login.html",
+  "start_url": "/login.html?source=pwa",
   "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#0b0b0c",
+  "id": "/login.html",
+  "description": "CAOS: Plataforma educativa interactiva para profesores y estudiantes.",
+  "orientation": "portrait",
+  "dir": "auto",
+
   "icons": [
     { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
     { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
     { "src": "/icons/apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "any maskable" }
   ],
+
   "shortcuts": [
     {
       "name": "Estudiante",
@@ -23,6 +29,15 @@
       "short_name": "Profesor",
       "url": "/panel_profesor/panel_profesor.html",
       "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ],
+
+  "screenshots": [
+    {
+      "src": "/icons/screenshot-login.png",
+      "type": "image/png",
+      "sizes": "1080x1920",
+      "form_factor": "narrow"
     }
   ]
 }
