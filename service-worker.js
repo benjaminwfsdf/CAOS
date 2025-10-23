@@ -1,5 +1,5 @@
 // /service-worker.js — ámbito raíz
-const VERSION = 'v2.9.58';               // <= bump para forzar actualización
+const VERSION = 'v2.9.69';               // <= bump para forzar actualización
 const STATIC_CACHE  = `static-${VERSION}`;
 const RUNTIME_CACHE = `runtime-${VERSION}`;
 const API_CACHE     = 'api-cache-v1';
