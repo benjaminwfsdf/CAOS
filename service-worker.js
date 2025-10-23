@@ -1,5 +1,5 @@
 // /service-worker.js — ámbito raíz
-const VERSION = 'v2.9.69';               // <= bump para forzar actualización
+const VERSION = 'v2.9.35'; // ⚠️ Subir número cada vez que actualices
 const STATIC_CACHE  = `static-${VERSION}`;
 const RUNTIME_CACHE = `runtime-${VERSION}`;
 const API_CACHE     = 'api-cache-v1';
@@ -10,7 +10,6 @@ const PRECACHE = [
 
   // Alumno
   '/estudiante/estudiante.html',
-  // Íconos de alumno (nuevos nombres)
   '/estudiante/icons/icon-alumno-invertido.png',
   '/estudiante/icons/icon-alumno-192.png',
   '/estudiante/icons/icon-alumno-512.png',
@@ -29,30 +28,38 @@ const PRECACHE = [
   '/panel_profesor/validar_canje_CAOS.html',
   '/panel_profesor/prueba%20carga%20con%20retorno.html',
 
-  // Íconos generales (profe)
+  // Íconos generales
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   '/icons/apple-touch-icon.png'
 ];
 
+// =============================
+//   INSTALACIÓN Y ACTIVACIÓN
+// =============================
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(STATIC_CACHE).then(c => c.addAll(PRECACHE)));
+  event.waitUntil(
+    caches.open(STATIC_CACHE).then(c => c.addAll(PRECACHE))
+  );
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys
-        .filter(k => ![STATIC_CACHE, RUNTIME_CACHE, API_CACHE].includes(k))
-        .map(k => caches.delete(k))
+      Promise.all(
+        keys
+          .filter(k => ![STATIC_CACHE, RUNTIME_CACHE, API_CACHE].includes(k))
+          .map(k => caches.delete(k))
       )
     )
   );
   self.clients.claim();
 });
 
-// Estrategias de fetch
+// =============================
+//   ESTRATEGIAS DE FETCH
+// =============================
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
@@ -61,7 +68,7 @@ self.addEventListener('fetch', (event) => {
   const accept = req.headers.get('accept') || '';
   const isHTML = req.mode === 'navigate' || accept.includes('text/html');
 
-  // Evitar cachear MANIFESTS para que iOS no se quede con el viejo
+  // Evitar cachear manifest.json
   if (url.pathname.endsWith('/manifest.json')) {
     event.respondWith(fetch(req).catch(() => caches.match(req)));
     return;
@@ -70,10 +77,13 @@ self.addEventListener('fetch', (event) => {
   // Network-first para HTML
   if (isHTML) {
     event.respondWith(
-      fetch(req).then(res => {
-        caches.open(RUNTIME_CACHE).then(c => c.put(req, res.clone()));
-        return res;
-      }).catch(async () => (await caches.match(req)) || caches.match('/index.html'))
+      fetch(req)
+        .then((res) => {
+          const copy = res.clone();
+          caches.open(RUNTIME_CACHE).then(c => c.put(req, copy));
+          return res;
+        })
+        .catch(async () => (await caches.match(req)) || caches.match('/index.html'))
     );
     return;
   }
@@ -85,7 +95,8 @@ self.addEventListener('fetch', (event) => {
       caches.match(req).then(cached => {
         if (cached) return cached;
         return fetch(req).then(res => {
-          caches.open(STATIC_CACHE).then(c => c.put(req, res.clone()));
+          const copy = res.clone();
+          caches.open(STATIC_CACHE).then(c => c.put(req, copy));
           return res;
         });
       })
@@ -93,15 +104,17 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // SWR para Apps Script
+  // Stale-While-Revalidate para Apps Script
   if (/script\.google\.com/.test(url.hostname)) {
     event.respondWith((async () => {
       const cache = await caches.open(API_CACHE);
       const cached = await cache.match(req);
-      const networkFetch = fetch(req).then(res => {
-        if (res && res.status === 200) cache.put(req, res.clone());
-        return res;
-      }).catch(() => cached);
+      const networkFetch = fetch(req)
+        .then(res => {
+          if (res && res.status === 200) cache.put(req, res.clone());
+          return res;
+        })
+        .catch(() => cached);
       return cached || networkFetch;
     })());
     return;
@@ -109,9 +122,20 @@ self.addEventListener('fetch', (event) => {
 
   // Resto: network con fallback a cache
   event.respondWith(
-    fetch(req).then(res => {
-      caches.open(RUNTIME_CACHE).then(c => c.put(req, res.clone()));
-      return res;
-    }).catch(() => caches.match(req))
+    fetch(req)
+      .then((res) => {
+        const copy = res.clone();
+        caches.open(RUNTIME_CACHE).then(c => c.put(req, copy));
+        return res;
+      })
+      .catch(() => caches.match(req))
   );
+});
+
+// =============================
+//   EVENTO INSTALACIÓN PWA
+// =============================
+// Este evento garantiza que Chrome detecte la instalabilidad
+self.addEventListener('beforeinstallprompt', (e) => {
+  console.log('[PWA] Evento beforeinstallprompt disparado.');
 });
