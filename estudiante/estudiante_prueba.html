@@ -508,31 +508,33 @@
       }
     }
 
-    /* ===== Función para girar cartas - CORREGIDA ===== */
-    function toggleFlip(cartaInner, ev) {
-      if (ev) {
-        ev.preventDefault();
-        ev.stopPropagation();
-      }
+    /* ===== Función para girar cartas ===== */
+    function toggleFlip(cartaInner) {
       cartaInner.classList.toggle('is-flipped');
     }
 
-    /* ===== Carga de cartas CORREGIDA - Sin bug de recarga ===== */
+    /* ===== Carga de cartas MEJORADA - Sin bug de recarga en móviles ===== */
     let _imagenesIndex = null;
     let _cartasData = null;
     let _nombresOrden = [];
     let _renderIndex = 0;
     let _currentObserver = null;
     let _cargaCompletada = false;
-    let _isRendering = false;
     const RENDER_CHUNK = 12;
 
     async function cargarCartas(alumno) {
-      if (_cargaCompletada) return;
+      // EVITAR CARGA DUPLICADA
+      if (_cargaCompletada && _nombresOrden.length > 0) {
+        return;
+      }
       
       document.getElementById("nombreAlumno").innerText = alumno;
       const contenedor = document.getElementById("cartasContainer");
-      contenedor.innerHTML = "Cargando cartas...";
+      
+      // Solo mostrar loading si es la primera carga
+      if (!_cartasData || Object.keys(_cartasData).length === 0) {
+        contenedor.innerHTML = "Cargando cartas...";
+      }
 
       if (_currentObserver) {
         _currentObserver.disconnect();
@@ -551,9 +553,12 @@
 
         _cartasData = dataCartas.conteo || {};
         
-        _nombresOrden = Object.keys(_cartasData).sort((a, b) => {
-          return a.localeCompare(b, 'es', { sensitivity: 'base' });
-        });
+        // SOLO RESETEAR si es una carga nueva
+        if (!_nombresOrden.length) {
+          _nombresOrden = Object.keys(_cartasData).sort((a, b) => {
+            return a.localeCompare(b, 'es', { sensitivity: 'base' });
+          });
+        }
 
         if (!_nombresOrden.length) {
           contenedor.innerHTML = "<p style='text-align:center;font-family:Arial,sans-serif;'>📭 No tienes cartas todavía.</p>";
@@ -563,15 +568,18 @@
           return;
         }
 
-        contenedor.innerHTML = "";
-        _renderIndex = 0;
-        _isRendering = false;
+        // SOLO LIMPIAR CONTENEDOR en primera carga
+        if (_renderIndex === 0) {
+          contenedor.innerHTML = "";
+        }
 
         renderChunk(contenedor);
         prepararCargaProgresiva(contenedor);
 
-        showOnomato(contenedor, '¡POW!', 'ok');
-        showBubble(contenedor, 'Cartas cargadas', 'ok');
+        if (_renderIndex === 0) {
+          showOnomato(contenedor, '¡POW!', 'ok');
+          showBubble(contenedor, 'Cartas cargadas', 'ok');
+        }
 
       } catch (error) {
         console.error('Error cargando cartas:', error);
@@ -582,9 +590,6 @@
     }
 
     function renderChunk(contenedor){
-      if (_isRendering || _cargaCompletada) return;
-      _isRendering = true;
-
       const fin = Math.min(_renderIndex + RENDER_CHUNK, _nombresOrden.length);
       for (let i = _renderIndex; i < fin; i++){
         const nombre = _nombresOrden[i];
@@ -703,16 +708,9 @@
         cartaInner.appendChild(caraBack);
         cartaFlip.appendChild(cartaInner);
         
-        // CORREGIDO: Mejor manejo de eventos para evitar recargas
-        cartaFlip.addEventListener('click', (e) => {
+        cartaFlip.addEventListener('click', () => toggleFlip(cartaInner));
+        cartaFlip.addEventListener('touchstart', (e) => {
           e.preventDefault();
-          e.stopPropagation();
-          toggleFlip(cartaInner);
-        });
-        
-        cartaFlip.addEventListener('touchend', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
           toggleFlip(cartaInner);
         }, { passive: false });
 
@@ -783,7 +781,6 @@
         contenedor.appendChild(div);
       }
       _renderIndex = fin;
-      _isRendering = false;
       
       if (_renderIndex >= _nombresOrden.length) {
         _cargaCompletada = true;
@@ -802,17 +799,32 @@
         _currentObserver.disconnect();
       }
 
+      // REDUCIR MARGEN y AGREGAR THROTTLING
+      let isRendering = false;
+      
       _currentObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-          if (entry.isIntersecting && _renderIndex < _nombresOrden.length && !_cargaCompletada && !_isRendering) {
+          if (entry.isIntersecting && 
+              _renderIndex < _nombresOrden.length && 
+              !_cargaCompletada && 
+              !isRendering) {
+            
+            isRendering = true;
+            
+            // Usar requestAnimationFrame para mejor performance
             requestAnimationFrame(() => {
               renderChunk(contenedor);
+              // Pequeño delay para evitar renderizados consecutivos
+              setTimeout(() => {
+                isRendering = false;
+              }, 50);
             });
           }
         });
       }, { 
-        rootMargin: '400px 0px',
-        threshold: 0.01
+        // REDUCIR MARGEN SIGNIFICATIVAMENTE para móviles
+        rootMargin: '200px 0px 200px 0px',
+        threshold: 0.1 
       });
 
       _currentObserver.observe(sentinel);
@@ -846,14 +858,15 @@
 
     /* ===== Watcher de aprobaciones de canje MEJORADO ===== */
     let watcherTimer = null;
-    let _notificacionMostrada = false;
+    let _notificacionMostrada = false; // Evitar notificaciones repetidas
 
     function iniciarWatcherEstadoCanje(alumno){
       const KEY = 'canje_last_hash';
-      const NOTIFICACION_KEY = 'notificacion_pacman_vista';
+      const NOTIFICACION_KEY = 'notificacion_pacman_vista'; // Para evitar repeticiones
       
       async function tick(){
         try{
+          // Si ya se mostró la notificación en esta sesión, no verificar
           if (sessionStorage.getItem(NOTIFICACION_KEY)) return;
           
           const url = `${apiCartas}?accion=estado_canje&alumno=${encodeURIComponent(alumno)}`;
@@ -865,14 +878,17 @@
           const last = localStorage.getItem(KEY);
           if (data.hash && data.hash === last) return;
           
+          // Actualizar el hash
           if (data.hash) localStorage.setItem(KEY, data.hash);
 
+          // Solo mostrar notificación si es para Pac-Man y no se ha mostrado antes
           if (data.accion && data.accion.tipo === 'juego' && data.accion.juego === 'pacman' && !_notificacionMostrada) {
             _notificacionMostrada = true;
-            sessionStorage.setItem(NOTIFICACION_KEY, 'true');
+            sessionStorage.setItem(NOTIFICACION_KEY, 'true'); // Marcar como vista en esta sesión
             
             mostrarNotificacionPacman(data.accion.url);
           } else if (data.mensaje && !_notificacionMostrada) {
+            // Para otros tipos de mensajes, mostrar de forma más discreta
             console.log('Notificación de canje:', data.mensaje);
           }
         }catch(error){
@@ -881,8 +897,8 @@
       }
       
       if (watcherTimer) clearInterval(watcherTimer);
-      watcherTimer = setInterval(tick, 15000);
-      tick();
+      watcherTimer = setInterval(tick, 15000); // Reducido a 15 segundos
+      tick(); // Ejecutar inmediatamente al iniciar
     }
 
     /* ===== Notificación elegante para Pac-Man ===== */
@@ -890,10 +906,12 @@
       const notificacion = document.getElementById('notificacionPacman');
       notificacion.style.display = 'block';
       
+      // Mostrar con animación
       setTimeout(() => {
         notificacion.classList.add('mostrar');
       }, 100);
 
+      // Configurar botones
       document.getElementById('btnIrPacman').onclick = () => {
         const ret = encodeURIComponent(location.pathname + location.search);
         const base = urlJuego || '/estudiante/pac-man.html';
@@ -909,6 +927,7 @@
         }, 400);
       };
 
+      // Auto-ocultar después de 10 segundos
       setTimeout(() => {
         if (notificacion.classList.contains('mostrar')) {
           notificacion.classList.remove('mostrar');
@@ -940,15 +959,19 @@
         setTimeout(hideSplash, wait);
       };
 
-      if (document.readyState === 'complete') {
+      if (document.readyState === 'complete' || document.readyState === 'interactive') {
         scheduleHideRespectingMin();
       } else {
-        window.addEventListener('load', scheduleHideRespectingMin);
+        document.addEventListener('DOMContentLoaded', scheduleHideRespectingMin, {once:true});
       }
 
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(scheduleHideRespectingMin).catch(()=>{});
+      }
+
+      window.addEventListener('load', scheduleHideRespectingMin, {once:true});
       setTimeout(hideSplash, SPLASH_MAX_MS);
     })();
-
   </script>
 </body>
 </html>
