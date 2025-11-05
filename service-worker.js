@@ -1,5 +1,5 @@
 // /service-worker.js — ámbito raíz
-const VERSION = 'v2.11.1'; // ⚠️ Subir número cada vez que actualices
+const VERSION = 'v2.11.5'; // ⚠️ Subir número cada vez que actualices
 const STATIC_CACHE  = `static-${VERSION}`;
 const RUNTIME_CACHE = `runtime-${VERSION}`;
 const API_CACHE     = 'api-cache-v1';
