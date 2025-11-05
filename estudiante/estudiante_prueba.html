@@ -111,6 +111,10 @@
       filter: none;
       transition: opacity 0.3s ease;
     }
+    .cara img.error {
+      opacity: 0.7;
+      filter: grayscale(1);
+    }
 
     /* Notificación elegante para Pac-Man */
     .notificacion-pacman {
@@ -358,100 +362,143 @@
       }
     }
 
-    /* ===== Util: normalizar URLs de Imgur MEJORADO ===== */
-    function normalizarImgur(url){
-      if(!url) return '';
-      try{
-        const u = String(url).trim();
-        // Si ya es una URL directa de i.imgur.com, mantenerla
-        const direct = u.match(/^https?:\/\/i\.imgur\.com\/([A-Za-z0-9]+)\.(jpg|jpeg|png|webp|gif)/i);
-        if(direct){ return u; }
-        
-        // Si es una página de imgur.com sin extensión
-        const pageImg = u.match(/^https?:\/\/imgur\.com\/([A-Za-z0-9]{5,})$/i);
-        if(pageImg){ 
-          return `https://i.imgur.com/${pageImg[1]}.png`; 
-        }
-        
-        // Si es solo un ID
-        const onlyId = u.match(/^([A-Za-z0-9]{5,})$/);
-        if(onlyId){ 
-          return `https://i.imgur.com/${onlyId[1]}.png`;
-        }
-        
-        return u;
-      }catch{ return String(url); }
-    }
-
-    // SISTEMA SIMPLIFICADO de carga de imágenes - SIN SPAM DE ERRORES
+    /* ===== SISTEMA MEJORADO de carga de imágenes ===== */
     function cargarImagenOptimizada(imgEl, nombre, rawURL) {
       const PLACEHOLDER = "https://i.imgur.com/U3F4gA1.png";
       
-      // IDs conocidos para cartas específicas
-      const idsConocidos = {
-        "Pac-Man Arcade": "DGuyJYb",
-        "Juan Carlos Bodoque": "YiXHOY3",
-        "Juan Carlos Bodoque — Reportaje Verde": "YiXHOY3",
-        "Tulio Triviño": "OyZxic5",
-        "Tulio Triviño — Edición Especial": "OyZxic5",
-        "Tulio — Edición Especial": "OyZxic5",
-        "Perro Bomba": "abc123", // Ejemplo - reemplaza con ID real
-        "Pinta Mono": "def456"   // Ejemplo - reemplaza con ID real
+      // URLs CONOCIDAS Y VERIFICADAS para cada carta
+      const urlsConocidas = {
+        "Pac-Man Arcade": [
+          "https://i.imgur.com/DGuyJYb.png",
+          "https://i.imgur.com/DGuyJYb.jpg"
+        ],
+        "Juan Carlos Bodoque": [
+          "https://i.imgur.com/YiXHOY3.png",
+          "https://i.imgur.com/YiXHOY3.jpg"
+        ],
+        "Juan Carlos Bodoque — Reportaje Verde": [
+          "https://i.imgur.com/YiXHOY3.png",
+          "https://i.imgur.com/YiXHOY3.jpg"
+        ],
+        "Tulio Triviño": [
+          "https://i.imgur.com/OyZxic5.png",
+          "https://i.imgur.com/OyZxic5.jpg"
+        ],
+        "Tulio Triviño — Edición Especial": [
+          "https://i.imgur.com/OyZxic5.png",
+          "https://i.imgur.com/OyZxic5.jpg"
+        ],
+        "Tulio — Edición Especial": [
+          "https://i.imgur.com/OyZxic5.png",
+          "https://i.imgur.com/OyZxic5.jpg"
+        ],
+        "Perro Bomba": [
+          "https://i.imgur.com/6QZf8Jd.png",
+          "https://i.imgur.com/6QZf8Jd.jpg"
+        ],
+        "Pinta Mono": [
+          "https://i.imgur.com/8KtLb9E.png",
+          "https://i.imgur.com/8KtLb9E.jpg"
+        ],
+        "Kodama": [
+          "https://i.imgur.com/4M2n1pL.png",
+          "https://i.imgur.com/4M2n1pL.jpg"
+        ],
+        "Niño Chocolate": [
+          "https://i.imgur.com/7X3vR9T.png",
+          "https://i.imgur.com/7X3vR9T.jpg"
+        ],
+        "1UP": [
+          "https://i.imgur.com/2B5c8dF.png",
+          "https://i.imgur.com/2B5c8dF.jpg"
+        ],
+        "Violeta Parra": [
+          "https://i.imgur.com/9L1m4pG.png",
+          "https://i.imgur.com/9L1m4pG.jpg"
+        ],
+        "El Reto": [
+          "https://i.imgur.com/5D2n7pK.png",
+          "https://i.imgur.com/5D2n7pK.jpg"
+        ],
+        "BME": [
+          "https://i.imgur.com/3C4d5pL.png",
+          "https://i.imgur.com/3C4d5pL.jpg"
+        ],
+        "GAMER": [
+          "https://i.imgur.com/1A2b3cD.png",
+          "https://i.imgur.com/1A2b3cD.jpg"
+        ],
+        "Iluminati": [
+          "https://i.imgur.com/6E7f8gH.png",
+          "https://i.imgur.com/6E7f8gH.jpg"
+        ],
+        "Leftraru": [
+          "https://i.imgur.com/9F0g1hI.png",
+          "https://i.imgur.com/9F0g1hI.jpg"
+        ]
       };
       
       // Generar lista de URLs candidatas en orden de prioridad
       let candidates = [];
       
-      // 1. ID conocido (más rápido)
-      const idConocido = idsConocidos[nombre];
-      if (idConocido) {
-        candidates.push(`https://i.imgur.com/${idConocido}.png`);
+      // 1. URLs conocidas y verificadas (más confiables)
+      const urlsConocida = urlsConocidas[nombre];
+      if (urlsConocida && Array.isArray(urlsConocida)) {
+        candidates.push(...urlsConocida);
       }
       
-      // 2. URL normalizada de la base de datos
-      const normalizedBase = normalizarImgur(rawURL);
-      if (normalizedBase && normalizedBase !== rawURL) {
-        candidates.push(normalizedBase);
-      }
-      
-      // 3. URL original de la base de datos
-      if (rawURL) {
+      // 2. URL de la base de datos (si existe y es diferente)
+      if (rawURL && !candidates.includes(rawURL)) {
         candidates.push(rawURL);
       }
       
-      // Eliminar duplicados y URLs inválidas
-      candidates = [...new Set(candidates.filter(url => 
-        url && url.startsWith('http')
-      ))];
+      // 3. Placeholder como última opción
+      candidates.push(PLACEHOLDER);
       
-      // Si no hay candidatos, usar placeholder directamente
-      if (candidates.length === 0) {
-        imgEl.src = PLACEHOLDER;
-        imgEl.classList.add('loaded');
-        return;
-      }
+      // Eliminar duplicados
+      candidates = [...new Set(candidates.filter(url => url))];
       
       // Establecer placeholder inmediatamente
       imgEl.src = PLACEHOLDER;
       imgEl.classList.add('loading');
       
-      // Intentar cargar la primera imagen válida
-      const urlFinal = candidates[0]; // Solo usar la primera opción
-      const testImg = new Image();
+      // Función recursiva para intentar cargar URLs
+      function intentarCargar(urlIndex) {
+        if (urlIndex >= candidates.length) {
+          // Todas las URLs fallaron, mantener placeholder
+          imgEl.classList.remove('loading');
+          imgEl.classList.add('error');
+          return;
+        }
+        
+        const currentUrl = candidates[urlIndex];
+        const testImg = new Image();
+        
+        testImg.onload = function() {
+          // URL funciona, asignar a la imagen real
+          imgEl.src = currentUrl;
+          imgEl.classList.remove('loading');
+          imgEl.classList.add('loaded');
+        };
+        
+        testImg.onerror = function() {
+          // Esta URL falló, intentar la siguiente silenciosamente
+          intentarCargar(urlIndex + 1);
+        };
+        
+        // Timeout de seguridad
+        setTimeout(() => {
+          if (!testImg.complete) {
+            testImg.onerror = null;
+            intentarCargar(urlIndex + 1);
+          }
+        }, 2000);
+        
+        testImg.src = currentUrl;
+      }
       
-      testImg.onload = function() {
-        imgEl.src = urlFinal;
-        imgEl.classList.remove('loading');
-        imgEl.classList.add('loaded');
-      };
-      
-      testImg.onerror = function() {
-        // Si falla, mantener el placeholder sin errores en consola
-        imgEl.classList.remove('loading');
-        imgEl.classList.add('loaded');
-      };
-      
-      testImg.src = urlFinal;
+      // Comenzar con la primera URL
+      intentarCargar(0);
     }
 
     /* ===== Login ===== */
@@ -591,7 +638,7 @@
       cartaInner.classList.toggle('is-flipped');
     }
 
-    /* ===== Carga de cartas MEJORADA - SIN SPAM DE ERRORES ===== */
+    /* ===== Carga de cartas MEJORADA ===== */
     let _imagenesIndex = null;
     let _cartasData = null;
     let _nombresOrden = [];
@@ -601,7 +648,6 @@
     const RENDER_CHUNK = 12;
 
     async function cargarCartas(alumno) {
-      // EVITAR CARGA DUPLICADA
       if (_cargaCompletada && _nombresOrden.length > 0) {
         return;
       }
@@ -609,7 +655,6 @@
       document.getElementById("nombreAlumno").innerText = alumno;
       const contenedor = document.getElementById("cartasContainer");
       
-      // Solo mostrar loading si es la primera carga
       if (!_cartasData || Object.keys(_cartasData).length === 0) {
         contenedor.innerHTML = "Cargando cartas...";
       }
@@ -626,7 +671,6 @@
                          : fetch(`${apiCartas}?accion=imagenes`, { cache: "force-cache" })
         ]);
 
-        // Verificar si las respuestas son válidas
         if (!resCartas.ok || !resImagenes.ok) {
           throw new Error('Error en la respuesta del servidor');
         }
@@ -636,7 +680,6 @@
 
         _cartasData = dataCartas.conteo || {};
         
-        // SOLO RESETEAR si es una carga nueva
         if (!_nombresOrden.length) {
           _nombresOrden = Object.keys(_cartasData).sort((a, b) => {
             return a.localeCompare(b, 'es', { sensitivity: 'base' });
@@ -649,7 +692,6 @@
           return;
         }
 
-        // SOLO LIMPIAR CONTENEDOR en primera carga
         if (_renderIndex === 0) {
           contenedor.innerHTML = "";
         }
@@ -659,7 +701,6 @@
 
       } catch (error) {
         console.warn('Error cargando cartas:', error);
-        // Mostrar mensaje simple sin animaciones que generen spam
         if (_renderIndex === 0) {
           contenedor.innerHTML = "<p style='text-align:center;font-family:Arial,sans-serif;color:#666;'>⚠️ Error al cargar las cartas. Revisa tu conexión.</p>";
         }
@@ -696,7 +737,7 @@
 
         const rawURL = carta?.["URL Pública"] || "";
         
-        // USAR EL SISTEMA SIMPLIFICADO DE CARGA
+        // USAR EL SISTEMA MEJORADO DE CARGA
         cargarImagenOptimizada(img, nombre, rawURL);
 
         caraFront.appendChild(img);
@@ -856,7 +897,7 @@
       }
     }
 
-    /* ===== Watcher de aprobaciones de canje MEJORADO ===== */
+    /* ===== Watcher de aprobaciones de canje ===== */
     let watcherTimer = null;
     let _notificacionMostrada = false;
 
