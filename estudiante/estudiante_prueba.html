@@ -349,23 +349,27 @@
       const nombreLimpio = limpiarNombre(nombreEntrada);
       const nombreNorm   = normalizarNombre(nombreEntrada);
       const url = `${apiURL}?accion=resolver_alumno&nombre=${encodeURIComponent(nombreLimpio)}&nombre_norm=${encodeURIComponent(nombreNorm)}`;
-      const res = await fetch(url);
-      return await res.json();
+      try {
+        const res = await fetch(url);
+        return await res.json();
+      } catch (error) {
+        console.warn('Error al resolver alumno:', error);
+        return { ok: false, sugerencias: [] };
+      }
     }
 
-    /* ===== Util: normalizar URLs de Imgur + helper de candidatos MEJORADO ===== */
+    /* ===== Util: normalizar URLs de Imgur MEJORADO ===== */
     function normalizarImgur(url){
       if(!url) return '';
       try{
         const u = String(url).trim();
         // Si ya es una URL directa de i.imgur.com, mantenerla
         const direct = u.match(/^https?:\/\/i\.imgur\.com\/([A-Za-z0-9]+)\.(jpg|jpeg|png|webp|gif)/i);
-        if(direct){ return u; } // Devolver la URL original completa
+        if(direct){ return u; }
         
         // Si es una página de imgur.com sin extensión
         const pageImg = u.match(/^https?:\/\/imgur\.com\/([A-Za-z0-9]{5,})$/i);
         if(pageImg){ 
-          // Probar con extensiones más comunes primero
           return `https://i.imgur.com/${pageImg[1]}.png`; 
         }
         
@@ -379,13 +383,9 @@
       }catch{ return String(url); }
     }
 
-    // MEJORADO: Sistema de carga de imágenes más eficiente
+    // SISTEMA SIMPLIFICADO de carga de imágenes - SIN SPAM DE ERRORES
     function cargarImagenOptimizada(imgEl, nombre, rawURL) {
       const PLACEHOLDER = "https://i.imgur.com/U3F4gA1.png";
-      
-      // Primero establecer el placeholder
-      imgEl.src = PLACEHOLDER;
-      imgEl.classList.add('loading');
       
       // IDs conocidos para cartas específicas
       const idsConocidos = {
@@ -394,7 +394,9 @@
         "Juan Carlos Bodoque — Reportaje Verde": "YiXHOY3",
         "Tulio Triviño": "OyZxic5",
         "Tulio Triviño — Edición Especial": "OyZxic5",
-        "Tulio — Edición Especial": "OyZxic5"
+        "Tulio — Edición Especial": "OyZxic5",
+        "Perro Bomba": "abc123", // Ejemplo - reemplaza con ID real
+        "Pinta Mono": "def456"   // Ejemplo - reemplaza con ID real
       };
       
       // Generar lista de URLs candidatas en orden de prioridad
@@ -404,82 +406,52 @@
       const idConocido = idsConocidos[nombre];
       if (idConocido) {
         candidates.push(`https://i.imgur.com/${idConocido}.png`);
-        candidates.push(`https://i.imgur.com/${idConocido}.jpg`);
-        candidates.push(`https://i.imgur.com/${idConocido}.webp`);
       }
       
       // 2. URL normalizada de la base de datos
       const normalizedBase = normalizarImgur(rawURL);
       if (normalizedBase && normalizedBase !== rawURL) {
-        // Si la normalización produjo una URL diferente, agregarla
         candidates.push(normalizedBase);
       }
       
       // 3. URL original de la base de datos
-      if (rawURL && !candidates.includes(rawURL)) {
+      if (rawURL) {
         candidates.push(rawURL);
-      }
-      
-      // 4. Extraer ID de la URL original si es de Imgur
-      if (rawURL && rawURL.includes('imgur.com')) {
-        const idFromURL = rawURL.match(/([A-Za-z0-9]{5,})/);
-        if (idFromURL && idFromURL[1]) {
-          const baseURL = `https://i.imgur.com/${idFromURL[1]}`;
-          candidates.push(`${baseURL}.png`);
-          candidates.push(`${baseURL}.jpg`);
-        }
       }
       
       // Eliminar duplicados y URLs inválidas
       candidates = [...new Set(candidates.filter(url => 
-        url && url.startsWith('http') && !url.includes('/a/') && !url.includes('/gallery/')
+        url && url.startsWith('http')
       ))];
       
-      // Si no hay candidatos, usar placeholder
+      // Si no hay candidatos, usar placeholder directamente
       if (candidates.length === 0) {
-        imgEl.classList.remove('loading');
+        imgEl.src = PLACEHOLDER;
         imgEl.classList.add('loaded');
         return;
       }
       
+      // Establecer placeholder inmediatamente
+      imgEl.src = PLACEHOLDER;
+      imgEl.classList.add('loading');
+      
       // Intentar cargar la primera imagen válida
-      let currentIndex = 0;
+      const urlFinal = candidates[0]; // Solo usar la primera opción
+      const testImg = new Image();
       
-      function tryNext() {
-        if (currentIndex >= candidates.length) {
-          // Todas fallaron, mantener placeholder
-          imgEl.classList.remove('loading');
-          imgEl.classList.add('loaded');
-          return;
-        }
-        
-        const url = candidates[currentIndex++];
-        const testImg = new Image();
-        
-        testImg.onload = function() {
-          // Esta URL funciona, asignarla a la imagen real
-          imgEl.src = url;
-          imgEl.classList.remove('loading');
-          imgEl.classList.add('loaded');
-        };
-        
-        testImg.onerror = function() {
-          // Esta URL falló, intentar la siguiente
-          tryNext();
-        };
-        
-        // Timeout de 5 segundos por imagen
-        setTimeout(() => {
-          if (!testImg.complete) {
-            testImg.onerror = null;
-            tryNext();
-          }
-        }, 5000);
-        
-        testImg.src = url;
-      }
+      testImg.onload = function() {
+        imgEl.src = urlFinal;
+        imgEl.classList.remove('loading');
+        imgEl.classList.add('loaded');
+      };
       
-      tryNext();
+      testImg.onerror = function() {
+        // Si falla, mantener el placeholder sin errores en consola
+        imgEl.classList.remove('loading');
+        imgEl.classList.add('loaded');
+      };
+      
+      testImg.src = urlFinal;
     }
 
     /* ===== Login ===== */
@@ -619,7 +591,7 @@
       cartaInner.classList.toggle('is-flipped');
     }
 
-    /* ===== Carga de cartas MEJORADA - Sin bug de recarga en móviles ===== */
+    /* ===== Carga de cartas MEJORADA - SIN SPAM DE ERRORES ===== */
     let _imagenesIndex = null;
     let _cartasData = null;
     let _nombresOrden = [];
@@ -654,6 +626,11 @@
                          : fetch(`${apiCartas}?accion=imagenes`, { cache: "force-cache" })
         ]);
 
+        // Verificar si las respuestas son válidas
+        if (!resCartas.ok || !resImagenes.ok) {
+          throw new Error('Error en la respuesta del servidor');
+        }
+
         const dataCartas = await resCartas.json();
         _imagenesIndex = _imagenesIndex || await resImagenes.json();
 
@@ -668,8 +645,6 @@
 
         if (!_nombresOrden.length) {
           contenedor.innerHTML = "<p style='text-align:center;font-family:Arial,sans-serif;'>📭 No tienes cartas todavía.</p>";
-          showOnomato(contenedor, '¡PING!', 'wow');
-          showBubble(contenedor, 'Cuando recibas cartas, aparecerán aquí', 'warn');
           _cargaCompletada = true;
           return;
         }
@@ -682,16 +657,12 @@
         renderChunk(contenedor);
         prepararCargaProgresiva(contenedor);
 
-        if (_renderIndex === 0) {
-          showOnomato(contenedor, '¡POW!', 'ok');
-          showBubble(contenedor, 'Cartas cargadas', 'ok');
-        }
-
       } catch (error) {
-        console.error('Error cargando cartas:', error);
-        document.getElementById("cartasContainer").innerText = "Error al cargar las cartas.";
-        showOnomato(document.getElementById("cartasContainer"), '¡BANG!', 'error');
-        showBubble(document.getElementById("cartasContainer"), 'Error al conectar con el servidor', 'error');
+        console.warn('Error cargando cartas:', error);
+        // Mostrar mensaje simple sin animaciones que generen spam
+        if (_renderIndex === 0) {
+          contenedor.innerHTML = "<p style='text-align:center;font-family:Arial,sans-serif;color:#666;'>⚠️ Error al cargar las cartas. Revisa tu conexión.</p>";
+        }
       }
     }
 
@@ -725,7 +696,7 @@
 
         const rawURL = carta?.["URL Pública"] || "";
         
-        // USAR EL NUEVO SISTEMA OPTIMIZADO DE CARGA
+        // USAR EL SISTEMA SIMPLIFICADO DE CARGA
         cargarImagenOptimizada(img, nombre, rawURL);
 
         caraFront.appendChild(img);
@@ -840,30 +811,18 @@
         _currentObserver.disconnect();
       }
 
-      // REDUCIR MARGEN y AGREGAR THROTTLING
-      let isRendering = false;
-      
       _currentObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting && 
               _renderIndex < _nombresOrden.length && 
-              !_cargaCompletada && 
-              !isRendering) {
+              !_cargaCompletada) {
             
-            isRendering = true;
-            
-            // Usar requestAnimationFrame para mejor performance
             requestAnimationFrame(() => {
               renderChunk(contenedor);
-              // Pequeño delay para evitar renderizados consecutivos
-              setTimeout(() => {
-                isRendering = false;
-              }, 50);
             });
           }
         });
       }, { 
-        // REDUCIR MARGEN SIGNIFICATIVAMENTE para móviles
         rootMargin: '200px 0px 200px 0px',
         threshold: 0.1 
       });
@@ -899,15 +858,14 @@
 
     /* ===== Watcher de aprobaciones de canje MEJORADO ===== */
     let watcherTimer = null;
-    let _notificacionMostrada = false; // Evitar notificaciones repetidas
+    let _notificacionMostrada = false;
 
     function iniciarWatcherEstadoCanje(alumno){
       const KEY = 'canje_last_hash';
-      const NOTIFICACION_KEY = 'notificacion_pacman_vista'; // Para evitar repeticiones
+      const NOTIFICACION_KEY = 'notificacion_pacman_vista';
       
       async function tick(){
         try{
-          // Si ya se mostró la notificación en esta sesión, no verificar
           if (sessionStorage.getItem(NOTIFICACION_KEY)) return;
           
           const url = `${apiCartas}?accion=estado_canje&alumno=${encodeURIComponent(alumno)}`;
@@ -919,27 +877,21 @@
           const last = localStorage.getItem(KEY);
           if (data.hash && data.hash === last) return;
           
-          // Actualizar el hash
           if (data.hash) localStorage.setItem(KEY, data.hash);
 
-          // Solo mostrar notificación si es para Pac-Man y no se ha mostrado antes
           if (data.accion && data.accion.tipo === 'juego' && data.accion.juego === 'pacman' && !_notificacionMostrada) {
             _notificacionMostrada = true;
-            sessionStorage.setItem(NOTIFICACION_KEY, 'true'); // Marcar como vista en esta sesión
-            
+            sessionStorage.setItem(NOTIFICACION_KEY, 'true');
             mostrarNotificacionPacman(data.accion.url);
-          } else if (data.mensaje && !_notificacionMostrada) {
-            // Para otros tipos de mensajes, mostrar de forma más discreta
-            console.log('Notificación de canje:', data.mensaje);
           }
         }catch(error){
-          console.error('Error en watcher:', error);
+          console.warn('Error en watcher:', error);
         }
       }
       
       if (watcherTimer) clearInterval(watcherTimer);
-      watcherTimer = setInterval(tick, 15000); // Reducido a 15 segundos
-      tick(); // Ejecutar inmediatamente al iniciar
+      watcherTimer = setInterval(tick, 15000);
+      tick();
     }
 
     /* ===== Notificación elegante para Pac-Man ===== */
@@ -947,12 +899,10 @@
       const notificacion = document.getElementById('notificacionPacman');
       notificacion.style.display = 'block';
       
-      // Mostrar con animación
       setTimeout(() => {
         notificacion.classList.add('mostrar');
       }, 100);
 
-      // Configurar botones
       document.getElementById('btnIrPacman').onclick = () => {
         const ret = encodeURIComponent(location.pathname + location.search);
         const base = urlJuego || '/estudiante/pac-man.html';
@@ -968,7 +918,6 @@
         }, 400);
       };
 
-      // Auto-ocultar después de 10 segundos
       setTimeout(() => {
         if (notificacion.classList.contains('mostrar')) {
           notificacion.classList.remove('mostrar');
