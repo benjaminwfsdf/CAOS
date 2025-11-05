@@ -101,6 +101,17 @@
       padding: 8px;
     }
 
+    /* Loading state para imágenes */
+    .cara img.loading {
+      opacity: 0.3;
+      filter: blur(2px);
+    }
+    .cara img.loaded {
+      opacity: 1;
+      filter: none;
+      transition: opacity 0.3s ease;
+    }
+
     /* Notificación elegante para Pac-Man */
     .notificacion-pacman {
       position: fixed;
@@ -342,38 +353,133 @@
       return await res.json();
     }
 
-    /* ===== Util: normalizar URLs de Imgur + helper de candidatos ===== */
+    /* ===== Util: normalizar URLs de Imgur + helper de candidatos MEJORADO ===== */
     function normalizarImgur(url){
       if(!url) return '';
       try{
         const u = String(url).trim();
+        // Si ya es una URL directa de i.imgur.com, mantenerla
         const direct = u.match(/^https?:\/\/i\.imgur\.com\/([A-Za-z0-9]+)\.(jpg|jpeg|png|webp|gif)/i);
-        if(direct){ return `https://i.imgur.com/${direct[1]}`; }
+        if(direct){ return u; } // Devolver la URL original completa
+        
+        // Si es una página de imgur.com sin extensión
         const pageImg = u.match(/^https?:\/\/imgur\.com\/([A-Za-z0-9]{5,})$/i);
-        if(pageImg){ return `https://i.imgur.com/${pageImg[1]}`; }
-        if (/imgur\.com\/(a|gallery)\//i.test(u)) { return ''; }
+        if(pageImg){ 
+          // Probar con extensiones más comunes primero
+          return `https://i.imgur.com/${pageImg[1]}.png`; 
+        }
+        
+        // Si es solo un ID
         const onlyId = u.match(/^([A-Za-z0-9]{5,})$/);
-        if(onlyId){ return `https://i.imgur.com/${onlyId[1]}`; }
+        if(onlyId){ 
+          return `https://i.imgur.com/${onlyId[1]}.png`;
+        }
+        
         return u;
       }catch{ return String(url); }
     }
 
-    function tryImageCandidates(imgEl, sources, fallback){
-      let i = 0;
-      const ordered = [];
-      sources.forEach(s=>{
-        if(!s) return;
-        const base = s.replace(/\.(png|jpg|jpeg|webp|gif)$/i,'');
-        ordered.push(`${base}.webp`, `${base}.jpg`, `${base}.jpeg`, `${base}.png`);
-      });
-      const unique = [...new Set(ordered.concat(sources))];
-      const next = () => {
-        if (i >= unique.length){ imgEl.src = fallback; return; }
-        const url = unique[i++];
-        imgEl.onerror = next;
-        imgEl.src = url;
+    // MEJORADO: Sistema de carga de imágenes más eficiente
+    function cargarImagenOptimizada(imgEl, nombre, rawURL) {
+      const PLACEHOLDER = "https://i.imgur.com/U3F4gA1.png";
+      
+      // Primero establecer el placeholder
+      imgEl.src = PLACEHOLDER;
+      imgEl.classList.add('loading');
+      
+      // IDs conocidos para cartas específicas
+      const idsConocidos = {
+        "Pac-Man Arcade": "DGuyJYb",
+        "Juan Carlos Bodoque": "YiXHOY3",
+        "Juan Carlos Bodoque — Reportaje Verde": "YiXHOY3",
+        "Tulio Triviño": "OyZxic5",
+        "Tulio Triviño — Edición Especial": "OyZxic5",
+        "Tulio — Edición Especial": "OyZxic5"
       };
-      next();
+      
+      // Generar lista de URLs candidatas en orden de prioridad
+      let candidates = [];
+      
+      // 1. ID conocido (más rápido)
+      const idConocido = idsConocidos[nombre];
+      if (idConocido) {
+        candidates.push(`https://i.imgur.com/${idConocido}.png`);
+        candidates.push(`https://i.imgur.com/${idConocido}.jpg`);
+        candidates.push(`https://i.imgur.com/${idConocido}.webp`);
+      }
+      
+      // 2. URL normalizada de la base de datos
+      const normalizedBase = normalizarImgur(rawURL);
+      if (normalizedBase && normalizedBase !== rawURL) {
+        // Si la normalización produjo una URL diferente, agregarla
+        candidates.push(normalizedBase);
+      }
+      
+      // 3. URL original de la base de datos
+      if (rawURL && !candidates.includes(rawURL)) {
+        candidates.push(rawURL);
+      }
+      
+      // 4. Extraer ID de la URL original si es de Imgur
+      if (rawURL && rawURL.includes('imgur.com')) {
+        const idFromURL = rawURL.match(/([A-Za-z0-9]{5,})/);
+        if (idFromURL && idFromURL[1]) {
+          const baseURL = `https://i.imgur.com/${idFromURL[1]}`;
+          candidates.push(`${baseURL}.png`);
+          candidates.push(`${baseURL}.jpg`);
+        }
+      }
+      
+      // Eliminar duplicados y URLs inválidas
+      candidates = [...new Set(candidates.filter(url => 
+        url && url.startsWith('http') && !url.includes('/a/') && !url.includes('/gallery/')
+      ))];
+      
+      // Si no hay candidatos, usar placeholder
+      if (candidates.length === 0) {
+        imgEl.classList.remove('loading');
+        imgEl.classList.add('loaded');
+        return;
+      }
+      
+      // Intentar cargar la primera imagen válida
+      let currentIndex = 0;
+      
+      function tryNext() {
+        if (currentIndex >= candidates.length) {
+          // Todas fallaron, mantener placeholder
+          imgEl.classList.remove('loading');
+          imgEl.classList.add('loaded');
+          return;
+        }
+        
+        const url = candidates[currentIndex++];
+        const testImg = new Image();
+        
+        testImg.onload = function() {
+          // Esta URL funciona, asignarla a la imagen real
+          imgEl.src = url;
+          imgEl.classList.remove('loading');
+          imgEl.classList.add('loaded');
+        };
+        
+        testImg.onerror = function() {
+          // Esta URL falló, intentar la siguiente
+          tryNext();
+        };
+        
+        // Timeout de 5 segundos por imagen
+        setTimeout(() => {
+          if (!testImg.complete) {
+            testImg.onerror = null;
+            tryNext();
+          }
+        }, 5000);
+        
+        testImg.src = url;
+      }
+      
+      tryNext();
     }
 
     /* ===== Login ===== */
@@ -617,75 +723,10 @@
         img.crossOrigin = "anonymous";
         img.referrerPolicy = "no-referrer";
 
-        const PLACEHOLDER = "https://i.imgur.com/U3F4gA1.png";
-
         const rawURL = carta?.["URL Pública"] || "";
-        const normalizedBase = normalizarImgur(rawURL);
-
-        if (nombre === "Pac-Man Arcade") {
-          const PACMAN_ID = "DGuyJYb";
-          const candidates = [
-            `https://i.imgur.com/${PACMAN_ID}.png`,
-            `https://i.imgur.com/${PACMAN_ID}.jpg`,
-            `https://i.imgur.com/${PACMAN_ID}.jpeg`,
-            `https://i.imgur.com/${PACMAN_ID}.webp`,
-            ...(normalizedBase ? [
-              `${normalizedBase}.png`,
-              `${normalizedBase}.jpg`,
-              `${normalizedBase}.jpeg`,
-              `${normalizedBase}.webp`,
-            ] : []),
-            rawURL
-          ];
-          tryImageCandidates(img, candidates, PLACEHOLDER);
-
-        } else if (/bodoque/i.test(nombre)) {
-          const BODOQUE_ID = "YiXHOY3";
-          const candidates = [
-            `https://i.imgur.com/${BODOQUE_ID}.png`,
-            `https://i.imgur.com/${BODOQUE_ID}.jpg`,
-            `https://i.imgur.com/${BODOQUE_ID}.jpeg`,
-            `https://i.imgur.com/${BODOQUE_ID}.webp`,
-            ...(normalizedBase ? [
-              `${normalizedBase}.png`,
-              `${normalizedBase}.jpg`,
-              `${normalizedBase}.jpeg`,
-              `${normalizedBase}.webp`,
-            ] : []),
-            rawURL
-          ];
-          tryImageCandidates(img, candidates, PLACEHOLDER);
-
-        } else if (/tulio/i.test(nombre)) {
-          const TULIO_ID = "OyZxic5";
-          const candidates = [
-            `https://i.imgur.com/${TULIO_ID}.png`,
-            `https://i.imgur.com/${TULIO_ID}.jpg`,
-            `https://i.imgur.com/${TULIO_ID}.jpeg`,
-            `https://i.imgur.com/${TULIO_ID}.webp`,
-            ...(normalizedBase ? [
-              `${normalizedBase}.png`,
-              `${normalizedBase}.jpg`,
-              `${normalizedBase}.jpeg`,
-              `${normalizedBase}.webp`,
-            ] : []),
-            rawURL
-          ];
-          tryImageCandidates(img, candidates, PLACEHOLDER);
-
-        } else {
-          const candidates = [];
-          if (normalizedBase && /^https?:\/\/i\.imgur\.com\/[A-Za-z0-9]+$/i.test(normalizedBase)) {
-            candidates.push(
-              `${normalizedBase}.webp`,
-              `${normalizedBase}.jpg`,
-              `${normalizedBase}.jpeg`,
-              `${normalizedBase}.png`
-            );
-          }
-          if (rawURL) candidates.unshift(rawURL);
-          tryImageCandidates(img, candidates, PLACEHOLDER);
-        }
+        
+        // USAR EL NUEVO SISTEMA OPTIMIZADO DE CARGA
+        cargarImagenOptimizada(img, nombre, rawURL);
 
         caraFront.appendChild(img);
         
